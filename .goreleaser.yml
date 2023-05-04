@@ -1,7 +1,7 @@
 project_name: toolbox
 release:
   github:
-    owner: spiegel-im-spiegel
+    owner: goark
     name: toolbox
 
 builds:

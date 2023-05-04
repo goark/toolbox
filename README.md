@@ -34,10 +34,10 @@ Available Commands:
   version     Print the version number
 
 Flags:
-      --config string      Config file (default "/home/spiegel/.config/toolbox/config.yaml")
+      --config string      Config file (default "/home/username/.config/toolbox/config.yaml")
       --debug              for debug
   -h, --help               help for toolbox
-      --log-dir string     Directory for log files (default "/home/spiegel/.cache/toolbox")
+      --log-dir string     Directory for log files (default "/home/username/.cache/toolbox")
       --log-level string   Log level [nop|error|warn|info|debug|trace] (default "nop")
 
 Use "toolbox [command] --help" for more information about a command.

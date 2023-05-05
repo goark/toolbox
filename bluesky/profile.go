@@ -2,13 +2,17 @@ package bluesky
 
 import (
 	"context"
+	"encoding/json"
+	"fmt"
+	"io"
 
 	"github.com/bluesky-social/indigo/api/bsky"
 	"github.com/goark/errs"
 	"github.com/goark/toolbox/ecode"
 )
 
-func (cfg *Bluesky) ShowProfile(ctx context.Context, actor string) (*bsky.ActorDefs_ProfileViewDetailed, error) {
+// Profile method returns actor's profile information.
+func (cfg *Bluesky) Profile(ctx context.Context, actor string) (*bsky.ActorDefs_ProfileViewDetailed, error) {
 	if cfg == nil {
 		return nil, errs.Wrap(ecode.ErrNullPointer, errs.WithContext("actor", actor))
 	}
@@ -24,12 +28,48 @@ func (cfg *Bluesky) ShowProfile(ctx context.Context, actor string) (*bsky.ActorD
 	if len(actor) == 0 {
 		actor = cfg.Handle
 	}
+	cfg.Logger().Debug().Str("actor", actor).Send()
 	profile, err := bsky.ActorGetProfile(ctx, cfg.client, actor)
 	if err != nil {
 		return nil, errs.Wrap(err, errs.WithContext("actor", actor))
 	}
 	cfg.Logger().Info().Interface("profile", profile).Send()
 	return profile, nil
+}
+
+// ShowProfile method outouts actor's profile information to io.Wtiter.
+func (cfg *Bluesky) ShowProfile(ctx context.Context, actor string, jsonFlag bool, w io.Writer) error {
+	prof, err := cfg.Profile(ctx, actor)
+	if err != nil {
+		return errs.Wrap(err)
+	}
+	if jsonFlag {
+		if err := json.NewEncoder(w).Encode(prof); err != nil {
+			return errs.Wrap(err, errs.WithContext("actor", actor))
+		}
+	} else {
+		fmt.Fprintf(w, " Handle Name: %s\n", prof.Handle)
+		fmt.Fprintf(w, "         Did: %s\n", prof.Did)
+		if prof.DisplayName != nil {
+			fmt.Fprintf(w, "Display Name: %s\n", *prof.DisplayName)
+		}
+		if prof.IndexedAt != nil {
+			fmt.Fprintf(w, "    Index at: %s\n", *prof.IndexedAt)
+		}
+		if prof.PostsCount != nil {
+			fmt.Fprintf(w, "       Posts: %d\n", *prof.PostsCount)
+		}
+		if prof.FollowsCount != nil {
+			fmt.Fprintf(w, "     Follows: %d\n", *prof.FollowsCount)
+		}
+		if prof.FollowersCount != nil {
+			fmt.Fprintf(w, "   Followers: %d\n", *prof.FollowersCount)
+		}
+		if prof.Description != nil {
+			fmt.Fprintf(w, "\n%s\n", *prof.Description)
+		}
+	}
+	return nil
 }
 
 /* Copyright 2023 Spiegel

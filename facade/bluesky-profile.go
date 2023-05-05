@@ -1,6 +1,9 @@
 package facade
 
 import (
+	"io"
+	"strings"
+
 	"github.com/goark/errs"
 	"github.com/goark/gocli/rwi"
 	"github.com/spf13/cobra"
@@ -20,14 +23,26 @@ func newBlueskyProfileCmd(ui *rwi.RWI) *cobra.Command {
 				return debugPrint(ui, err)
 			}
 			// local options
-			handle, err := cmd.Flags().GetString("handle")
-			if err != nil {
-				return debugPrint(ui, err)
-			}
 			jsonFlag, err := cmd.Flags().GetBool("json")
 			if err != nil {
 				return debugPrint(ui, err)
 			}
+			handle, err := cmd.Flags().GetString("handle")
+			if err != nil {
+				return debugPrint(ui, err)
+			}
+			pipeFlag, err := cmd.Flags().GetBool("pipe")
+			if err != nil {
+				return debugPrint(ui, err)
+			}
+			if pipeFlag {
+				b, err := io.ReadAll(ui.Reader())
+				if err != nil {
+					return debugPrint(ui, err)
+				}
+				handle = string(b)
+			}
+			handle = strings.TrimSpace(handle)
 
 			// post message
 			if err := bluesky.ShowProfile(cmd.Context(), handle, jsonFlag, ui.Writer()); err != nil {
@@ -37,8 +52,10 @@ func newBlueskyProfileCmd(ui *rwi.RWI) *cobra.Command {
 			return nil
 		},
 	}
-	blueskyProfileCmd.Flags().StringP("handle", "", "", "Handle name")
 	blueskyProfileCmd.Flags().BoolP("json", "j", false, "Output JSON format")
+	blueskyProfileCmd.Flags().StringP("handle", "", "", "Handle name")
+	blueskyProfileCmd.Flags().BoolP("pipe", "", false, "Input from standard-input")
+	blueskyProfileCmd.MarkFlagsMutuallyExclusive("handle", "pipe")
 
 	return blueskyProfileCmd
 }

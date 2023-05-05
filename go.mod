@@ -9,9 +9,12 @@ require (
 	github.com/goark/fetch v0.4.1
 	github.com/goark/gocli v0.13.0
 	github.com/hymkor/go-multiline-ny v0.7.0
+	github.com/mattn/go-encoding v0.0.2
 	github.com/rs/zerolog v1.29.1
 	github.com/spf13/cobra v1.7.0
 	github.com/spf13/viper v1.15.0
+	golang.org/x/image v0.0.0-20190802002840-cff245a6509b
+	golang.org/x/net v0.9.0
 )
 
 require (
@@ -68,7 +71,6 @@ require (
 	go.uber.org/multierr v1.11.0 // indirect
 	go.uber.org/zap v1.24.0 // indirect
 	golang.org/x/crypto v0.7.0 // indirect
-	golang.org/x/net v0.9.0 // indirect
 	golang.org/x/sys v0.7.0 // indirect
 	golang.org/x/term v0.7.0 // indirect
 	golang.org/x/text v0.9.0 // indirect

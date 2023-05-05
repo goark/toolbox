@@ -18,7 +18,7 @@ func newBlueskyProfileCmd(ui *rwi.RWI) *cobra.Command {
 		Long:    "Show profile.",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			// Global options
-			bluesky, err := getBluesky()
+			bsky, err := getBluesky()
 			if err != nil {
 				return debugPrint(ui, err)
 			}
@@ -45,8 +45,8 @@ func newBlueskyProfileCmd(ui *rwi.RWI) *cobra.Command {
 			handle = strings.TrimSpace(handle)
 
 			// post message
-			if err := bluesky.ShowProfile(cmd.Context(), handle, jsonFlag, ui.Writer()); err != nil {
-				bluesky.Logger().Error().Interface("error", errs.Wrap(err)).Send()
+			if err := bsky.ShowProfile(cmd.Context(), handle, jsonFlag, ui.Writer()); err != nil {
+				bsky.Logger().Error().Interface("error", errs.Wrap(err)).Send()
 				return debugPrint(ui, err)
 			}
 			return nil

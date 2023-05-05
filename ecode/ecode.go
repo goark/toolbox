@@ -7,6 +7,7 @@ var (
 	ErrNoCommand       = errors.New("no command")
 	ErrNoBlueskyHandle = errors.New("no Bluesky handle")
 	ErrNoContent       = errors.New("no content")
+	ErrNotSupportImage = errors.New("not support image format")
 )
 
 /* Copyright 2023 Spiegel

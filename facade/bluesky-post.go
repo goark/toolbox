@@ -8,6 +8,7 @@ import (
 
 	"github.com/goark/errs"
 	"github.com/goark/gocli/rwi"
+	"github.com/goark/toolbox/bluesky"
 	"github.com/hymkor/go-multiline-ny"
 	"github.com/spf13/cobra"
 )
@@ -21,11 +22,15 @@ func newBlueskyPostCmd(ui *rwi.RWI) *cobra.Command {
 		Long:    "Post message to Bluesky.",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			// Global options
-			bluesky, err := getBluesky()
+			bsky, err := getBluesky()
 			if err != nil {
 				return debugPrint(ui, err)
 			}
 			// local options
+			images, err := cmd.Flags().GetStringSlice("image-file")
+			if err != nil {
+				return debugPrint(ui, err)
+			}
 			msg, err := cmd.Flags().GetString("message")
 			if err != nil {
 				return debugPrint(ui, err)
@@ -53,9 +58,9 @@ func newBlueskyPostCmd(ui *rwi.RWI) *cobra.Command {
 			msg = strings.TrimSpace(msg)
 
 			// post message
-			resText, err := bluesky.PostMessage(cmd.Context(), msg)
+			resText, err := bsky.PostMessage(cmd.Context(), &bluesky.Message{Msg: msg, ImageFiles: images})
 			if err != nil {
-				bluesky.Logger().Error().Interface("error", errs.Wrap(err)).Send()
+				bsky.Logger().Error().Interface("error", errs.Wrap(err)).Send()
 				return debugPrint(ui, err)
 			}
 			return debugPrint(ui, ui.Outputln(resText))
@@ -65,6 +70,7 @@ func newBlueskyPostCmd(ui *rwi.RWI) *cobra.Command {
 	blueskyPostCmd.Flags().BoolP("pipe", "", false, "Input from standard-input")
 	blueskyPostCmd.Flags().BoolP("edit", "", false, "Edit message")
 	blueskyPostCmd.MarkFlagsMutuallyExclusive("message", "pipe", "edit")
+	blueskyPostCmd.Flags().StringSliceP("image-file", "i", nil, "Image file")
 	return blueskyPostCmd
 }
 

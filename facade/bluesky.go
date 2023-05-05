@@ -15,7 +15,7 @@ var (
 	defaultBskyConfigPath = config.Path(Name, bskyConfigFile)
 )
 
-// newVersionCmd returns cobra.Command instance for show sub-command
+// newBlueskyCmd returns cobra.Command instance for show sub-command
 func newBlueskyCmd(ui *rwi.RWI) *cobra.Command {
 	blueskyCmd := &cobra.Command{
 		Use:     "bluesky",
@@ -34,6 +34,7 @@ func newBlueskyCmd(ui *rwi.RWI) *cobra.Command {
 
 	blueskyCmd.AddCommand(
 		newBlueskyPostCmd(ui),
+		newBlueskyProfileCmd(ui),
 	)
 	return blueskyCmd
 }
@@ -43,7 +44,7 @@ func getBluesky() (*bluesky.Bluesky, error) {
 	if err != nil {
 		return nil, errs.Wrap(err)
 	}
-	bcfg, err := bluesky.New(viper.GetString("bluesky-config"), cacheDir, gopts.Logger)
+	bcfg, err := bluesky.New(viper.GetString("bluesky-config"), gopts.CacheDir, gopts.Logger)
 	if err != nil {
 		gopts.Logger.Error().Interface("error", errs.Wrap(err)).Send()
 		return nil, errs.Wrap(err)

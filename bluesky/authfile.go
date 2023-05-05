@@ -11,9 +11,9 @@ import (
 )
 
 func (cfg *Bluesky) authPath() string {
-	ss := strings.Split(cfg.Handle, ":")
-	if len(ss) > 0 && len(ss[len(ss)-1]) > 0 {
-		return filepath.Join(cfg.BaseDir(), ss[len(ss)-1]+".auth")
+	handle := strings.ReplaceAll(cfg.Handle, ":", "_")
+	if len(handle) > 0 {
+		return filepath.Join(cfg.BaseDir(), handle+".auth")
 	}
 	return filepath.Join(cfg.BaseDir(), "bluesky.auth")
 }
@@ -33,7 +33,7 @@ func (cfg *Bluesky) readAuth() (*xrpc.AuthInfo, error) {
 }
 
 func (cfg *Bluesky) writeAuth(auth *xrpc.AuthInfo) error {
-	file, err := os.Create(cfg.authPath())
+	file, err := os.OpenFile(cfg.authPath(), os.O_RDWR|os.O_CREATE, 0600)
 	if err != nil {
 		return errs.Wrap(err, errs.WithContext("authfile", cfg.authPath()))
 	}

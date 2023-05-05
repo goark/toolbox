@@ -6,13 +6,13 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// newBlueskyPostCmd returns cobra.Command instance for show sub-command
-func newBlueskyPostCmd(ui *rwi.RWI) *cobra.Command {
-	blueskyPostCmd := &cobra.Command{
-		Use:     "post",
-		Aliases: []string{"pst", "p"},
-		Short:   "Post message to Bluesky",
-		Long:    "Post message to Bluesky.",
+// newBlueskyProfileCmd returns cobra.Command instance for show sub-command
+func newBlueskyProfileCmd(ui *rwi.RWI) *cobra.Command {
+	blueskyProfileCmd := &cobra.Command{
+		Use:     "profile",
+		Aliases: []string{"prof"},
+		Short:   "Output profile",
+		Long:    "Show profile.",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			// Global options
 			bluesky, err := getBluesky()
@@ -20,23 +20,27 @@ func newBlueskyPostCmd(ui *rwi.RWI) *cobra.Command {
 				return debugPrint(ui, err)
 			}
 			// local options
-			msg, err := cmd.Flags().GetString("message")
+			handle, err := cmd.Flags().GetString("handle")
+			if err != nil {
+				return debugPrint(ui, err)
+			}
+			jsonFlag, err := cmd.Flags().GetBool("json")
 			if err != nil {
 				return debugPrint(ui, err)
 			}
 
 			// post message
-			resText, err := bluesky.PostMessage(cmd.Context(), msg)
-			if err != nil {
+			if err := bluesky.ShowProfile(cmd.Context(), handle, jsonFlag, ui.Writer()); err != nil {
 				bluesky.Logger().Error().Interface("error", errs.Wrap(err)).Send()
 				return debugPrint(ui, err)
 			}
-			return debugPrint(ui, ui.Outputln(resText))
+			return nil
 		},
 	}
-	blueskyPostCmd.Flags().StringP("message", "m", "", "Message")
+	blueskyProfileCmd.Flags().StringP("handle", "", "", "Handle name")
+	blueskyProfileCmd.Flags().BoolP("json", "j", false, "Output JSON format")
 
-	return blueskyPostCmd
+	return blueskyProfileCmd
 }
 
 /* Copyright 2023 Spiegel

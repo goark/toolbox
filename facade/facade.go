@@ -27,11 +27,9 @@ var (
 )
 
 var (
-	debugFlag  bool   //debug flag
-	configPath string //path for config file
-	configFile = "config"
-	// configDir         = config.Dir(Name)
-	cacheDir          = cache.Dir(Name)
+	debugFlag         bool   //debug flag
+	configPath        string //path for config file
+	configFile        = "config"
 	defaultConfigPath = config.Path(Name, configFile+".yaml")
 )
 
@@ -46,10 +44,12 @@ func newRootCmd(ui *rwi.RWI, args []string) *cobra.Command {
 		},
 	}
 	// global options (binding)
+	rootCmd.PersistentFlags().StringP("cache-dir", "", cache.Dir(Name), "Directory for cache files")
 	rootCmd.PersistentFlags().StringP("log-dir", "", logger.DefaultLogDir(Name), "Directory for log files")
 	rootCmd.PersistentFlags().StringP("log-level", "", "nop", fmt.Sprintf("Log level [%s]", strings.Join(logger.LevelList(), "|")))
 
 	//Bind config file
+	_ = viper.BindPFlag("cache-dir", rootCmd.PersistentFlags().Lookup("log-dir"))
 	_ = viper.BindPFlag("log-dir", rootCmd.PersistentFlags().Lookup("log-dir"))
 	_ = viper.BindPFlag("log-level", rootCmd.PersistentFlags().Lookup("log-level"))
 	cobra.OnInitialize(initConfig)

@@ -85,7 +85,7 @@ func (cfg *Bluesky) PostMessage(ctx context.Context, msg string) (string, error)
 
 	// add mentions metadata
 	for _, e := range getMentionsFrom(msg) {
-		prof, err := cfg.ShowProfile(ctx, e.text)
+		prof, err := cfg.Profile(ctx, e.text)
 		if err != nil {
 			return "", errs.Wrap(err, errs.WithContext("msg", msg))
 		}

@@ -2,16 +2,22 @@ package facade
 
 import (
 	"github.com/goark/errs"
+	"github.com/goark/gocli/cache"
 	"github.com/goark/toolbox/logger"
 	"github.com/rs/zerolog"
 	"github.com/spf13/viper"
 )
 
 type globalOptions struct {
-	Logger *zerolog.Logger
+	Logger   *zerolog.Logger
+	CacheDir string
 }
 
 func getGlobalOptions() (*globalOptions, error) {
+	cacheDir := viper.GetString("cache-dir")
+	if len(cacheDir) == 0 {
+		cacheDir = cache.Dir(Name)
+	}
 	logger, err := logger.New(
 		logger.LevelFrom(viper.GetString("log-level")),
 		viper.GetString("log-dir"),
@@ -20,7 +26,8 @@ func getGlobalOptions() (*globalOptions, error) {
 		return nil, errs.Wrap(err)
 	}
 	return &globalOptions{
-		Logger: logger,
+		Logger:   logger,
+		CacheDir: cacheDir,
 	}, nil
 }
 

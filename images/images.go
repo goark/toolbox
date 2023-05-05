@@ -6,11 +6,11 @@ import (
 	"image"
 	"image/jpeg"
 	"io"
-	"math"
 	"os"
 
 	"github.com/goark/errs"
 	"github.com/goark/fetch"
+	"github.com/goark/toolbox/ecode"
 	"golang.org/x/image/draw"
 )
 
@@ -49,8 +49,7 @@ const (
 
 func AjustImage(src []byte) (io.Reader, error) {
 	// check file size
-	length := len(src)
-	if length < imageFileMaxSize {
+	if len(src) < imageFileMaxSize {
 		return bytes.NewReader(src), nil
 	}
 
@@ -65,8 +64,7 @@ func AjustImage(src []byte) (io.Reader, error) {
 		if err != nil {
 			return nil, errs.Wrap(err)
 		}
-		length = len(b)
-		if length < imageFileMaxSize {
+		if len(b) < imageFileMaxSize {
 			return bytes.NewReader(b), nil
 		}
 		src = b
@@ -83,41 +81,38 @@ func AjustImage(src []byte) (io.Reader, error) {
 			return nil, errs.Wrap(err)
 		}
 		quality = q
-		length = len(b)
-		if length < imageFileMaxSize {
+		if len(b) < imageFileMaxSize {
 			return bytes.NewReader(b), nil
 		}
-		src = b
 	}
-	rateFile := float64(imageFileMaxSize) / float64(length)
 
 	// rectange of image
 	rctSrc := imgSrc.Bounds()
-	rateSize := 1.0
+	rate := 1.0
 	if rctSrc.Dx() > rctSrc.Dy() {
 		if rctSrc.Dx() > imageMaxSize {
-			rateSize = imageMaxSize / float64(rctSrc.Dx())
+			rate = imageMaxSize / float64(rctSrc.Dx())
 		}
 	} else {
 		if rctSrc.Dy() > imageMaxSize {
-			rateSize = imageMaxSize / float64(rctSrc.Dy())
+			rate = imageMaxSize / float64(rctSrc.Dy())
 		}
 	}
-	rate := math.Min(rateFile, rateSize)
 	if rate >= 1.0 {
-		return bytes.NewReader(src), nil
+		return nil, errs.Wrap(ecode.ErrTooLargeImage)
 	}
-	dstX := int(float64(rctSrc.Dx()) * rate)
-	dstY := int(float64(rctSrc.Dy()) * rate)
 
 	// scale down
+	dstX := int(float64(rctSrc.Dx()) * rate)
+	dstY := int(float64(rctSrc.Dy()) * rate)
 	imgDst := image.NewRGBA(image.Rect(0, 0, dstX, dstY))
 	draw.BiLinear.Scale(imgDst, imgDst.Bounds(), imgSrc, rctSrc, draw.Over, nil)
-
-	// encode resized image
-	b, err := convertJPEG(imgSrc, quality)
+	b, err := convertJPEG(imgDst, quality)
 	if err != nil {
 		return nil, errs.Wrap(err)
+	}
+	if len(b) > imageFileMaxSize {
+		return nil, errs.Wrap(ecode.ErrTooLargeImage)
 	}
 	return bytes.NewReader(b), nil
 }

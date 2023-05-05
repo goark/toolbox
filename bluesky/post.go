@@ -1,7 +1,6 @@
 package bluesky
 
 import (
-	"bytes"
 	"context"
 	"path/filepath"
 	"regexp"
@@ -110,8 +109,8 @@ func (cfg *Bluesky) PostMessage(ctx context.Context, msg *Message) (string, erro
 			}
 			img, err := images.AjustImage(src)
 			if err != nil {
-				cfg.Logger().Info().Interface("error", errs.Wrap(err)).Str("file_name", fn).Msg("not support image")
-				img = bytes.NewReader(src)
+				cfg.Logger().Error().Interface("error", errs.Wrap(err)).Str("file_name", fn).Msg("cannot ajust image")
+				return "", errs.Wrap(err, errs.WithContext("file", fn))
 			}
 			cfg.Logger().Trace().Str("file_name", fn).Msg("start uploading image file")
 			res, err := atproto.RepoUploadBlob(ctx, cfg.client, img)
@@ -155,8 +154,7 @@ func (cfg *Bluesky) getEmbedImage(ctx context.Context, urlStr string) (*atproto.
 	}
 	img, err := images.AjustImage(src)
 	if err != nil {
-		cfg.Logger().Info().Interface("error", errs.Wrap(err)).Str("url", urlStr).Msg("not support image")
-		img = bytes.NewReader(src)
+		return nil, errs.Wrap(err, errs.WithContext("url", urlStr))
 	}
 
 	res, err := atproto.RepoUploadBlob(ctx, cfg.client, img)

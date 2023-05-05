@@ -84,7 +84,6 @@ func AjustImage(src []byte) (io.Reader, error) {
 		if len(b) < imageFileMaxSize {
 			return bytes.NewReader(b), nil
 		}
-		src = b
 	}
 
 	// rectange of image

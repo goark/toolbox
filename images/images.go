@@ -43,7 +43,7 @@ func FetchFromFile(fn string) ([]byte, error) {
 }
 
 const (
-	imageMaxSize     = 1024
+	imageMaxSize     = 1000
 	imageFileMaxSize = 1024 * 1024
 )
 
@@ -59,8 +59,9 @@ func AjustImage(src []byte) (io.Reader, error) {
 		return nil, errs.Wrap(err)
 	}
 	// convert JPEG
+	quality := 90
 	if t != "jpeg" {
-		b, err := convertJPEG(imgSrc, 100)
+		b, err := convertJPEG(imgSrc, quality)
 		if err != nil {
 			return nil, errs.Wrap(err)
 		}
@@ -74,8 +75,7 @@ func AjustImage(src []byte) (io.Reader, error) {
 		}
 	}
 	// quality down
-	quality := 100
-	for _, q := range []int{75, 50, 25} {
+	for _, q := range []int{85, 55, 25} {
 		b, err := convertJPEG(imgSrc, q)
 		if err != nil {
 			return nil, errs.Wrap(err)

@@ -68,11 +68,6 @@ func AjustImage(src []byte) (io.Reader, error) {
 		if len(b) < imageFileMaxSize {
 			return bytes.NewReader(b), nil
 		}
-		src = b
-		imgSrc, _, err = image.Decode(bytes.NewReader(src))
-		if err != nil {
-			return nil, errs.Wrap(err)
-		}
 	}
 	// quality down
 	for _, q := range []int{85, 55, 25} {

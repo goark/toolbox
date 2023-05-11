@@ -9,8 +9,10 @@ import (
 )
 
 type globalOptions struct {
-	Logger   *zerolog.Logger
-	CacheDir string
+	Logger          *zerolog.Logger
+	CacheDir        string
+	bskyConfigPath  string
+	mstdnConfigPath string
 }
 
 func getGlobalOptions() (*globalOptions, error) {
@@ -25,9 +27,19 @@ func getGlobalOptions() (*globalOptions, error) {
 	if err != nil {
 		return nil, errs.Wrap(err)
 	}
+	bskyConfigPath := viper.GetString("bluesky-config")
+	if len(bskyConfigFile) == 0 {
+		bskyConfigPath = defaultBskyConfigPath
+	}
+	mstdnConfigPath := viper.GetString("mastodon-config")
+	if len(mstdnConfigPath) == 0 {
+		mstdnConfigPath = defaultMstdnConfigPath
+	}
 	return &globalOptions{
-		Logger:   logger,
-		CacheDir: cacheDir,
+		Logger:          logger,
+		CacheDir:        cacheDir,
+		bskyConfigPath:  bskyConfigPath,
+		mstdnConfigPath: mstdnConfigPath,
 	}, nil
 }
 

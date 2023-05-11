@@ -21,7 +21,7 @@ type Bluesky struct {
 }
 
 // New creates new Bluesky instance.
-func New(path string, dir string, logger *zerolog.Logger) (*Bluesky, error) {
+func New(path, dir string, logger *zerolog.Logger) (*Bluesky, error) {
 	file, err := os.Open(path)
 	if err != nil {
 		return nil, errs.Wrap(err, errs.WithContext("path", path), errs.WithContext("die", dir))

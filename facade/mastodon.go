@@ -3,40 +3,41 @@ package facade
 import (
 	"github.com/goark/errs"
 	"github.com/goark/gocli/rwi"
-	"github.com/goark/toolbox/bluesky"
 	"github.com/goark/toolbox/ecode"
+	"github.com/goark/toolbox/mastodon"
 	"github.com/spf13/cobra"
 )
 
 // newBlueskyCmd returns cobra.Command instance for show sub-command
-func newBlueskyCmd(ui *rwi.RWI) *cobra.Command {
-	blueskyCmd := &cobra.Command{
-		Use:     "bluesky",
-		Aliases: []string{"bsky", "bs"},
-		Short:   "Simple Bluesky commands",
-		Long:    "Simple Bluesky commands.",
+func newMastodonCmd(ui *rwi.RWI) *cobra.Command {
+	mastodonCmd := &cobra.Command{
+		Use:     "mastodon",
+		Aliases: []string{"mstdn", "mast", "mst"},
+		Short:   "Simple Mastodon commands",
+		Long:    "Simple Mastodon commands.",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return debugPrint(ui, errs.Wrap(ecode.ErrNoCommand))
 		},
 	}
-	blueskyCmd.AddCommand(
-		newBlueskyPostCmd(ui),
-		newBlueskyProfileCmd(ui),
+	mastodonCmd.AddCommand(
+		newMastodonRegisterCmd(ui),
+		newMastodonProfileCmd(ui),
+		newMastodonPostCmd(ui),
 	)
-	return blueskyCmd
+	return mastodonCmd
 }
 
-func getBluesky() (*bluesky.Bluesky, error) {
+func getMastodon() (*mastodon.Mastodon, error) {
 	gopts, err := getGlobalOptions()
 	if err != nil {
 		return nil, errs.Wrap(err)
 	}
-	bcfg, err := bluesky.New(gopts.bskyConfigPath, gopts.CacheDir, gopts.Logger)
+	mcfg, err := mastodon.New(gopts.mstdnConfigPath, gopts.Logger)
 	if err != nil {
 		gopts.Logger.Error().Interface("error", errs.Wrap(err)).Send()
 		return nil, errs.Wrap(err)
 	}
-	return bcfg, nil
+	return mcfg, nil
 }
 
 /* Copyright 2023 Spiegel

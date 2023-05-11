@@ -1,14 +1,9 @@
-package ecode
+package consts
 
-import "errors"
-
-var (
-	ErrNullPointer           = errors.New("null reference instance")
-	ErrNoCommand             = errors.New("no command")
-	ErrNoBlueskyHandle       = errors.New("no Bluesky handle")
-	ErrInvalidMastodonUserId = errors.New("invalid Mastodon user ID")
-	ErrNoContent             = errors.New("no content")
-	ErrTooLargeImage         = errors.New("too large image (>1MB)")
+const (
+	AppNameShort  = "toolbox"
+	AppName       = "github.com/goark/" + AppNameShort
+	RepositoryURL = "https://github.com/goark/toolbox"
 )
 
 /* Copyright 2023 Spiegel

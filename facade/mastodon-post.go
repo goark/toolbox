@@ -5,25 +5,37 @@ import (
 
 	"github.com/goark/errs"
 	"github.com/goark/gocli/rwi"
-	"github.com/goark/toolbox/bluesky"
+	"github.com/goark/toolbox/mastodon"
 	"github.com/spf13/cobra"
 )
 
-// newBlueskyPostCmd returns cobra.Command instance for show sub-command
-func newBlueskyPostCmd(ui *rwi.RWI) *cobra.Command {
-	blueskyPostCmd := &cobra.Command{
+// newBlueskyCmd returns cobra.Command instance for show sub-command
+func newMastodonPostCmd(ui *rwi.RWI) *cobra.Command {
+	mastodonPostCmd := &cobra.Command{
 		Use:     "post",
-		Aliases: []string{"pst", "p"},
-		Short:   "Post message to Bluesky",
-		Long:    "Post message to Bluesky.",
+		Aliases: []string{"pst", "p", "toot", "tt", "t"},
+		Short:   "Post message to Mastodon",
+		Long:    "Post message to Mastodon.",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			// Global options
-			bsky, err := getBluesky()
+			// global options
+			mstdn, err := getMastodon()
 			if err != nil {
 				return debugPrint(ui, err)
 			}
 			// local options
 			images, err := cmd.Flags().GetStringSlice("image-file")
+			if err != nil {
+				return debugPrint(ui, err)
+			}
+			visStr, err := cmd.Flags().GetString("visibility")
+			if err != nil {
+				return debugPrint(ui, err)
+			}
+			visibility := mastodon.GetVisibilityFrom(visStr)
+			if visibility == mastodon.VisibilityUnknown {
+				return debugPrint(ui, errs.New("invlid visibility", errs.WithContext("visibility", visStr)))
+			}
+			spoilerText, err := cmd.Flags().GetString("spoiler-text")
 			if err != nil {
 				return debugPrint(ui, err)
 			}
@@ -53,20 +65,28 @@ func newBlueskyPostCmd(ui *rwi.RWI) *cobra.Command {
 			msg = strings.TrimSpace(msg)
 
 			// post message
-			resText, err := bsky.PostMessage(cmd.Context(), &bluesky.Message{Msg: msg, ImageFiles: images})
+			resText, err := mstdn.PostMessage(cmd.Context(), &mastodon.Message{
+				Msg:         msg,
+				SpoilerText: spoilerText,
+				Visibility:  visibility.String(),
+				ImageFiles:  images,
+			})
 			if err != nil {
-				bsky.Logger().Error().Interface("error", errs.Wrap(err)).Send()
+				mstdn.Logger().Error().Interface("error", errs.Wrap(err)).Send()
 				return debugPrint(ui, err)
 			}
 			return debugPrint(ui, ui.Outputln(resText))
 		},
 	}
-	blueskyPostCmd.Flags().StringP("message", "m", "", "Message")
-	blueskyPostCmd.Flags().BoolP("pipe", "", false, "Input from standard-input")
-	blueskyPostCmd.Flags().BoolP("edit", "", false, "Edit message")
-	blueskyPostCmd.MarkFlagsMutuallyExclusive("message", "pipe", "edit")
-	blueskyPostCmd.Flags().StringSliceP("image-file", "i", nil, "Image file")
-	return blueskyPostCmd
+	mastodonPostCmd.Flags().StringP("message", "m", "", "Message")
+	mastodonPostCmd.Flags().BoolP("pipe", "", false, "Input from standard-input")
+	mastodonPostCmd.Flags().BoolP("edit", "", false, "Edit message")
+	mastodonPostCmd.MarkFlagsMutuallyExclusive("message", "pipe", "edit")
+	mastodonPostCmd.Flags().StringSliceP("image-file", "i", nil, "Image file")
+	mastodonPostCmd.Flags().StringP("visibility", "v", mastodon.DefaultVisibility().String(), "Visibility ["+strings.Join(mastodon.VisibilityList(), "|")+"]")
+	mastodonPostCmd.Flags().StringP("spoiler-text", "s", "", "Spoiler text")
+
+	return mastodonPostCmd
 }
 
 /* Copyright 2023 Spiegel

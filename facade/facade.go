@@ -13,6 +13,7 @@ import (
 	"github.com/goark/gocli/config"
 	"github.com/goark/gocli/exitcode"
 	"github.com/goark/gocli/rwi"
+	"github.com/goark/toolbox/consts"
 	"github.com/goark/toolbox/ecode"
 	"github.com/goark/toolbox/logger"
 	"github.com/spf13/cobra"
@@ -21,16 +22,23 @@ import (
 
 var (
 	//Name is applicatin name
-	Name = "toolbox"
+	Name = consts.AppNameShort
 	//Version is version for applicatin
 	Version = "dev-version"
 )
 
+const (
+	configFile      = "config"
+	bskyConfigFile  = "bluesky.json"
+	mstdnConfigFile = "mastodon.json"
+)
+
 var (
-	debugFlag         bool   //debug flag
-	configPath        string //path for config file
-	configFile        = "config"
-	defaultConfigPath = config.Path(Name, configFile+".yaml")
+	debugFlag              bool   //debug flag
+	configPath             string //path for config file
+	defaultConfigPath      = config.Path(Name, configFile+".yaml")
+	defaultBskyConfigPath  = config.Path(Name, bskyConfigFile)
+	defaultMstdnConfigPath = config.Path(Name, mstdnConfigFile)
 )
 
 // newRootCmd returns cobra.Command instance for root command
@@ -47,11 +55,15 @@ func newRootCmd(ui *rwi.RWI, args []string) *cobra.Command {
 	rootCmd.PersistentFlags().StringP("cache-dir", "", cache.Dir(Name), "Directory for cache files")
 	rootCmd.PersistentFlags().StringP("log-dir", "", logger.DefaultLogDir(Name), "Directory for log files")
 	rootCmd.PersistentFlags().StringP("log-level", "", "nop", fmt.Sprintf("Log level [%s]", strings.Join(logger.LevelList(), "|")))
+	rootCmd.PersistentFlags().StringP("bluesky-config", "", defaultBskyConfigPath, "Config file for Bluesky")
+	rootCmd.PersistentFlags().StringP("mastodon-config", "", defaultMstdnConfigPath, "Config file for Mastodon")
 
 	//Bind config file
 	_ = viper.BindPFlag("cache-dir", rootCmd.PersistentFlags().Lookup("log-dir"))
 	_ = viper.BindPFlag("log-dir", rootCmd.PersistentFlags().Lookup("log-dir"))
 	_ = viper.BindPFlag("log-level", rootCmd.PersistentFlags().Lookup("log-level"))
+	_ = viper.BindPFlag("bluesky-config", rootCmd.PersistentFlags().Lookup("bluesky-config"))
+	_ = viper.BindPFlag("mastodon-config", rootCmd.PersistentFlags().Lookup("mastodon-config"))
 	cobra.OnInitialize(initConfig)
 
 	// global options (other)
@@ -67,6 +79,7 @@ func newRootCmd(ui *rwi.RWI, args []string) *cobra.Command {
 	rootCmd.AddCommand(
 		newVersionCmd(ui),
 		newBlueskyCmd(ui),
+		newMastodonCmd(ui),
 	)
 	return rootCmd
 }

@@ -22,6 +22,7 @@ type Message struct {
 	ImageFiles []string
 }
 
+// PostMessage method posts message and image files to Bluesky.
 func (cfg *Bluesky) PostMessage(ctx context.Context, msg *Message) (string, error) {
 	if cfg == nil {
 		return "", errs.Wrap(ecode.ErrNullPointer, errs.WithContext("msg", msg))

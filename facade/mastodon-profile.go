@@ -1,35 +1,36 @@
 package facade
 
 import (
-	"strings"
-
 	"github.com/goark/gocli/rwi"
-	"github.com/goark/toolbox/consts"
 	"github.com/spf13/cobra"
 )
 
-var versionStrings = []string{ //output message of version
-	Name + " " + Version,
-	"repository: " + consts.RepositoryURL,
-}
-
-func getVersion() string {
-	return strings.Join(versionStrings, "\n")
-}
-
-// newVersionCmd returns cobra.Command instance for show sub-command
-func newVersionCmd(ui *rwi.RWI) *cobra.Command {
-	versionCmd := &cobra.Command{
-		Use:     "version",
-		Aliases: []string{"ver", "v"},
-		Short:   "Print the version number",
-		Long:    "Print the version number of " + Name,
+// newBlueskyCmd returns cobra.Command instance for show sub-command
+func newMastodonProfileCmd(ui *rwi.RWI) *cobra.Command {
+	mastodonProfileCmd := &cobra.Command{
+		Use:     "profile",
+		Aliases: []string{"prof"},
+		Short:   "Output my profile",
+		Long:    "Output my profile.",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return ui.OutputErrln(getVersion())
+			// global options
+			mstdn, err := getMastodon()
+			if err != nil {
+				return debugPrint(ui, err)
+			}
+			// local options
+			jsonFlag, err := cmd.Flags().GetBool("json")
+			if err != nil {
+				return debugPrint(ui, err)
+			}
+
+			// get my account
+			return debugPrint(ui, mstdn.ShowProfile(cmd.Context(), jsonFlag, ui.Writer()))
 		},
 	}
+	mastodonProfileCmd.Flags().BoolP("json", "j", false, "Output JSON format")
 
-	return versionCmd
+	return mastodonProfileCmd
 }
 
 /* Copyright 2023 Spiegel

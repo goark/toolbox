@@ -31,16 +31,85 @@ Usage:
 Available Commands:
   bluesky     Simple Bluesky commands
   help        Help about any command
+  mastodon    Simple Mastodon commands
   version     Print the version number
 
 Flags:
-      --config string      Config file (default "/home/username/.config/toolbox/config.yaml")
-      --debug              for debug
-  -h, --help               help for toolbox
-      --log-dir string     Directory for log files (default "/home/username/.cache/toolbox")
-      --log-level string   Log level [nop|error|warn|info|debug|trace] (default "nop")
+      --bluesky-config string    Config file for Bluesky (default "/home/username/.config/toolbox/bluesky.json")
+      --cache-dir string         Directory for cache files (default "/home/username/.cache/toolbox")
+      --config string            Config file (default "/home/username/.config/toolbox/config.yaml")
+      --debug                    for debug
+  -h, --help                     help for toolbox
+      --log-dir string           Directory for log files (default "/home/username/.cache/toolbox")
+      --log-level string         Log level [nop|error|warn|info|debug|trace] (default "nop")
+      --mastodon-config string   Config file for Mastodon (default "/home/username/.config/toolbox/mastodon.json")
 
 Use "toolbox [command] --help" for more information about a command.
+```
+
+### Usage mastodon command
+
+```
+$ toolbox mastodon -h
+Simple Mastodon commands.
+
+Usage:
+  toolbox mastodon [flags]
+  toolbox mastodon [command]
+
+Aliases:
+  mastodon, mstdn, mast, mst
+
+Available Commands:
+  post        Post message to Mastodon
+  profile     Output my profile
+  register    Register application
+
+Flags:
+  -h, --help   help for mastodon
+
+Global Flags:
+      --bluesky-config string    Config file for Bluesky (default "/home/username/.config/toolbox/bluesky.json")
+      --cache-dir string         Directory for cache files (default "/home/username/.cache/toolbox")
+      --config string            Config file (default "/home/username/.config/toolbox/config.yaml")
+      --debug                    for debug
+      --log-dir string           Directory for log files (default "/home/username/.cache/toolbox")
+      --log-level string         Log level [nop|error|warn|info|debug|trace] (default "nop")
+      --mastodon-config string   Config file for Mastodon (default "/home/username/.config/toolbox/mastodon.json")
+
+Use "toolbox mastodon [command] --help" for more information about a command.
+```
+
+### Usage bluesky command
+
+```
+$ toolbox bluesky -h
+Simple Bluesky commands.
+
+Usage:
+  toolbox bluesky [flags]
+  toolbox bluesky [command]
+
+Aliases:
+  bluesky, bsky, bs
+
+Available Commands:
+  post        Post message to Bluesky
+  profile     Output Bluesky profile
+
+Flags:
+  -h, --help   help for bluesky
+
+Global Flags:
+      --bluesky-config string    Config file for Bluesky (default "/home/username/.config/toolbox/bluesky.json")
+      --cache-dir string         Directory for cache files (default "/home/username/.cache/toolbox")
+      --config string            Config file (default "/home/username/.config/toolbox/config.yaml")
+      --debug                    for debug
+      --log-dir string           Directory for log files (default "/home/username/.cache/toolbox")
+      --log-level string         Log level [nop|error|warn|info|debug|trace] (default "nop")
+      --mastodon-config string   Config file for Mastodon (default "/home/username/.config/toolbox/mastodon.json")
+
+Use "toolbox bluesky [command] --help" for more information about a command.
 ```
 
 ## Modules Requirement Graph

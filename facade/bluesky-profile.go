@@ -14,8 +14,8 @@ func newBlueskyProfileCmd(ui *rwi.RWI) *cobra.Command {
 	blueskyProfileCmd := &cobra.Command{
 		Use:     "profile",
 		Aliases: []string{"prof"},
-		Short:   "Output profile",
-		Long:    "Show profile.",
+		Short:   "Output Bluesky profile",
+		Long:    "Output Bluesky profile.",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			// Global options
 			bsky, err := getBluesky()

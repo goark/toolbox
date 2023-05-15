@@ -59,6 +59,7 @@ func (cfg *Bluesky) CreateSession(ctx context.Context) error {
 		client.Auth.Did = auth.Did
 		client.Auth.AccessJwt = auth.AccessJwt
 		client.Auth.RefreshJwt = auth.RefreshJwt
+		cfg.Handle = auth.Did
 		if err := cfg.writeAuth(client.Auth); err != nil {
 			return errs.Wrap(err)
 		}

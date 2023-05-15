@@ -20,6 +20,7 @@ func newBlueskyCmd(ui *rwi.RWI) *cobra.Command {
 		},
 	}
 	blueskyCmd.AddCommand(
+		newBlueskyRegisterCmd(ui),
 		newBlueskyPostCmd(ui),
 		newBlueskyProfileCmd(ui),
 	)

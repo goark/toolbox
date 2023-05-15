@@ -10,14 +10,18 @@ import (
 	"github.com/rs/zerolog"
 )
 
+const (
+	DefaltHostName = "bsky.social"
+)
+
 // Bluesky is configuration for Bluesky
 type Bluesky struct {
 	Host     string `json:"host"`
 	Handle   string `json:"handle"`
 	Password string `json:"password"`
 	baseDir  string
-	client   *xrpc.Client
 	logger   *zerolog.Logger
+	client   *xrpc.Client
 }
 
 // New creates new Bluesky instance.
@@ -33,7 +37,7 @@ func New(path, dir string, logger *zerolog.Logger) (*Bluesky, error) {
 		return nil, errs.Wrap(err, errs.WithContext("path", path))
 	}
 	if len(cfg.Host) == 0 {
-		cfg.Host = "https://bsky.social"
+		cfg.Host = "https://" + DefaltHostName
 	}
 	if len(cfg.Handle) == 0 {
 		return nil, errs.Wrap(ecode.ErrNoBlueskyHandle, errs.WithContext("path", path), errs.WithContext("die", dir))
@@ -62,6 +66,23 @@ func (cfg *Bluesky) Logger() *zerolog.Logger {
 		return &logger
 	}
 	return cfg.logger
+}
+
+// Export methods exports configuration to config file.
+func (cfg *Bluesky) Export(path string) error {
+	if cfg == nil {
+		return errs.Wrap(ecode.ErrNullPointer)
+	}
+	file, err := os.OpenFile(path, os.O_RDWR|os.O_CREATE, 0600)
+	if err != nil {
+		return errs.Wrap(err, errs.WithContext("path", path))
+	}
+	defer file.Close()
+
+	if err := json.NewEncoder(file).Encode(cfg); err != nil {
+		return errs.Wrap(err, errs.WithContext("path", path))
+	}
+	return nil
 }
 
 /* Copyright 2023 Spiegel

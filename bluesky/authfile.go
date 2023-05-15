@@ -11,9 +11,9 @@ import (
 )
 
 func (cfg *Bluesky) authPath() string {
-	handle := strings.ReplaceAll(cfg.Handle, ":", "_")
-	if len(handle) > 0 {
-		return filepath.Join(cfg.BaseDir(), handle+".auth")
+	did := strings.ReplaceAll(cfg.Handle, ":", "_")
+	if len(did) > 0 {
+		return filepath.Join(cfg.BaseDir(), did+".auth")
 	}
 	return filepath.Join(cfg.BaseDir(), "bluesky.auth")
 }

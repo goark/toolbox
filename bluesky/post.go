@@ -19,6 +19,7 @@ import (
 // Message is information of post message.
 type Message struct {
 	Msg        string
+	ReplryTo   string
 	ImageFiles []string
 }
 
@@ -38,11 +39,28 @@ func (cfg *Bluesky) PostMessage(ctx context.Context, msg *Message) (string, erro
 		}
 	}
 
+	// reply
+	var reply *bsky.FeedPost_ReplyRef
+	if len(msg.ReplryTo) > 0 {
+		record, err := cfg.getRecord(ctx, msg.ReplryTo)
+		if err != nil {
+			return "", errs.Wrap(err, errs.WithContext("msg", msg))
+		}
+		orig := record.Value.Val.(*bsky.FeedPost)
+		reply = &bsky.FeedPost_ReplyRef{
+			Root:   &atproto.RepoStrongRef{Cid: *record.Cid, Uri: record.Uri},
+			Parent: &atproto.RepoStrongRef{Cid: *record.Cid, Uri: record.Uri},
+		}
+		if orig.Reply != nil && orig.Reply.Root != nil {
+			reply.Root = &atproto.RepoStrongRef{Cid: orig.Reply.Root.Cid, Uri: orig.Reply.Root.Uri}
+		}
+	}
+
 	// make post data (not support reply and quote)
 	post := &bsky.FeedPost{
 		Text:      msg.Msg,
 		CreatedAt: time.Now().UTC().Format(time.RFC3339),
-		Reply:     nil,
+		Reply:     reply,
 	}
 
 	// add links metadata

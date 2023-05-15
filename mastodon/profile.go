@@ -34,7 +34,7 @@ func (cfg *Mastodon) ShowProfile(ctx context.Context, jsonFlag bool, w io.Writer
 			return errs.Wrap(err)
 		}
 	} else {
-		fmt.Fprintf(w, "      Username: %s\n", account.Username)
+		fmt.Fprintf(w, "       User ID: %s\n", account.Username)
 		fmt.Fprintf(w, "User ID (full): @%s@%s\n", account.Username, cfg.Servername())
 		fmt.Fprintf(w, "           URL: %s\n", account.URL)
 		fmt.Fprintf(w, "  Display name: %s\n", account.DisplayName)

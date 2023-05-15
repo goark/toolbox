@@ -8,18 +8,18 @@ import (
 
 	"github.com/goark/errs"
 	"github.com/goark/gocli/rwi"
-	"github.com/goark/toolbox/mastodon"
+	"github.com/goark/toolbox/bluesky"
 	"github.com/nyaosorg/go-readline-ny"
 	"github.com/spf13/cobra"
 )
 
-// newBlueskyCmd returns cobra.Command instance for show sub-command
-func newMastodonRegisterCmd(ui *rwi.RWI) *cobra.Command {
-	mastodonRegisterCmd := &cobra.Command{
+// newBlueskyRegisterCmd returns cobra.Command instance for show sub-command
+func newBlueskyRegisterCmd(ui *rwi.RWI) *cobra.Command {
+	blueskyRegisterCmd := &cobra.Command{
 		Use:     "register",
 		Aliases: []string{"reg"},
-		Short:   "Register application",
-		Long:    "Register Mastodon application.",
+		Short:   "Register account in local PC",
+		Long:    "Register Bluesky account in local PC.",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			// global options
 			gopts, err := getGlobalOptions()
@@ -27,43 +27,56 @@ func newMastodonRegisterCmd(ui *rwi.RWI) *cobra.Command {
 				return debugPrint(ui, err)
 			}
 			// local options (interactive mode)
-			server, err := getMastodonServer(cmd.Context())
+			server, err := getBlueskyServer(cmd.Context())
 			if err != nil {
 				return debugPrint(ui, err)
 			}
-			username, err := getMastodonUserId(cmd.Context())
+			handle, err := getBlueskyHandle(cmd.Context())
 			if err != nil {
 				return debugPrint(ui, err)
 			}
-			passaord, err := getMastodonPassword(cmd.Context())
+			passaord, err := getBlueskyPassword(cmd.Context())
 			if err != nil {
 				return debugPrint(ui, err)
 			}
-			mcfg, err := mastodon.Register(cmd.Context(), server, username, passaord, gopts.Logger)
+			bcfg, err := bluesky.Register(cmd.Context(), server, handle, passaord, gopts.CacheDir, gopts.Logger)
 			if err != nil {
 				gopts.Logger.Error().Interface("error", errs.Wrap(err)).Send()
 				return debugPrint(ui, err)
 			}
-			if err := debugPrint(ui, mcfg.Export(gopts.mstdnConfigPath)); err != nil {
+			if err := debugPrint(ui, bcfg.Export(gopts.bskyConfigPath)); err != nil {
 				return debugPrint(ui, err)
 			}
 			_ = ui.Outputln()
-			_ = ui.Outputln("          server:", mcfg.Server)
-			_ = ui.Outputln("application name:", mcfg.AppName())
-			_ = ui.Outputln("         website:", mcfg.Registory())
-			_ = ui.Outputln("          scopes:", mcfg.Scopes())
+			_ = ui.Outputln("Host:", bcfg.Host)
+			_ = ui.Outputln(" DID:", bcfg.Handle)
 			_ = ui.Outputln()
-			_ = ui.Outputln("output:", gopts.mstdnConfigPath)
+			_ = ui.Outputln("output:", gopts.bskyConfigPath)
 			return nil
 		},
 	}
 
-	return mastodonRegisterCmd
+	return blueskyRegisterCmd
 }
 
-func getMastodonServer(ctx context.Context) (string, error) {
+func getBlueskyServer(ctx context.Context) (string, error) {
 	editor := readline.Editor{
-		PromptWriter: func(w io.Writer) (int, error) { return fmt.Fprint(w, "Server (e.g. mastodon.social) > ") },
+		PromptWriter: func(w io.Writer) (int, error) {
+			return fmt.Fprintf(w, "     Host (default %s) > ", bluesky.DefaltHostName)
+		},
+	}
+	text, err := editor.ReadLine(ctx)
+	if err != nil {
+		return "", errs.Wrap(err)
+	}
+	return strings.TrimSpace(text), nil
+}
+
+func getBlueskyHandle(ctx context.Context) (string, error) {
+	editor := readline.Editor{
+		PromptWriter: func(w io.Writer) (int, error) {
+			return fmt.Fprint(w, "User (Handle/DID/email address) > ")
+		},
 	}
 	for {
 		text, err := editor.ReadLine(ctx)
@@ -77,25 +90,11 @@ func getMastodonServer(ctx context.Context) (string, error) {
 	}
 }
 
-func getMastodonUserId(ctx context.Context) (string, error) {
+func getBlueskyPassword(ctx context.Context) (string, error) {
 	editor := readline.Editor{
-		PromptWriter: func(w io.Writer) (int, error) { return fmt.Fprint(w, "         User (email address) > ") },
-	}
-	for {
-		text, err := editor.ReadLine(ctx)
-		if err != nil {
-			return "", errs.Wrap(err)
-		}
-		text = strings.TrimSpace(text)
-		if len(text) > 0 {
-			return text, nil
-		}
-	}
-}
-
-func getMastodonPassword(ctx context.Context) (string, error) {
-	editor := readline.Editor{
-		PromptWriter: func(w io.Writer) (int, error) { return fmt.Fprint(w, "                     Password > ") },
+		PromptWriter: func(w io.Writer) (int, error) {
+			return fmt.Fprint(w, "                   App password > ")
+		},
 	}
 	for {
 		text, err := editor.ReadLine(ctx)

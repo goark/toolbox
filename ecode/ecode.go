@@ -3,12 +3,13 @@ package ecode
 import "errors"
 
 var (
-	ErrNullPointer           = errors.New("null reference instance")
-	ErrNoCommand             = errors.New("no command")
-	ErrNoBlueskyHandle       = errors.New("no Bluesky handle")
-	ErrInvalidMastodonUserId = errors.New("invalid Mastodon user ID")
-	ErrNoContent             = errors.New("no content")
-	ErrTooLargeImage         = errors.New("too large image (>1MB)")
+	ErrNullPointer             = errors.New("null reference instance")
+	ErrNoCommand               = errors.New("no command")
+	ErrNoBlueskyHandle         = errors.New("no Bluesky handle")
+	ErrInvalidBlueskyRecordURI = errors.New("invalid Bluesky record URI")
+	ErrInvalidMastodonUserId   = errors.New("invalid Mastodon user ID")
+	ErrNoContent               = errors.New("no content")
+	ErrTooLargeImage           = errors.New("too large image (>1MB)")
 )
 
 /* Copyright 2023 Spiegel

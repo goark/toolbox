@@ -49,7 +49,7 @@ func (cfg *Bluesky) ShowProfile(ctx context.Context, actor string, jsonFlag bool
 		}
 	} else {
 		fmt.Fprintf(w, " Handle Name: %s\n", prof.Handle)
-		fmt.Fprintf(w, "         Did: %s\n", prof.Did)
+		fmt.Fprintf(w, "         DID: %s\n", prof.Did)
 		if prof.DisplayName != nil {
 			fmt.Fprintf(w, "Display Name: %s\n", *prof.DisplayName)
 		}

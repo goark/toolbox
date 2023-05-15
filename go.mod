@@ -4,14 +4,14 @@ go 1.20
 
 require (
 	github.com/PuerkitoBio/goquery v1.8.1
-	github.com/bluesky-social/indigo v0.0.0-20230504025040-8915cccc3319
+	github.com/bluesky-social/indigo v0.0.0-20230512185855-9660afd5a941
 	github.com/goark/errs v1.2.2
 	github.com/goark/fetch v0.4.1
 	github.com/goark/gocli v0.13.0
 	github.com/hymkor/go-multiline-ny v0.8.0
 	github.com/mattn/go-encoding v0.0.2
 	github.com/mattn/go-mastodon v0.0.6
-	github.com/nyaosorg/go-readline-ny v0.11.6
+	github.com/nyaosorg/go-readline-ny v0.12.2
 	github.com/rs/zerolog v1.29.1
 	github.com/spf13/cobra v1.7.0
 	github.com/spf13/viper v1.15.0
@@ -33,7 +33,7 @@ require (
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/ipfs/bbloom v0.0.4 // indirect
 	github.com/ipfs/go-block-format v0.1.2 // indirect
-	github.com/ipfs/go-cid v0.4.0 // indirect
+	github.com/ipfs/go-cid v0.4.1 // indirect
 	github.com/ipfs/go-datastore v0.6.0 // indirect
 	github.com/ipfs/go-ipfs-blockstore v1.3.0 // indirect
 	github.com/ipfs/go-ipfs-ds-help v1.1.0 // indirect

@@ -7,7 +7,9 @@ import (
 	"github.com/bluesky-social/indigo/xrpc"
 	"github.com/goark/errs"
 	"github.com/goark/toolbox/ecode"
-	"github.com/rs/zerolog"
+	"github.com/goark/toolbox/logger"
+	"github.com/ipfs/go-log/v2"
+	"go.uber.org/zap"
 )
 
 const (
@@ -20,12 +22,12 @@ type Bluesky struct {
 	Handle   string `json:"handle"`
 	Password string `json:"password"`
 	baseDir  string
-	logger   *zerolog.Logger
+	logger   *log.ZapEventLogger
 	client   *xrpc.Client
 }
 
 // New creates new Bluesky instance.
-func New(path, dir string, logger *zerolog.Logger) (*Bluesky, error) {
+func New(path, dir string, logger *log.ZapEventLogger) (*Bluesky, error) {
 	file, err := os.Open(path)
 	if err != nil {
 		return nil, errs.Wrap(err, errs.WithContext("path", path), errs.WithContext("die", dir))
@@ -43,10 +45,6 @@ func New(path, dir string, logger *zerolog.Logger) (*Bluesky, error) {
 		return nil, errs.Wrap(ecode.ErrNoBlueskyHandle, errs.WithContext("path", path), errs.WithContext("die", dir))
 	}
 	cfg.baseDir = dir
-	if logger == nil {
-		lggr := zerolog.Nop()
-		logger = &lggr
-	}
 	cfg.logger = logger
 	return &cfg, nil
 }
@@ -59,13 +57,12 @@ func (cfg *Bluesky) BaseDir() string {
 	return cfg.baseDir
 }
 
-// Logger method returns zerolog.Logger instance.
-func (cfg *Bluesky) Logger() *zerolog.Logger {
+// Logger method returns zap.Logger instance.
+func (cfg *Bluesky) Logger() *zap.Logger {
 	if cfg == nil || cfg.logger == nil {
-		logger := zerolog.Nop()
-		return &logger
+		return logger.Nop().Desugar()
 	}
-	return cfg.logger
+	return cfg.logger.Desugar()
 }
 
 // Export methods exports configuration to config file.

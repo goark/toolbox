@@ -5,11 +5,11 @@ import (
 	"net/url"
 
 	"github.com/goark/errs"
-	"github.com/rs/zerolog"
+	"github.com/ipfs/go-log/v2"
 )
 
 // Register functions registers application to mastodon server.
-func Register(ctx context.Context, server, handle, password, baseDir string, logger *zerolog.Logger) (*Bluesky, error) {
+func Register(ctx context.Context, server, handle, password, baseDir string, logger *log.ZapEventLogger) (*Bluesky, error) {
 	if len(server) == 0 {
 		server = DefaltHostName
 	} else if u, err := url.Parse(server); err != nil {

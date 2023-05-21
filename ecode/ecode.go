@@ -5,6 +5,7 @@ import "errors"
 var (
 	ErrNullPointer             = errors.New("null reference instance")
 	ErrNoCommand               = errors.New("no command")
+	ErrLogLevel                = errors.New("invalid log level")
 	ErrNoBlueskyHandle         = errors.New("no Bluesky handle")
 	ErrInvalidBlueskyRecordURI = errors.New("invalid Bluesky record URI")
 	ErrInvalidMastodonUserId   = errors.New("invalid Mastodon user ID")

@@ -7,10 +7,12 @@ import (
 	"strings"
 
 	"github.com/goark/errs"
+	"github.com/goark/errs/zapobject"
 	"github.com/goark/gocli/rwi"
 	"github.com/goark/toolbox/mastodon"
 	"github.com/nyaosorg/go-readline-ny"
 	"github.com/spf13/cobra"
+	"go.uber.org/zap"
 )
 
 // newBlueskyCmd returns cobra.Command instance for show sub-command
@@ -41,7 +43,7 @@ func newMastodonRegisterCmd(ui *rwi.RWI) *cobra.Command {
 			}
 			mcfg, err := mastodon.Register(cmd.Context(), server, username, passaord, gopts.Logger)
 			if err != nil {
-				gopts.Logger.Error().Interface("error", errs.Wrap(err)).Send()
+				gopts.Logger.Desugar().Error("error in mastodon.Register", zap.Object("error", zapobject.New(err)))
 				return debugPrint(ui, err)
 			}
 			if err := debugPrint(ui, mcfg.Export(gopts.mstdnConfigPath)); err != nil {

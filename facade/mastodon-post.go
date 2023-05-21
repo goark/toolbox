@@ -4,9 +4,11 @@ import (
 	"strings"
 
 	"github.com/goark/errs"
+	"github.com/goark/errs/zapobject"
 	"github.com/goark/gocli/rwi"
 	"github.com/goark/toolbox/mastodon"
 	"github.com/spf13/cobra"
+	"go.uber.org/zap"
 )
 
 // newBlueskyCmd returns cobra.Command instance for show sub-command
@@ -72,7 +74,7 @@ func newMastodonPostCmd(ui *rwi.RWI) *cobra.Command {
 				ImageFiles:  images,
 			})
 			if err != nil {
-				mstdn.Logger().Error().Interface("error", errs.Wrap(err)).Send()
+				mstdn.Logger().Error("error in mastodon.PostMessage", zap.Object("error", zapobject.New(err)))
 				return debugPrint(ui, err)
 			}
 			return debugPrint(ui, ui.Outputln(resText))

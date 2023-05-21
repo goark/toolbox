@@ -8,8 +8,10 @@ import (
 	"github.com/goark/errs"
 	"github.com/goark/toolbox/consts"
 	"github.com/goark/toolbox/ecode"
+	"github.com/goark/toolbox/logger"
+	"github.com/ipfs/go-log/v2"
 	mstdn "github.com/mattn/go-mastodon"
-	"github.com/rs/zerolog"
+	"go.uber.org/zap"
 )
 
 const (
@@ -23,10 +25,10 @@ type Mastodon struct {
 	ClientSecret string `json:"client_secret"`
 	AccessToken  string `json:"access_token"`
 	client       *mstdn.Client
-	logger       *zerolog.Logger
+	logger       *log.ZapEventLogger
 }
 
-func New(path string, logger *zerolog.Logger) (*Mastodon, error) {
+func New(path string, logger *log.ZapEventLogger) (*Mastodon, error) {
 	file, err := os.Open(path)
 	if err != nil {
 		return nil, errs.Wrap(err, errs.WithContext("path", path))
@@ -72,13 +74,12 @@ func (cfg *Mastodon) Servername() string {
 	return cfg.Server
 }
 
-// Logger method returns zerolog.Logger instance.
-func (cfg *Mastodon) Logger() *zerolog.Logger {
+// Logger method returns zap.Logger instance.
+func (cfg *Mastodon) Logger() *zap.Logger {
 	if cfg == nil || cfg.logger == nil {
-		logger := zerolog.Nop()
-		return &logger
+		return logger.Nop().Desugar()
 	}
-	return cfg.logger
+	return cfg.logger.Desugar()
 }
 
 // Export methods exports configuration to config file.

@@ -5,12 +5,13 @@ import (
 	"net/url"
 
 	"github.com/goark/errs"
+	"github.com/ipfs/go-log/v2"
 	mstdn "github.com/mattn/go-mastodon"
-	"github.com/rs/zerolog"
+	"go.uber.org/zap"
 )
 
 // Register functions registers application to mastodon server.
-func Register(ctx context.Context, server, userId, password string, logger *zerolog.Logger) (*Mastodon, error) {
+func Register(ctx context.Context, server, userId, password string, logger *log.ZapEventLogger) (*Mastodon, error) {
 	if u, err := url.Parse(server); err == nil && len(u.Hostname()) > 0 {
 		server = u.Hostname()
 	}
@@ -37,7 +38,7 @@ func (cfg *Mastodon) register(ctx context.Context) error {
 	if err != nil {
 		return errs.Wrap(err, errs.WithContext("server", cfg.Server))
 	}
-	cfg.Logger().Info().Interface("application", app).Str("server", cfg.Server).Msg("register application")
+	cfg.Logger().Info("register application", zap.Any("application", app), zap.Any("server", cfg.Server))
 	cfg.ClientID = app.ClientID
 	cfg.ClientSecret = app.ClientSecret
 	return nil
@@ -49,11 +50,11 @@ func (cfg *Mastodon) authenticate(ctx context.Context, userId, password string) 
 		ClientID:     cfg.ClientID,
 		ClientSecret: cfg.ClientSecret,
 	})
-	cfg.Logger().Trace().Str("server", cfg.Server).Msg("start authntication")
+	cfg.Logger().Debug("start authntication", zap.Any("server", cfg.Server))
 	if err := client.Authenticate(ctx, userId, password); err != nil {
 		return errs.Wrap(err, errs.WithContext("server", cfg.Server))
 	}
-	cfg.Logger().Trace().Str("server", cfg.Server).Msg("complete authntication")
+	cfg.Logger().Debug("complete authntication", zap.Any("server", cfg.Server))
 	cfg.AccessToken = client.Config.AccessToken
 	cfg.client = client
 	return nil

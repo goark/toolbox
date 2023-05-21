@@ -8,6 +8,7 @@ import (
 	"github.com/bluesky-social/indigo/api/atproto"
 	"github.com/goark/errs"
 	"github.com/goark/toolbox/ecode"
+	"go.uber.org/zap"
 )
 
 func (cfg *Bluesky) getRecord(ctx context.Context, uri string) (*atproto.RepoGetRecord_Output, error) {
@@ -45,7 +46,7 @@ func (cfg *Bluesky) getRecord(ctx context.Context, uri string) (*atproto.RepoGet
 		recordKey = parts[4]
 		collection = "app.bsky.feed.post"
 	}
-	cfg.Logger().Trace().Str("did", did).Str("collection", collection).Str("record_key", recordKey).Msg("start getting record")
+	cfg.Logger().Debug("start getting record", zap.String("collection", collection), zap.String("record_key", recordKey))
 	record, err := atproto.RepoGetRecord(context.TODO(), cfg.client, "", collection, did, recordKey)
 	if err != nil {
 		return nil, errs.Wrap(
@@ -56,7 +57,7 @@ func (cfg *Bluesky) getRecord(ctx context.Context, uri string) (*atproto.RepoGet
 			errs.WithContext("record_key", recordKey),
 		)
 	}
-	cfg.Logger().Info().Interface("record", record).Msg("complete getting record")
+	cfg.Logger().Info("complete getting record", zap.Any("record", record))
 	return record, nil
 }
 

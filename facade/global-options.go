@@ -3,13 +3,14 @@ package facade
 import (
 	"github.com/goark/errs"
 	"github.com/goark/gocli/cache"
+	"github.com/goark/gocli/config"
 	"github.com/goark/toolbox/logger"
-	"github.com/rs/zerolog"
+	"github.com/ipfs/go-log/v2"
 	"github.com/spf13/viper"
 )
 
 type globalOptions struct {
-	Logger          *zerolog.Logger
+	Logger          *log.ZapEventLogger
 	CacheDir        string
 	bskyConfigPath  string
 	mstdnConfigPath string
@@ -20,8 +21,10 @@ func getGlobalOptions() (*globalOptions, error) {
 	if len(cacheDir) == 0 {
 		cacheDir = cache.Dir(Name)
 	}
-	logger, err := logger.New(
+	golog, err := logger.New(
 		logger.LevelFrom(viper.GetString("log-level")),
+		Name,
+		config.Dir(Name),
 		viper.GetString("log-dir"),
 	)
 	if err != nil {
@@ -36,7 +39,7 @@ func getGlobalOptions() (*globalOptions, error) {
 		mstdnConfigPath = defaultMstdnConfigPath
 	}
 	return &globalOptions{
-		Logger:          logger,
+		Logger:          golog,
 		CacheDir:        cacheDir,
 		bskyConfigPath:  bskyConfigPath,
 		mstdnConfigPath: mstdnConfigPath,

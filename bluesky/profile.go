@@ -9,6 +9,7 @@ import (
 	"github.com/bluesky-social/indigo/api/bsky"
 	"github.com/goark/errs"
 	"github.com/goark/toolbox/ecode"
+	"go.uber.org/zap"
 )
 
 // Profile method returns actor's profile information.
@@ -28,12 +29,12 @@ func (cfg *Bluesky) Profile(ctx context.Context, actor string) (*bsky.ActorDefs_
 	if len(actor) == 0 {
 		actor = cfg.Handle
 	}
-	cfg.Logger().Debug().Str("actor", actor).Send()
+	cfg.Logger().Info("start getting profile", zap.String("actor", actor))
 	profile, err := bsky.ActorGetProfile(ctx, cfg.client, actor)
 	if err != nil {
 		return nil, errs.Wrap(err, errs.WithContext("actor", actor))
 	}
-	cfg.Logger().Info().Interface("profile", profile).Send()
+	cfg.Logger().Info("complete getting profile", zap.Any("profile", profile))
 	return profile, nil
 }
 

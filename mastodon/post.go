@@ -7,6 +7,7 @@ import (
 	"github.com/goark/errs"
 	"github.com/goark/toolbox/ecode"
 	mstdn "github.com/mattn/go-mastodon"
+	"go.uber.org/zap"
 )
 
 type Visibility int
@@ -94,15 +95,14 @@ func (cfg *Mastodon) PostMessage(ctx context.Context, msg *Message) (string, err
 	if len(toot.SpoilerText) > 0 {
 		toot.Sensitive = true
 	}
-	cfg.Logger().Debug().Interface("toot", toot).Send()
 
 	// post toot
-	cfg.Logger().Debug().Msg("start posting message")
+	cfg.Logger().Debug("start posting message", zap.Any("toot", toot))
 	stat, err := cfg.client.PostStatus(ctx, toot)
 	if err != nil {
 		return "", errs.Wrap(err)
 	}
-	cfg.Logger().Info().Interface("response_of_post", stat).Msg("complete posting message")
+	cfg.Logger().Info("complete posting message", zap.Any("response_of_post", stat))
 	return stat.URL, nil
 }
 
@@ -112,12 +112,12 @@ func (cfg *Mastodon) uploadImages(ctx context.Context, paths []string) ([]mstdn.
 	}
 	list := make([]mstdn.ID, 0, len(paths))
 	for _, path := range paths {
-		cfg.Logger().Debug().Str("path", path).Msg("start uploading image file")
+		cfg.Logger().Debug("start uploading image file", zap.String("path", path))
 		attch, err := cfg.client.UploadMedia(ctx, path)
 		if err != nil {
 			return nil, errs.Wrap(err, errs.WithContext("path", path))
 		}
-		cfg.Logger().Info().Str("path", path).Interface("atach_info", attch).Msg("complete uploading image file")
+		cfg.Logger().Info("complete uploading image file", zap.Any("atach_info", attch))
 		list = append(list, attch.ID)
 	}
 	return list, nil

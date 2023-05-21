@@ -7,10 +7,12 @@ import (
 	"strings"
 
 	"github.com/goark/errs"
+	"github.com/goark/errs/zapobject"
 	"github.com/goark/gocli/rwi"
 	"github.com/goark/toolbox/bluesky"
 	"github.com/nyaosorg/go-readline-ny"
 	"github.com/spf13/cobra"
+	"go.uber.org/zap"
 )
 
 // newBlueskyRegisterCmd returns cobra.Command instance for show sub-command
@@ -41,7 +43,7 @@ func newBlueskyRegisterCmd(ui *rwi.RWI) *cobra.Command {
 			}
 			bcfg, err := bluesky.Register(cmd.Context(), server, handle, passaord, gopts.CacheDir, gopts.Logger)
 			if err != nil {
-				gopts.Logger.Error().Interface("error", errs.Wrap(err)).Send()
+				gopts.Logger.Desugar().Error("error in bluesky.Register", zap.Object("error", zapobject.New(err)))
 				return debugPrint(ui, err)
 			}
 			if err := debugPrint(ui, bcfg.Export(gopts.bskyConfigPath)); err != nil {

@@ -8,7 +8,9 @@ import (
 	"github.com/bluesky-social/indigo/api/atproto"
 	"github.com/bluesky-social/indigo/xrpc"
 	"github.com/goark/errs"
+	"github.com/goark/errs/zapobject"
 	"github.com/goark/toolbox/ecode"
+	"go.uber.org/zap"
 )
 
 // CreateSession method makes XRPC instance and creates/refreshes session.
@@ -17,7 +19,7 @@ func (cfg *Bluesky) CreateSession(ctx context.Context) error {
 		return errs.Wrap(ecode.ErrNullPointer)
 	}
 	if cfg.client != nil {
-		cfg.Logger().Debug().Msg("exist session")
+		cfg.Logger().Debug("exist session")
 		return nil
 	}
 	client := &xrpc.Client{
@@ -28,15 +30,15 @@ func (cfg *Bluesky) CreateSession(ctx context.Context) error {
 	auth, err := cfg.readAuth()
 	if err == nil { // exist auth file
 		// refresh session
-		cfg.Logger().Debug().Msg("start refreshing session")
+		cfg.Logger().Debug("start refreshing session")
 		client.Auth = auth
 		client.Auth.AccessJwt = client.Auth.RefreshJwt
 		refresh, err2 := atproto.ServerRefreshSession(ctx, client)
 		if err2 != nil {
 			err = err2 // --> create session
-			cfg.Logger().Info().Msg("cannot refresh session.")
+			cfg.Logger().Info("cannot refresh session")
 		} else {
-			cfg.Logger().Debug().Msg("complete refreshing session")
+			cfg.Logger().Info("complete refreshing session")
 			client.Auth.Did = refresh.Did
 			client.Auth.AccessJwt = refresh.AccessJwt
 			client.Auth.RefreshJwt = refresh.RefreshJwt
@@ -46,7 +48,7 @@ func (cfg *Bluesky) CreateSession(ctx context.Context) error {
 		}
 	}
 	if err != nil {
-		cfg.Logger().Info().Interface("error", errs.Wrap(err)).Msg("no valid auth-file, start creating session")
+		cfg.Logger().Info("no valid auth-file, start creating session", zap.Object("error", zapobject.New(err)))
 		// create session
 		auth, err := atproto.ServerCreateSession(ctx, client, &atproto.ServerCreateSession_Input{
 			Identifier: client.Auth.Handle,
@@ -55,7 +57,7 @@ func (cfg *Bluesky) CreateSession(ctx context.Context) error {
 		if err != nil {
 			return errs.Wrap(err)
 		}
-		cfg.Logger().Debug().Msg("complete creating session")
+		cfg.Logger().Debug("complete creating session")
 		client.Auth.Did = auth.Did
 		client.Auth.AccessJwt = auth.AccessJwt
 		client.Auth.RefreshJwt = auth.RefreshJwt

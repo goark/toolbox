@@ -11,9 +11,11 @@ import (
 	"github.com/bluesky-social/indigo/api/bsky"
 	"github.com/bluesky-social/indigo/lex/util"
 	"github.com/goark/errs"
+	"github.com/goark/errs/zapobject"
 	"github.com/goark/toolbox/ecode"
 	"github.com/goark/toolbox/images"
 	"github.com/goark/toolbox/webpage"
+	"go.uber.org/zap"
 )
 
 // Message is information of post message.
@@ -79,7 +81,7 @@ func (cfg *Bluesky) PostMessage(ctx context.Context, msg *Message) (string, erro
 		if post.Embed.EmbedExternal == nil {
 			// get information of web page
 			if link, err := webpage.ReadPage(ctx, e.text); err != nil {
-				cfg.Logger().Info().Interface("error", errs.Wrap(err)).Str("web_page", e.text).Msg("cannot read web page")
+				cfg.Logger().Info("cannot read web page", zap.Object("error", zapobject.New(errs.Wrap(err))), zap.String("web_page", e.text))
 			} else {
 				post.Embed.EmbedExternal = &bsky.EmbedExternal{
 					External: &bsky.EmbedExternal_External{
@@ -88,14 +90,14 @@ func (cfg *Bluesky) PostMessage(ctx context.Context, msg *Message) (string, erro
 						Uri:         link.URL,
 					},
 				}
-				cfg.Logger().Trace().Str("title", link.Title).Str("description", link.Description).Str("url", link.URL).Msg("web page info")
+				cfg.Logger().Debug("web page info", zap.String("title", link.Title), zap.String("description", link.Description), zap.String("url", link.URL))
 				// get attention image
 				if len(link.ImageURL) > 0 {
 					if res, err := cfg.getEmbedImage(ctx, link.ImageURL); err != nil {
-						cfg.Logger().Info().Interface("error", errs.Wrap(err)).Str("image_url", link.ImageURL).Msg("cannot get embeded image")
+						cfg.Logger().Info("cannot get embeded image", zap.Object("error", zapobject.New(errs.Wrap(err))), zap.String("image_url", link.ImageURL))
 					} else {
 						post.Embed.EmbedExternal.External.Thumb = res.Blob
-						cfg.Logger().Trace().Str("contentType", res.Blob.MimeType).Int64("size", res.Blob.Size).Str("url", link.ImageURL).Msg("embeded file")
+						cfg.Logger().Info("embeded image", zap.String("content_type", res.Blob.MimeType), zap.Int64("size", res.Blob.Size), zap.String("url", link.ImageURL))
 					}
 				}
 			}
@@ -128,14 +130,16 @@ func (cfg *Bluesky) PostMessage(ctx context.Context, msg *Message) (string, erro
 			}
 			img, err := images.AjustImage(src)
 			if err != nil {
-				cfg.Logger().Error().Interface("error", errs.Wrap(err)).Str("file_name", fn).Msg("cannot ajust image")
-				return "", errs.Wrap(err, errs.WithContext("file", fn))
+				err = errs.Wrap(err, errs.WithContext("file", fn))
+				cfg.Logger().Error("cannot ajust image", zap.Object("error", zapobject.New(err)), zap.String("file_name", fn))
+				return "", err
 			}
-			cfg.Logger().Trace().Str("file_name", fn).Msg("start uploading image file")
+			cfg.Logger().Debug("start uploading image file", zap.String("file_name", fn))
 			res, err := atproto.RepoUploadBlob(ctx, cfg.client, img)
 			if err != nil {
-				cfg.Logger().Error().Interface("error", errs.Wrap(err)).Str("file_name", fn).Msg("cannot upload image file")
-				return "", errs.Wrap(err, errs.WithContext("fn", fn))
+				err = errs.Wrap(err, errs.WithContext("file", fn))
+				cfg.Logger().Error("cannot upload image file", zap.Object("error", zapobject.New(err)), zap.String("file_name", fn))
+				return "", err
 			}
 			imgs = append(imgs, &bsky.EmbedImages_Image{
 				Alt:   filepath.Base(fn),
@@ -144,13 +148,13 @@ func (cfg *Bluesky) PostMessage(ctx context.Context, msg *Message) (string, erro
 			if post.Embed == nil {
 				post.Embed = &bsky.FeedPost_Embed{}
 			}
-			cfg.Logger().Trace().Str("contentType", res.Blob.MimeType).Int64("size", res.Blob.Size).Str("file_name", fn).Msg("complete uploading image file")
+			cfg.Logger().Info("complete uploading image file", zap.String("content_type", res.Blob.MimeType), zap.Int64("size", res.Blob.Size), zap.String("file_name", fn))
 			post.Embed.EmbedImages = &bsky.EmbedImages{Images: imgs}
 		}
 	}
 
 	// pos message
-	cfg.Logger().Debug().Msg("start posting message")
+	cfg.Logger().Debug("start posting message")
 	resp, err := atproto.RepoCreateRecord(ctx, cfg.client, &atproto.RepoCreateRecord_Input{
 		Collection: "app.bsky.feed.post",
 		Repo:       cfg.client.Auth.Did,
@@ -161,7 +165,7 @@ func (cfg *Bluesky) PostMessage(ctx context.Context, msg *Message) (string, erro
 	if err != nil {
 		return "", errs.Wrap(err, errs.WithContext("msg", msg))
 	}
-	cfg.Logger().Info().Interface("response_of_post", resp).Msg("complete posting message")
+	cfg.Logger().Info("complete posting message", zap.Any("response_of_post", resp))
 
 	return resp.Uri, nil
 }

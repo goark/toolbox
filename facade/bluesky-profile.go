@@ -4,9 +4,10 @@ import (
 	"io"
 	"strings"
 
-	"github.com/goark/errs"
+	"github.com/goark/errs/zapobject"
 	"github.com/goark/gocli/rwi"
 	"github.com/spf13/cobra"
+	"go.uber.org/zap"
 )
 
 // newBlueskyProfileCmd returns cobra.Command instance for show sub-command
@@ -46,7 +47,7 @@ func newBlueskyProfileCmd(ui *rwi.RWI) *cobra.Command {
 
 			// post message
 			if err := bsky.ShowProfile(cmd.Context(), handle, jsonFlag, ui.Writer()); err != nil {
-				bsky.Logger().Error().Interface("error", errs.Wrap(err)).Send()
+				bsky.Logger().Error("error in bluesky.ShowProfile", zap.Object("error", zapobject.New(err)))
 				return debugPrint(ui, err)
 			}
 			return nil

@@ -1,25 +1,65 @@
 package logger
 
-import "github.com/rs/zerolog"
+import (
+	"github.com/goark/errs"
+	"github.com/goark/toolbox/ecode"
+	"github.com/ipfs/go-log/v2"
+)
 
-var levelMap = map[string]zerolog.Level{
-	"nop":   zerolog.NoLevel,
-	"error": zerolog.ErrorLevel,
-	"warn":  zerolog.WarnLevel,
-	"info":  zerolog.InfoLevel,
-	"debug": zerolog.DebugLevel,
-	"trace": zerolog.TraceLevel,
+type Level int
+
+const (
+	LevelUnknown Level = iota
+	LevelNop
+	LevelError
+	LevelWarn
+	LevelInfo
+	LevelDebug
+	LevelTrace
+)
+
+var levelMap = map[string]Level{
+	"nop":   LevelNop,
+	"error": LevelError,
+	"warn":  LevelWarn,
+	"info":  LevelInfo,
+	"debug": LevelDebug,
+	"trace": LevelTrace,
 }
 
 func LevelList() []string {
 	return []string{"nop", "error", "warn", "info", "debug", "trace"}
 }
 
-func LevelFrom(s string) zerolog.Level {
+func LevelFrom(s string) Level {
 	if lvl, ok := levelMap[s]; ok {
 		return lvl
 	}
-	return zerolog.NoLevel
+	return LevelUnknown
+}
+
+var gologLevelMap = map[Level]log.LogLevel{
+	LevelError: log.LevelError,
+	LevelWarn:  log.LevelWarn,
+	LevelInfo:  log.LevelInfo,
+	LevelDebug: log.LevelDebug,
+	LevelTrace: log.LevelDebug,
+}
+
+func (lvl Level) GologLevel() (log.LogLevel, error) {
+	if gologLvl, ok := gologLevelMap[lvl]; ok {
+		return gologLvl, nil
+	}
+	return 0, errs.Wrap(ecode.ErrLogLevel)
+}
+
+func (lvl Level) String() string {
+	for k, v := range levelMap {
+		if lvl == v {
+			return k
+		}
+	}
+	return "unknown"
 }
 
 /* Copyright 2023 Spiegel

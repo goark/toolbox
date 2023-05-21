@@ -4,18 +4,21 @@ go 1.20
 
 require (
 	github.com/PuerkitoBio/goquery v1.8.1
-	github.com/bluesky-social/indigo v0.0.0-20230512185855-9660afd5a941
+	github.com/bluesky-social/indigo v0.0.0-20230521010027-a7315631d416
 	github.com/goark/errs v1.2.2
+	github.com/goark/errs/zapobject v0.1.1
 	github.com/goark/fetch v0.4.1
 	github.com/goark/gocli v0.13.0
-	github.com/hymkor/go-multiline-ny v0.8.0
+	github.com/hymkor/go-multiline-ny v0.11.0
+	github.com/ipfs/go-log/v2 v2.5.1
+	github.com/joho/godotenv v1.5.1
 	github.com/mattn/go-encoding v0.0.2
 	github.com/mattn/go-mastodon v0.0.6
-	github.com/nyaosorg/go-readline-ny v0.12.2
-	github.com/rs/zerolog v1.29.1
+	github.com/nyaosorg/go-readline-ny v0.13.0
 	github.com/spf13/cobra v1.7.0
 	github.com/spf13/viper v1.15.0
-	golang.org/x/image v0.0.0-20190802002840-cff245a6509b
+	go.uber.org/zap v1.24.0
+	golang.org/x/image v0.7.0
 	golang.org/x/net v0.9.0
 )
 
@@ -41,12 +44,10 @@ require (
 	github.com/ipfs/go-ipld-cbor v0.0.7-0.20230126201833-a73d038d90bc // indirect
 	github.com/ipfs/go-ipld-format v0.4.0 // indirect
 	github.com/ipfs/go-log v1.0.5 // indirect
-	github.com/ipfs/go-log/v2 v2.5.1 // indirect
 	github.com/ipfs/go-metrics-interface v0.0.1 // indirect
 	github.com/jbenet/goprocess v0.1.4 // indirect
 	github.com/klauspost/cpuid/v2 v2.2.4 // indirect
 	github.com/magiconair/properties v1.8.7 // indirect
-	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.18 // indirect
 	github.com/mattn/go-runewidth v0.0.14 // indirect
 	github.com/mattn/go-tty v0.0.5 // indirect
@@ -72,7 +73,6 @@ require (
 	github.com/whyrusleeping/cbor-gen v0.0.0-20230331140348-1f892b517e70 // indirect
 	go.uber.org/atomic v1.10.0 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
-	go.uber.org/zap v1.24.0 // indirect
 	golang.org/x/crypto v0.7.0 // indirect
 	golang.org/x/sys v0.8.0 // indirect
 	golang.org/x/term v0.8.0 // indirect

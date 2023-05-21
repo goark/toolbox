@@ -3,10 +3,11 @@ package facade
 import (
 	"strings"
 
-	"github.com/goark/errs"
+	"github.com/goark/errs/zapobject"
 	"github.com/goark/gocli/rwi"
 	"github.com/goark/toolbox/bluesky"
 	"github.com/spf13/cobra"
+	"go.uber.org/zap"
 )
 
 // newBlueskyPostCmd returns cobra.Command instance for show sub-command
@@ -60,7 +61,7 @@ func newBlueskyPostCmd(ui *rwi.RWI) *cobra.Command {
 			// post message
 			resText, err := bsky.PostMessage(cmd.Context(), &bluesky.Message{Msg: msg, ImageFiles: images, ReplryTo: replyTo})
 			if err != nil {
-				bsky.Logger().Error().Interface("error", errs.Wrap(err)).Send()
+				bsky.Logger().Error("error in bluesky.PostMessage", zap.Object("error", zapobject.New(err)))
 				return debugPrint(ui, err)
 			}
 			return debugPrint(ui, ui.Outputln(resText))

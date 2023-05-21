@@ -2,10 +2,12 @@ package facade
 
 import (
 	"github.com/goark/errs"
+	"github.com/goark/errs/zapobject"
 	"github.com/goark/gocli/rwi"
 	"github.com/goark/toolbox/bluesky"
 	"github.com/goark/toolbox/ecode"
 	"github.com/spf13/cobra"
+	"go.uber.org/zap"
 )
 
 // newBlueskyCmd returns cobra.Command instance for show sub-command
@@ -34,8 +36,9 @@ func getBluesky() (*bluesky.Bluesky, error) {
 	}
 	bcfg, err := bluesky.New(gopts.bskyConfigPath, gopts.CacheDir, gopts.Logger)
 	if err != nil {
-		gopts.Logger.Error().Interface("error", errs.Wrap(err)).Send()
-		return nil, errs.Wrap(err)
+		err = errs.Wrap(err)
+		gopts.Logger.Desugar().Error("cannot get configuration for Bluesky", zap.Object("error", zapobject.New(err)))
+		return nil, err
 	}
 	return bcfg, nil
 }

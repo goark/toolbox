@@ -1,5 +1,0 @@
-{"level":"debug","ts":"2023-05-21T13:09:37.364+0900","logger":"toolbox","msg":"start refreshing session"}
-{"level":"info","ts":"2023-05-21T13:09:38.325+0900","logger":"toolbox","msg":"complete refreshing session"}
-{"level":"debug","ts":"2023-05-21T13:09:38.326+0900","logger":"toolbox","msg":"start posting message"}
-{"level":"info","ts":"2023-05-21T13:09:38.586+0900","logger":"toolbox","msg":"complete posting message","response_of_post":{"cid":"bafyreidomdrhs62vfrra2an3qvzxo2ej4uhuuqqroocq5tn72sofo355we","uri":"at://did:plc:26eoqvsiov3hmsfqruoi4d3s/app.bsky.feed.post/3jw7lddxbtl2j"}}
-at://did:plc:26eoqvsiov3hmsfqruoi4d3s/app.bsky.feed.post/3jw7lddxbtl2j

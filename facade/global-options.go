@@ -14,6 +14,7 @@ type globalOptions struct {
 	CacheDir        string
 	bskyConfigPath  string
 	mstdnConfigPath string
+	apodConfigPath  string
 }
 
 func getGlobalOptions() (*globalOptions, error) {
@@ -38,11 +39,16 @@ func getGlobalOptions() (*globalOptions, error) {
 	if len(mstdnConfigPath) == 0 {
 		mstdnConfigPath = defaultMstdnConfigPath
 	}
+	apodConfigPath := viper.GetString("apod-config")
+	if len(mstdnConfigPath) == 0 {
+		mstdnConfigPath = defaultAPODConfigPath
+	}
 	return &globalOptions{
 		Logger:          golog,
 		CacheDir:        cacheDir,
 		bskyConfigPath:  bskyConfigPath,
 		mstdnConfigPath: mstdnConfigPath,
+		apodConfigPath:  apodConfigPath,
 	}, nil
 }
 

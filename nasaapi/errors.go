@@ -1,17 +1,10 @@
-package ecode
+package nasaapi
 
 import "errors"
 
 var (
-	ErrNullPointer             = errors.New("null reference instance")
-	ErrNoCommand               = errors.New("no command")
-	ErrLogLevel                = errors.New("invalid log level")
-	ErrNoBlueskyHandle         = errors.New("no Bluesky handle")
-	ErrInvalidBlueskyRecordURI = errors.New("invalid Bluesky record URI")
-	ErrInvalidMastodonUserId   = errors.New("invalid Mastodon user ID")
-	ErrNoContent               = errors.New("no content")
-	ErrTooLargeImage           = errors.New("too large image (>1MB)")
-	ErrNoAPODImage             = errors.New("no APOD image")
+	ErrNullPointer = errors.New("null reference instance")
+	ErrCombination = errors.New("invalid parameter combination passed")
 )
 
 /* Copyright 2023 Spiegel

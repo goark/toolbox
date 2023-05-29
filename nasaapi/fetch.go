@@ -14,12 +14,6 @@ const (
 	defaultHost   = "api.nasa.gov"
 )
 
-// Request is for NASA API client
-type Request struct {
-	path   string
-	params url.Values
-}
-
 // Request function requests to NASA API, and returns response data.
 func Fetch(ctx context.Context, path string, q url.Values) (io.ReadCloser, error) {
 	resp, err := fetch.New().GetWithContext(ctx, getURL(path, q))

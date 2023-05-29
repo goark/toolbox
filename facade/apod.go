@@ -24,7 +24,7 @@ func newAPODCmd(ui *rwi.RWI) *cobra.Command {
 	apodCmd.AddCommand(
 		newAPODRegisterCmd(ui),
 		newAPODLookupCmd(ui),
-		newAPODBlueskyCmd(ui),
+		newAPODPostCmd(ui),
 	)
 	return apodCmd
 }

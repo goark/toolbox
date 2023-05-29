@@ -4,22 +4,22 @@ go 1.20
 
 require (
 	github.com/PuerkitoBio/goquery v1.8.1
-	github.com/bluesky-social/indigo v0.0.0-20230521010027-a7315631d416
+	github.com/bluesky-social/indigo v0.0.0-20230524015214-dde615f101b6
 	github.com/goark/errs v1.2.2
 	github.com/goark/errs/zapobject v0.1.1
 	github.com/goark/fetch v0.4.1
 	github.com/goark/gocli v0.13.0
-	github.com/hymkor/go-multiline-ny v0.11.0
+	github.com/hymkor/go-multiline-ny v0.11.1
 	github.com/ipfs/go-log/v2 v2.5.1
 	github.com/joho/godotenv v1.5.1
 	github.com/mattn/go-encoding v0.0.2
 	github.com/mattn/go-mastodon v0.0.6
-	github.com/nyaosorg/go-readline-ny v0.13.0
+	github.com/nyaosorg/go-readline-ny v0.13.1
 	github.com/spf13/cobra v1.7.0
 	github.com/spf13/viper v1.15.0
 	go.uber.org/zap v1.24.0
 	golang.org/x/image v0.7.0
-	golang.org/x/net v0.9.0
+	golang.org/x/net v0.10.0
 )
 
 require (
@@ -48,7 +48,7 @@ require (
 	github.com/jbenet/goprocess v0.1.4 // indirect
 	github.com/klauspost/cpuid/v2 v2.2.4 // indirect
 	github.com/magiconair/properties v1.8.7 // indirect
-	github.com/mattn/go-isatty v0.0.18 // indirect
+	github.com/mattn/go-isatty v0.0.19 // indirect
 	github.com/mattn/go-runewidth v0.0.14 // indirect
 	github.com/mattn/go-tty v0.0.5 // indirect
 	github.com/minio/sha256-simd v1.0.0 // indirect

@@ -28,9 +28,10 @@ var (
 )
 
 const (
-	configFile      = "config"
-	bskyConfigFile  = "bluesky.json"
-	mstdnConfigFile = "mastodon.json"
+	configFile        = "config"
+	bskyConfigFile    = "bluesky.json"
+	mstdnConfigFile   = "mastodon.json"
+	nasaapiConfigFile = "nasaapi.json"
 )
 
 var (
@@ -39,6 +40,7 @@ var (
 	defaultConfigPath      = config.Path(Name, configFile+".yaml")
 	defaultBskyConfigPath  = config.Path(Name, bskyConfigFile)
 	defaultMstdnConfigPath = config.Path(Name, mstdnConfigFile)
+	defaultAPODConfigPath  = config.Path(Name, nasaapiConfigFile)
 )
 
 // newRootCmd returns cobra.Command instance for root command
@@ -57,6 +59,7 @@ func newRootCmd(ui *rwi.RWI, args []string) *cobra.Command {
 	rootCmd.PersistentFlags().StringP("log-level", "", "nop", fmt.Sprintf("Log level [%s]", strings.Join(logger.LevelList(), "|")))
 	rootCmd.PersistentFlags().StringP("bluesky-config", "", defaultBskyConfigPath, "Config file for Bluesky")
 	rootCmd.PersistentFlags().StringP("mastodon-config", "", defaultMstdnConfigPath, "Config file for Mastodon")
+	rootCmd.PersistentFlags().StringP("apod-config", "", defaultAPODConfigPath, "Config file for APOD")
 
 	//Bind config file
 	_ = viper.BindPFlag("cache-dir", rootCmd.PersistentFlags().Lookup("log-dir"))
@@ -64,6 +67,7 @@ func newRootCmd(ui *rwi.RWI, args []string) *cobra.Command {
 	_ = viper.BindPFlag("log-level", rootCmd.PersistentFlags().Lookup("log-level"))
 	_ = viper.BindPFlag("bluesky-config", rootCmd.PersistentFlags().Lookup("bluesky-config"))
 	_ = viper.BindPFlag("mastodon-config", rootCmd.PersistentFlags().Lookup("mastodon-config"))
+	_ = viper.BindPFlag("apod-config", rootCmd.PersistentFlags().Lookup("apod-config"))
 	cobra.OnInitialize(initConfig)
 
 	// global options (other)
@@ -80,6 +84,7 @@ func newRootCmd(ui *rwi.RWI, args []string) *cobra.Command {
 		newVersionCmd(ui),
 		newBlueskyCmd(ui),
 		newMastodonCmd(ui),
+		newAPODCmd(ui),
 	)
 	return rootCmd
 }

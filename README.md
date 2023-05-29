@@ -6,7 +6,7 @@
 [![GitHub license](https://img.shields.io/badge/license-Apache%202-blue.svg)](https://raw.githubusercontent.com/goark/toolbox/master/LICENSE)
 [![GitHub release](http://img.shields.io/github/release/goark/toolbox.svg)](https://github.com/goark/toolbox/releases/latest)
 
-This package is required Go 1.16 or later.
+This package is required Go 1.20 or later.
 
 ## Build and Install
 

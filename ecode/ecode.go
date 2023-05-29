@@ -11,6 +11,8 @@ var (
 	ErrInvalidMastodonUserId   = errors.New("invalid Mastodon user ID")
 	ErrNoContent               = errors.New("no content")
 	ErrTooLargeImage           = errors.New("too large image (>1MB)")
+	ErrNoAPODImage             = errors.New("no APOD image")
+	ErrExistAPODData           = errors.New("exist APOD data")
 )
 
 /* Copyright 2023 Spiegel

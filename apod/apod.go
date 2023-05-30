@@ -22,12 +22,12 @@ type APOD struct {
 // New functions creates new APOD instance from file.
 func New(path, cacheDir string, logger *log.ZapEventLogger) (*APOD, error) {
 	if len(path) == 0 {
-		return fallthroughCfg(logger), nil
+		return fallthroughCfg(cacheDir, logger), nil
 	}
 
 	file, err := os.Open(path)
 	if err != nil {
-		return fallthroughCfg(logger), nil
+		return fallthroughCfg(cacheDir, logger), nil
 	}
 	defer file.Close()
 
@@ -41,7 +41,7 @@ func New(path, cacheDir string, logger *log.ZapEventLogger) (*APOD, error) {
 	return &cfg, nil
 }
 
-func fallthroughCfg(logger *log.ZapEventLogger) *APOD {
+func fallthroughCfg(cacheDir string, logger *log.ZapEventLogger) *APOD {
 	return &APOD{
 		APIKey: nasaapi.DefaultAPIKey,
 		logger: logger,

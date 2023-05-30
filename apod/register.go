@@ -4,11 +4,10 @@ import "github.com/ipfs/go-log/v2"
 
 // Register function makes configuration for APOD operations
 func Register(apiKey, cacheDir string, logger *log.ZapEventLogger) *APOD {
-	cfg := fallthroughCfg(logger)
+	cfg := fallthroughCfg(cacheDir, logger)
 	if len(apiKey) > 0 {
 		cfg.APIKey = apiKey
 	}
-	cfg.cacheDir = cacheDir
 	return cfg
 }
 

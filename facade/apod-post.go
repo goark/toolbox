@@ -26,19 +26,9 @@ func newAPODPostCmd(ui *rwi.RWI) *cobra.Command {
 		Long:    "Post Astronomy Picture of the Day data to time lines.",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			// Global options
-			apd, err := getAPOD()
+			apd, gopts, err := getAPOD()
 			if err != nil {
 				return debugPrint(ui, err)
-			}
-			bsky, err := getBluesky()
-			if err != nil {
-				apd.Logger().Info("no Bluesky configuration", zap.Object("error", zapobject.New(err)))
-				bsky = nil
-			}
-			mstdn, err := getMastodon()
-			if err != nil {
-				apd.Logger().Info("no Mastodon configuration", zap.Object("error", zapobject.New(err)))
-				mstdn = nil
 			}
 			// local options
 			dateStr, err := cmd.Flags().GetString("date")
@@ -70,7 +60,7 @@ func newAPODPostCmd(ui *rwi.RWI) *cobra.Command {
 			}
 
 			// get image file
-			fname, err := res.ImageFile(cmd.Context(), bsky.BaseDir())
+			fname, err := res.ImageFile(cmd.Context(), gopts.CacheDir)
 			if err != nil && !errs.Is(err, ecode.ErrNoAPODImage) {
 				return debugPrint(ui, err)
 			}
@@ -86,9 +76,11 @@ func newAPODPostCmd(ui *rwi.RWI) *cobra.Command {
 			var lastErrs []error
 
 			// post to Bluesky
-			if bskyFlag && bsky != nil {
-				resText, err := bsky.PostMessage(cmd.Context(), &bluesky.Message{Msg: msg, ImageFiles: imgs})
-				if err != nil {
+			if bskyFlag {
+				if bsky, err := getBluesky(); err != nil {
+					apd.Logger().Info("no Bluesky configuration", zap.Object("error", zapobject.New(err)))
+					lastErrs = append(lastErrs, err)
+				} else if resText, err := bsky.PostMessage(cmd.Context(), &bluesky.Message{Msg: msg, ImageFiles: imgs}); err != nil {
 					bsky.Logger().Error("error in bluesky.PostMessage", zap.Object("error", zapobject.New(err)))
 					lastErrs = append(lastErrs, err)
 				} else {
@@ -96,12 +88,14 @@ func newAPODPostCmd(ui *rwi.RWI) *cobra.Command {
 				}
 			}
 			// post to Mastodon
-			if mastodonFlag && mstdn != nil {
-				resText, err := mstdn.PostMessage(cmd.Context(), &mastodon.Message{
+			if mastodonFlag {
+				if mstdn, err := getMastodon(); err != nil {
+					apd.Logger().Info("no Mastodon configuration", zap.Object("error", zapobject.New(err)))
+					lastErrs = append(lastErrs, err)
+				} else if resText, err := mstdn.PostMessage(cmd.Context(), &mastodon.Message{
 					Msg:        msg,
 					ImageFiles: imgs,
-				})
-				if err != nil {
+				}); err != nil {
 					mstdn.Logger().Error("error in mastodon.PostMessage", zap.Object("error", zapobject.New(err)))
 					lastErrs = append(lastErrs, err)
 				} else {

@@ -25,7 +25,7 @@ func New(path, cacheDir string, logger *log.ZapEventLogger) (*APOD, error) {
 		return fallthroughCfg(cacheDir, logger), nil
 	}
 
-	file, err := os.Open(path); 
+	file, err := os.Open(path)
 	if err != nil {
 		return fallthroughCfg(cacheDir, logger), nil
 	}

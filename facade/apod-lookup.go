@@ -17,7 +17,7 @@ func newAPODLookupCmd(ui *rwi.RWI) *cobra.Command {
 		Long:    "Lookup Astronomy Picture of the Day data.",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			// Global options
-			apd, err := getAPOD()
+			apd, _, err := getAPOD()
 			if err != nil {
 				return debugPrint(ui, err)
 			}

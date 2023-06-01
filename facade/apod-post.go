@@ -3,15 +3,14 @@ package facade
 import (
 	"errors"
 	"os"
-	"strings"
 
 	"github.com/goark/errs"
 	"github.com/goark/errs/zapobject"
 	"github.com/goark/gocli/rwi"
+	"github.com/goark/toolbox/apod"
 	"github.com/goark/toolbox/bluesky"
 	"github.com/goark/toolbox/ecode"
 	"github.com/goark/toolbox/mastodon"
-	"github.com/goark/toolbox/nasaapi/nasaapod"
 	"github.com/goark/toolbox/values"
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
@@ -73,9 +72,8 @@ func newAPODPostCmd(ui *rwi.RWI) *cobra.Command {
 				defer os.Remove(fname)
 				imgs = []string{fname}
 			}
-
 			// make message
-			msg := makeMessageFromAPOD(res)
+			msg := apod.MakeMessage(res)
 
 			var lastErrs []error
 
@@ -119,17 +117,6 @@ func newAPODPostCmd(ui *rwi.RWI) *cobra.Command {
 	apodPostCmd.Flags().BoolP("force", "", false, "Force getting APOD data from cache")
 
 	return apodPostCmd
-}
-
-func makeMessageFromAPOD(data *nasaapod.Response) string {
-	if data == nil {
-		return ""
-	}
-	title := data.Title
-	if len(data.Copyright) > 0 {
-		title += strings.Join([]string{title, "Image Credit: " + data.Copyright}, "\n")
-	}
-	return strings.Join([]string{"#apod", title, data.WebPage()}, "\n")
 }
 
 /* Copyright 2023 Spiegel

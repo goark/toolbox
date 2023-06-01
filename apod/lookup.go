@@ -2,6 +2,8 @@ package apod
 
 import (
 	"context"
+	"fmt"
+	"strings"
 
 	"github.com/goark/errs"
 	"github.com/goark/toolbox/ecode"
@@ -99,6 +101,35 @@ func (cfg *APOD) LookupWithoutCache(ctx context.Context, date values.Date, force
 		return nil, errs.Wrap(ecode.ErrNoContent, errs.WithContext("date", date.String()))
 	}
 	return res[0], nil
+}
+
+func MakeMessage(data *nasaapod.Response) string {
+	if data == nil {
+		return ""
+	}
+	bld := strings.Builder{}
+
+	// hash tag
+	bld.WriteString("#apod")
+	if len(data.MediaType) > 0 && data.MediaType != "image" {
+		bld.WriteString(fmt.Sprintf(" (%s)", data.MediaType))
+	}
+	bld.WriteString("\n")
+	//title
+	if len(data.Title) > 0 {
+		bld.WriteString(fmt.Sprintln(data.Title))
+	}
+	// credit
+	if len(data.Copyright) > 0 {
+		bld.WriteString(fmt.Sprintln("Image Credit:", data.Copyright))
+	}
+	// Web page
+	bld.WriteString(fmt.Sprintln(data.WebPage()))
+	// content URL
+	if data.MediaType != nasaapod.MediaImage && len(data.Url) > 0 {
+		bld.WriteString(fmt.Sprintln("Content:", data.Url))
+	}
+	return bld.String()
 }
 
 /* Copyright 2023 Spiegel

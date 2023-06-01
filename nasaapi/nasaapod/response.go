@@ -15,6 +15,11 @@ import (
 	"golang.org/x/net/context"
 )
 
+const (
+	MediaImage = "image"
+	MediaVideo = "video"
+)
+
 // Response is response data from NASA APOD API.
 type Response struct {
 	Copyright      string      `json:"copyright,omitempty"`
@@ -85,18 +90,30 @@ func (res *Response) ImageFile(ctx context.Context, dir string) (string, error) 
 	if res == nil {
 		return "", errs.Wrap(ecode.ErrNullPointer)
 	}
-	if res.MediaType != "image" {
+	var urlStr string
+	if res.MediaType == MediaImage {
+		if len(res.Url) > 0 {
+			urlStr = res.Url
+		} else if len(res.HdUrl) > 0 {
+			urlStr = res.HdUrl
+		} else if len(res.ThumbnailUrl) > 0 {
+			urlStr = res.ThumbnailUrl
+		}
+	} else if len(res.ThumbnailUrl) > 0 {
+		urlStr = res.ThumbnailUrl
+	}
+	if len(urlStr) == 0 {
 		return "", errs.Wrap(ecode.ErrNoAPODImage)
 	}
 
 	// get Image data
-	u, err := url.Parse(res.Url)
+	u, err := url.Parse(urlStr)
 	if err != nil {
-		return "", errs.Wrap(err, errs.WithContext("url", res.Url))
+		return "", errs.Wrap(err, errs.WithContext("url", urlStr))
 	}
 	img, err := fetch.New().GetWithContext(ctx, u)
 	if err != nil {
-		return "", errs.Wrap(err, errs.WithContext("url", res.Url))
+		return "", errs.Wrap(err, errs.WithContext("url", urlStr))
 	}
 	defer img.Close()
 
@@ -110,7 +127,7 @@ func (res *Response) ImageFile(ctx context.Context, dir string) (string, error) 
 	tname := file.Name()
 	_, err = io.Copy(file, img.Body())
 	if err != nil {
-		return "", errs.Wrap(err, errs.WithContext("url", res.Url), errs.WithContext("temp_file", tname))
+		return "", errs.Wrap(err, errs.WithContext("url", urlStr), errs.WithContext("temp_file", tname))
 	}
 	return tname, nil
 }

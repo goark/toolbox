@@ -4,7 +4,7 @@ go 1.20
 
 require (
 	github.com/PuerkitoBio/goquery v1.8.1
-	github.com/bluesky-social/indigo v0.0.0-20230524015214-dde615f101b6
+	github.com/bluesky-social/indigo v0.0.0-20230530020315-4a875abc1a98
 	github.com/goark/errs v1.2.2
 	github.com/goark/errs/zapobject v0.1.1
 	github.com/goark/fetch v0.4.1

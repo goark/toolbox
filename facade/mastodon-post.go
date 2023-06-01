@@ -20,7 +20,11 @@ func newMastodonPostCmd(ui *rwi.RWI) *cobra.Command {
 		Long:    "Post message to Mastodon.",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			// global options
-			mstdn, err := getMastodon()
+			gopts, err := getGlobalOptions()
+			if err != nil {
+				return debugPrint(ui, err)
+			}
+			mstdn, err := gopts.getMastodon()
 			if err != nil {
 				return debugPrint(ui, err)
 			}

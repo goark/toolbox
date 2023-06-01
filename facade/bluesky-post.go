@@ -19,7 +19,11 @@ func newBlueskyPostCmd(ui *rwi.RWI) *cobra.Command {
 		Long:    "Post message to Bluesky.",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			// Global options
-			bsky, err := getBluesky()
+			gopts, err := getGlobalOptions()
+			if err != nil {
+				return debugPrint(ui, err)
+			}
+			bsky, err := gopts.getBluesky()
 			if err != nil {
 				return debugPrint(ui, err)
 			}

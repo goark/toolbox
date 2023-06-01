@@ -26,7 +26,11 @@ func newAPODPostCmd(ui *rwi.RWI) *cobra.Command {
 		Long:    "Post Astronomy Picture of the Day data to time lines.",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			// Global options
-			apd, gopts, err := getAPOD()
+			gopts, err := getGlobalOptions()
+			if err != nil {
+				return debugPrint(ui, err)
+			}
+			apd, err := gopts.getAPOD()
 			if err != nil {
 				return debugPrint(ui, err)
 			}
@@ -77,7 +81,7 @@ func newAPODPostCmd(ui *rwi.RWI) *cobra.Command {
 
 			// post to Bluesky
 			if bskyFlag {
-				if bsky, err := getBluesky(); err != nil {
+				if bsky, err := gopts.getBluesky(); err != nil {
 					apd.Logger().Info("no Bluesky configuration", zap.Object("error", zapobject.New(err)))
 					lastErrs = append(lastErrs, err)
 				} else if resText, err := bsky.PostMessage(cmd.Context(), &bluesky.Message{Msg: msg, ImageFiles: imgs}); err != nil {
@@ -89,7 +93,7 @@ func newAPODPostCmd(ui *rwi.RWI) *cobra.Command {
 			}
 			// post to Mastodon
 			if mastodonFlag {
-				if mstdn, err := getMastodon(); err != nil {
+				if mstdn, err := gopts.getMastodon(); err != nil {
 					apd.Logger().Info("no Mastodon configuration", zap.Object("error", zapobject.New(err)))
 					lastErrs = append(lastErrs, err)
 				} else if resText, err := mstdn.PostMessage(cmd.Context(), &mastodon.Message{

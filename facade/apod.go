@@ -29,18 +29,14 @@ func newAPODCmd(ui *rwi.RWI) *cobra.Command {
 	return apodCmd
 }
 
-func getAPOD() (*apod.APOD, *globalOptions, error) {
-	gopts, err := getGlobalOptions()
-	if err != nil {
-		return nil, nil, errs.Wrap(err)
-	}
+func (gopts *globalOptions) getAPOD() (*apod.APOD, error) {
 	acfg, err := apod.New(gopts.apodConfigPath, gopts.CacheDir, gopts.Logger)
 	if err != nil {
 		err = errs.Wrap(err)
 		gopts.Logger.Desugar().Error("cannot get configuration for Mastodon", zap.Object("error", zapobject.New(err)))
-		return nil, nil, err
+		return nil, err
 	}
-	return acfg, gopts, nil
+	return acfg, nil
 }
 
 /* Copyright 2023 Spiegel

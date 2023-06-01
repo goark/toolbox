@@ -29,11 +29,7 @@ func newBlueskyCmd(ui *rwi.RWI) *cobra.Command {
 	return blueskyCmd
 }
 
-func getBluesky() (*bluesky.Bluesky, error) {
-	gopts, err := getGlobalOptions()
-	if err != nil {
-		return nil, errs.Wrap(err)
-	}
+func (gopts *globalOptions) getBluesky() (*bluesky.Bluesky, error) {
 	bcfg, err := bluesky.New(gopts.bskyConfigPath, gopts.CacheDir, gopts.Logger)
 	if err != nil {
 		err = errs.Wrap(err)

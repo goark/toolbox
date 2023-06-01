@@ -29,11 +29,7 @@ func newMastodonCmd(ui *rwi.RWI) *cobra.Command {
 	return mastodonCmd
 }
 
-func getMastodon() (*mastodon.Mastodon, error) {
-	gopts, err := getGlobalOptions()
-	if err != nil {
-		return nil, errs.Wrap(err)
-	}
+func (gopts *globalOptions) getMastodon() (*mastodon.Mastodon, error) {
 	mcfg, err := mastodon.New(gopts.mstdnConfigPath, gopts.Logger)
 	if err != nil {
 		err = errs.Wrap(err)

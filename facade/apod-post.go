@@ -3,15 +3,14 @@ package facade
 import (
 	"errors"
 	"os"
-	"strings"
 
 	"github.com/goark/errs"
 	"github.com/goark/errs/zapobject"
 	"github.com/goark/gocli/rwi"
+	"github.com/goark/toolbox/apod"
 	"github.com/goark/toolbox/bluesky"
 	"github.com/goark/toolbox/ecode"
 	"github.com/goark/toolbox/mastodon"
-	"github.com/goark/toolbox/nasaapi/nasaapod"
 	"github.com/goark/toolbox/values"
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
@@ -26,7 +25,11 @@ func newAPODPostCmd(ui *rwi.RWI) *cobra.Command {
 		Long:    "Post Astronomy Picture of the Day data to time lines.",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			// Global options
-			apd, gopts, err := getAPOD()
+			gopts, err := getGlobalOptions()
+			if err != nil {
+				return debugPrint(ui, err)
+			}
+			apd, err := gopts.getAPOD()
 			if err != nil {
 				return debugPrint(ui, err)
 			}
@@ -69,15 +72,14 @@ func newAPODPostCmd(ui *rwi.RWI) *cobra.Command {
 				defer os.Remove(fname)
 				imgs = []string{fname}
 			}
-
 			// make message
-			msg := makeMessageFromAPOD(res)
+			msg := apod.MakeMessage(res)
 
 			var lastErrs []error
 
 			// post to Bluesky
 			if bskyFlag {
-				if bsky, err := getBluesky(); err != nil {
+				if bsky, err := gopts.getBluesky(); err != nil {
 					apd.Logger().Info("no Bluesky configuration", zap.Object("error", zapobject.New(err)))
 					lastErrs = append(lastErrs, err)
 				} else if resText, err := bsky.PostMessage(cmd.Context(), &bluesky.Message{Msg: msg, ImageFiles: imgs}); err != nil {
@@ -89,7 +91,7 @@ func newAPODPostCmd(ui *rwi.RWI) *cobra.Command {
 			}
 			// post to Mastodon
 			if mastodonFlag {
-				if mstdn, err := getMastodon(); err != nil {
+				if mstdn, err := gopts.getMastodon(); err != nil {
 					apd.Logger().Info("no Mastodon configuration", zap.Object("error", zapobject.New(err)))
 					lastErrs = append(lastErrs, err)
 				} else if resText, err := mstdn.PostMessage(cmd.Context(), &mastodon.Message{
@@ -115,17 +117,6 @@ func newAPODPostCmd(ui *rwi.RWI) *cobra.Command {
 	apodPostCmd.Flags().BoolP("force", "", false, "Force getting APOD data from cache")
 
 	return apodPostCmd
-}
-
-func makeMessageFromAPOD(data *nasaapod.Response) string {
-	if data == nil {
-		return ""
-	}
-	title := data.Title
-	if len(data.Copyright) > 0 {
-		title += strings.Join([]string{title, "Image Credit: " + data.Copyright}, "\n")
-	}
-	return strings.Join([]string{"#apod", title, data.WebPage()}, "\n")
 }
 
 /* Copyright 2023 Spiegel

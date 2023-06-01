@@ -19,7 +19,11 @@ func newBlueskyProfileCmd(ui *rwi.RWI) *cobra.Command {
 		Long:    "Output Bluesky profile.",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			// Global options
-			bsky, err := getBluesky()
+			gopts, err := getGlobalOptions()
+			if err != nil {
+				return debugPrint(ui, err)
+			}
+			bsky, err := gopts.getBluesky()
 			if err != nil {
 				return debugPrint(ui, err)
 			}

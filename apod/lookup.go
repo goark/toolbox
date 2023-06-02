@@ -110,7 +110,7 @@ func MakeMessage(data *nasaapod.Response) string {
 	bld := strings.Builder{}
 
 	// hash tag
-	bld.WriteString("#apod")
+	bld.WriteString("#apod " + data.Date.String())
 	if len(data.MediaType) > 0 && data.MediaType != "image" {
 		bld.WriteString(fmt.Sprintf(" (%s)", data.MediaType))
 	}

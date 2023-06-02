@@ -16,7 +16,7 @@ func TestDate(t *testing.T) {
 	}
 
 	for _, tc := range testCases {
-		s, err := DateFrom(tc.s)
+		s, err := DateFrom(tc.s, false)
 		if (err != nil) != tc.isErr {
 			t.Errorf("Is \"%v\" error ? %v, want %v", tc.s, err != nil, tc.isErr)
 		}

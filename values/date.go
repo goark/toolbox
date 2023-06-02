@@ -19,7 +19,7 @@ func NewDate(tm time.Time) Date {
 }
 
 // Today returns Date instance in today.
-func Today() Date {
+func Today(utcFlag bool) Date {
 	return NewDate(time.Now())
 }
 
@@ -45,7 +45,7 @@ var timeTemplate = []string{
 }
 
 // DateFrom returns Date instance from date string
-func DateFrom(s string) (Date, error) {
+func DateFrom(s string, utcFlag bool) (Date, error) {
 	if len(s) == 0 || strings.EqualFold(s, "null") {
 		return NewDate(time.Time{}), nil
 	}
@@ -66,7 +66,7 @@ func (t *Date) UnmarshalJSON(b []byte) error {
 	if err != nil {
 		s = string(b)
 	}
-	*t, err = DateFrom(s)
+	*t, err = DateFrom(s, false)
 	return err
 }
 

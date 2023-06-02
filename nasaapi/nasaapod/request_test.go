@@ -9,7 +9,7 @@ import (
 )
 
 func dateFromMust(s string) values.Date {
-	dt, err := values.DateFrom(s)
+	dt, err := values.DateFrom(s, false)
 	if err != nil {
 		panic(err)
 	}

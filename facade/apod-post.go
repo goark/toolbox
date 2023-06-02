@@ -34,11 +34,15 @@ func newAPODPostCmd(ui *rwi.RWI) *cobra.Command {
 				return debugPrint(ui, err)
 			}
 			// local options
+			utcFlag, err := cmd.Flags().GetBool("utc")
+			if err != nil {
+				return debugPrint(ui, err)
+			}
 			dateStr, err := cmd.Flags().GetString("date")
 			if err != nil {
 				return debugPrint(ui, err)
 			}
-			date, err := values.DateFrom(dateStr)
+			date, err := values.DateFrom(dateStr, utcFlag)
 			if err != nil {
 				return debugPrint(ui, err)
 			}
@@ -56,7 +60,7 @@ func newAPODPostCmd(ui *rwi.RWI) *cobra.Command {
 			}
 
 			// lookup APOD data
-			res, err := apd.LookupWithoutCache(cmd.Context(), date, forceFlag)
+			res, err := apd.LookupWithoutCache(cmd.Context(), date, utcFlag, forceFlag)
 			if err != nil {
 				apd.Logger().Error("error in apod.Lookup", zap.Object("error", zapobject.New(err)))
 				return debugPrint(ui, err)
@@ -111,7 +115,6 @@ func newAPODPostCmd(ui *rwi.RWI) *cobra.Command {
 			return nil
 		},
 	}
-	apodPostCmd.Flags().StringP("date", "d", "", "Date for APOD data (YYYY-MM-DD)")
 	apodPostCmd.Flags().BoolP("bluesky", "b", false, "Post to bluesky")
 	apodPostCmd.Flags().BoolP("mastodon", "m", false, "Post to Mastodon")
 	apodPostCmd.Flags().BoolP("force", "", false, "Force getting APOD data from cache")

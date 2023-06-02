@@ -26,11 +26,15 @@ func newAPODLookupCmd(ui *rwi.RWI) *cobra.Command {
 				return debugPrint(ui, err)
 			}
 			// local options
+			utcFlag, err := cmd.Flags().GetBool("utc")
+			if err != nil {
+				return debugPrint(ui, err)
+			}
 			dateStr, err := cmd.Flags().GetString("date")
 			if err != nil {
 				return debugPrint(ui, err)
 			}
-			date, err := values.DateFrom(dateStr)
+			date, err := values.DateFrom(dateStr, utcFlag)
 			if err != nil {
 				return debugPrint(ui, err)
 			}
@@ -40,7 +44,7 @@ func newAPODLookupCmd(ui *rwi.RWI) *cobra.Command {
 			}
 
 			// lookup APOD data
-			res, err := apd.Lookup(cmd.Context(), date, saveFlag)
+			res, err := apd.Lookup(cmd.Context(), date, utcFlag, saveFlag)
 			if err != nil {
 				apd.Logger().Error("error in apod.Lookup", zap.Object("error", zapobject.New(err)))
 				return debugPrint(ui, err)
@@ -48,7 +52,6 @@ func newAPODLookupCmd(ui *rwi.RWI) *cobra.Command {
 			return debugPrint(ui, res.Encode(ui.Writer()))
 		},
 	}
-	apodLookupCmd.Flags().StringP("date", "d", "", "Date for APOD data (YYYY-MM-DD)")
 	apodLookupCmd.Flags().BoolP("save", "", false, "Save APOD data to cache")
 
 	return apodLookupCmd

@@ -13,12 +13,12 @@ import (
 )
 
 // Lookup method gets APOD data from cache. If no data in cache, getting from NASA API.
-func (cfg *APOD) Lookup(ctx context.Context, date values.Date, saveFlag bool) (*nasaapod.Response, error) {
+func (cfg *APOD) Lookup(ctx context.Context, date values.Date, utcFlag, saveFlag bool) (*nasaapod.Response, error) {
 	if cfg == nil {
 		return nil, errs.Wrap(ecode.ErrNullPointer)
 	}
 	if date.IsZero() {
-		date = values.Today()
+		date = values.Today(utcFlag)
 	}
 	dt, err := cfg.importCacheData()
 	if err != nil {
@@ -47,7 +47,7 @@ func (cfg *APOD) Lookup(ctx context.Context, date values.Date, saveFlag bool) (*
 	// save APOD data
 	if saveFlag {
 		dt.Caches = append(dt.Caches, res[0])
-		dt.Date = values.Today()
+		dt.Date = values.Today(utcFlag)
 		cfg.Logger().Debug("save cache data", zap.Any("data", dt))
 		if err := cfg.exportCacheData(dt); err != nil {
 			return nil, errs.Wrap(ecode.ErrNoContent, errs.WithContext("date", date.String()))
@@ -58,12 +58,12 @@ func (cfg *APOD) Lookup(ctx context.Context, date values.Date, saveFlag bool) (*
 }
 
 // Lookup method gets APOD data from NASA API and save cache. If exist data in cache, returns ErrExistAPODData error.
-func (cfg *APOD) LookupWithoutCache(ctx context.Context, date values.Date, forceFlag bool) (*nasaapod.Response, error) {
+func (cfg *APOD) LookupWithoutCache(ctx context.Context, date values.Date, utcFlag, forceFlag bool) (*nasaapod.Response, error) {
 	if cfg == nil {
 		return nil, errs.Wrap(ecode.ErrNullPointer)
 	}
 	if date.IsZero() {
-		date = values.Today()
+		date = values.Today(utcFlag)
 	}
 	dt, err := cfg.importCacheData()
 	if err != nil {
@@ -95,7 +95,7 @@ func (cfg *APOD) LookupWithoutCache(ctx context.Context, date values.Date, force
 
 	// save APOD data
 	dt.Caches = append(dt.Caches, res[0])
-	dt.Date = values.Today()
+	dt.Date = values.Today(utcFlag)
 	cfg.Logger().Debug("save cache data", zap.Any("data", dt))
 	if err := cfg.exportCacheData(dt); err != nil {
 		return nil, errs.Wrap(ecode.ErrNoContent, errs.WithContext("date", date.String()))
@@ -110,7 +110,7 @@ func MakeMessage(data *nasaapod.Response) string {
 	bld := strings.Builder{}
 
 	// hash tag
-	bld.WriteString("#apod")
+	bld.WriteString("#apod " + data.Date.String())
 	if len(data.MediaType) > 0 && data.MediaType != "image" {
 		bld.WriteString(fmt.Sprintf(" (%s)", data.MediaType))
 	}
@@ -124,7 +124,7 @@ func MakeMessage(data *nasaapod.Response) string {
 		bld.WriteString(fmt.Sprintln("Image Credit:", data.Copyright))
 	}
 	// Web page
-	bld.WriteString(fmt.Sprintln(data.WebPage()))
+	bld.WriteString(fmt.Sprintln("Web page:", data.WebPage()))
 	// content URL
 	if data.MediaType != nasaapod.MediaImage && len(data.Url) > 0 {
 		bld.WriteString(fmt.Sprintln("Content:", data.Url))

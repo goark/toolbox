@@ -21,6 +21,9 @@ func newAPODCmd(ui *rwi.RWI) *cobra.Command {
 			return debugPrint(ui, errs.Wrap(ecode.ErrNoCommand))
 		},
 	}
+	apodCmd.PersistentFlags().StringP("date", "d", "", "Date for APOD data (YYYY-MM-DD)")
+	apodCmd.PersistentFlags().BoolP("utc", "u", false, "Time base on UTC")
+
 	apodCmd.AddCommand(
 		newAPODRegisterCmd(ui),
 		newAPODLookupCmd(ui),

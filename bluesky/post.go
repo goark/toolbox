@@ -67,13 +67,14 @@ func (cfg *Bluesky) PostMessage(ctx context.Context, msg *Message) (string, erro
 
 	// add links metadata
 	for _, e := range getLinksFrom(msg.Msg) {
-		post.Entities = append(post.Entities, &bsky.FeedPost_Entity{
-			Index: &bsky.FeedPost_TextSlice{
-				Start: e.start,
-				End:   e.end,
+		post.Facets = append(post.Facets, &bsky.RichtextFacet{
+			Features: []*bsky.RichtextFacet_Features_Elem{
+				{RichtextFacet_Link: &bsky.RichtextFacet_Link{Uri: e.text}},
 			},
-			Type:  "link",
-			Value: e.text,
+			Index: &bsky.RichtextFacet_ByteSlice{
+				ByteStart: e.start,
+				ByteEnd:   e.end,
+			},
 		})
 		if post.Embed == nil {
 			post.Embed = &bsky.FeedPost_Embed{}
@@ -110,13 +111,14 @@ func (cfg *Bluesky) PostMessage(ctx context.Context, msg *Message) (string, erro
 		if err != nil {
 			return "", errs.Wrap(err, errs.WithContext("msg", msg))
 		}
-		post.Entities = append(post.Entities, &bsky.FeedPost_Entity{
-			Index: &bsky.FeedPost_TextSlice{
-				Start: e.start,
-				End:   e.end,
+		post.Facets = append(post.Facets, &bsky.RichtextFacet{
+			Features: []*bsky.RichtextFacet_Features_Elem{
+				{RichtextFacet_Mention: &bsky.RichtextFacet_Mention{Did: prof.Did}},
 			},
-			Type:  "mention",
-			Value: prof.Did,
+			Index: &bsky.RichtextFacet_ByteSlice{
+				ByteStart: e.start,
+				ByteEnd:   e.end,
+			},
 		})
 	}
 
@@ -204,9 +206,9 @@ func getLinksFrom(msg string) []entry {
 	for _, m := range matches {
 		result = append(result, entry{
 			text:  msg[m[0]:m[1]],
-			start: int64(len([]rune(msg[0:m[0]]))),
-			end:   int64(len([]rune(msg[0:m[1]])))},
-		)
+			start: int64(m[0]),
+			end:   int64(m[1]),
+		})
 	}
 	return result
 }
@@ -217,9 +219,9 @@ func getMentionsFrom(msg string) []entry {
 	for _, m := range matches {
 		result = append(result, entry{
 			text:  strings.TrimPrefix(msg[m[0]:m[1]], "@"),
-			start: int64(len([]rune(msg[0:m[0]]))),
-			end:   int64(len([]rune(msg[0:m[1]])))},
-		)
+			start: int64(m[0]),
+			end:   int64(m[1]),
+		})
 	}
 	return result
 }

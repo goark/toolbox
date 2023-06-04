@@ -3,12 +3,16 @@ package webpage
 import (
 	"bufio"
 	"context"
+	"encoding/json"
 	"io"
+	"net/url"
+	"os"
 	"strings"
 
 	"github.com/PuerkitoBio/goquery"
 	"github.com/goark/errs"
 	"github.com/goark/fetch"
+	"github.com/goark/toolbox/ecode"
 	"github.com/mattn/go-encoding"
 	"golang.org/x/net/html/charset"
 )
@@ -89,6 +93,48 @@ func ReadPage(ctx context.Context, urlStr string) (*Info, error) {
 		})
 	})
 	return link, nil
+}
+
+// Encode putputs to io.Writer by JSON format.
+func (i *Info) Encode(w io.Writer) error {
+	if err := json.NewEncoder(w).Encode(i); err != nil {
+		return errs.Wrap(err)
+	}
+	return nil
+}
+
+func (i *Info) ImageFile(ctx context.Context, dir string) (string, error) {
+	if i == nil {
+		return "", errs.Wrap(ecode.ErrNullPointer)
+	}
+	if len(i.ImageURL) == 0 {
+		return "", errs.Wrap(ecode.ErrNoAPODImage)
+	}
+
+	// get Image data
+	u, err := url.Parse(i.ImageURL)
+	if err != nil {
+		return "", errs.Wrap(err, errs.WithContext("image_url", i.ImageURL))
+	}
+	img, err := fetch.New().GetWithContext(ctx, u)
+	if err != nil {
+		return "", errs.Wrap(err, errs.WithContext("image_url", i.ImageURL))
+	}
+	defer img.Close()
+
+	// copy to temporary file
+	file, err := os.CreateTemp(dir, "webpage.*.bin")
+	if err != nil {
+		return "", errs.Wrap(err)
+	}
+	defer file.Close()
+
+	tname := file.Name()
+	_, err = io.Copy(file, img.Body())
+	if err != nil {
+		return "", errs.Wrap(err, errs.WithContext("image_url", i.ImageURL), errs.WithContext("temp_file", tname))
+	}
+	return tname, nil
 }
 
 /* Copyright 2023 Spiegel

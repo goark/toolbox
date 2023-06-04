@@ -2,41 +2,40 @@ package facade
 
 import (
 	"github.com/goark/errs"
-	"github.com/goark/errs/zapobject"
 	"github.com/goark/gocli/rwi"
+	"github.com/goark/toolbox/bookmark"
 	"github.com/goark/toolbox/ecode"
-	"github.com/goark/toolbox/mastodon"
 	"github.com/spf13/cobra"
-	"go.uber.org/zap"
 )
 
-// newMastodonCmd returns cobra.Command instance for show sub-command
-func newMastodonCmd(ui *rwi.RWI) *cobra.Command {
-	mastodonCmd := &cobra.Command{
-		Use:     "mastodon",
-		Aliases: []string{"mstdn", "mast", "mst"},
-		Short:   "Simple Mastodon commands",
-		Long:    "Simple Mastodon commands.",
+// newBookmarkCmd returns cobra.Command instance for show sub-command
+func newBookmarkCmd(ui *rwi.RWI) *cobra.Command {
+	bookmarkCmd := &cobra.Command{
+		Use:     "bookmark",
+		Aliases: []string{"book", "bm"},
+		Short:   "Handling information for Web pages",
+		Long:    "Handling information for Web pages.",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return debugPrint(ui, errs.Wrap(ecode.ErrNoCommand))
 		},
 	}
-	mastodonCmd.AddCommand(
-		newMastodonRegisterCmd(ui),
-		newMastodonProfileCmd(ui),
-		newMastodonPostCmd(ui),
+	bookmarkCmd.PersistentFlags().StringP("url", "u", "", "Web page URL")
+	_ = bookmarkCmd.MarkFlagRequired("url")
+	bookmarkCmd.PersistentFlags().BoolP("save", "", false, "Save APOD data to cache")
+
+	bookmarkCmd.AddCommand(
+		newBookmarkDLookupCmd(ui),
+		newBookmarkPostCmd(ui),
 	)
-	return mastodonCmd
+	return bookmarkCmd
 }
 
-func (gopts *globalOptions) getMastodon() (*mastodon.Mastodon, error) {
-	mcfg, err := mastodon.New(gopts.mstdnConfigPath, gopts.Logger)
+func (gopts *globalOptions) getBookmark() (*bookmark.Config, error) {
+	cfg, err := bookmark.New(gopts.CacheDir, gopts.Logger)
 	if err != nil {
-		err = errs.Wrap(err)
-		gopts.Logger.Desugar().Error("cannot get configuration for Mastodon", zap.Object("error", zapobject.New(err)))
-		return nil, err
+		return nil, errs.Wrap(err)
 	}
-	return mcfg, nil
+	return cfg, nil
 }
 
 /* Copyright 2023 Spiegel

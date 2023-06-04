@@ -1,40 +1,49 @@
 package facade
 
 import (
+	"github.com/goark/errs/zapobject"
 	"github.com/goark/gocli/rwi"
 	"github.com/spf13/cobra"
+	"go.uber.org/zap"
 )
 
-// newMastodonProfileCmd returns cobra.Command instance for show sub-command
-func newMastodonProfileCmd(ui *rwi.RWI) *cobra.Command {
-	mastodonProfileCmd := &cobra.Command{
-		Use:     "profile",
-		Aliases: []string{"prof"},
-		Short:   "Output my profile",
-		Long:    "Output my profile.",
+// newBookmarkDLookupCmd returns cobra.Command instance for show sub-command
+func newBookmarkDLookupCmd(ui *rwi.RWI) *cobra.Command {
+	bookmarkLookupCmd := &cobra.Command{
+		Use:     "lookup",
+		Aliases: []string{"look", "l"},
+		Short:   "Lookup information for Web page",
+		Long:    "Lookup information for Web page.",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			// global options
+			// Global options
 			gopts, err := getGlobalOptions()
 			if err != nil {
 				return debugPrint(ui, err)
 			}
-			mstdn, err := gopts.getMastodon()
+			cfg, err := gopts.getBookmark()
 			if err != nil {
 				return debugPrint(ui, err)
 			}
 			// local options
-			jsonFlag, err := cmd.Flags().GetBool("json")
+			urlStr, err := cmd.Flags().GetString("url")
+			if err != nil {
+				return debugPrint(ui, err)
+			}
+			saveFlag, err := cmd.Flags().GetBool("save")
 			if err != nil {
 				return debugPrint(ui, err)
 			}
 
-			// get my account
-			return debugPrint(ui, mstdn.ShowProfile(cmd.Context(), jsonFlag, ui.Writer()))
+			// lookup Web page data
+			info, err := cfg.Lookup(cmd.Context(), urlStr, saveFlag)
+			if err != nil {
+				gopts.Logger.Desugar().Error("error in bookmark.Lookup", zap.Object("error", zapobject.New(err)))
+				return debugPrint(ui, err)
+			}
+			return debugPrint(ui, info.Encode(ui.Writer()))
 		},
 	}
-	mastodonProfileCmd.Flags().BoolP("json", "j", false, "Output JSON format")
-
-	return mastodonProfileCmd
+	return bookmarkLookupCmd
 }
 
 /* Copyright 2023 Spiegel

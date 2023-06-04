@@ -50,7 +50,7 @@ func (cfg *APOD) Lookup(ctx context.Context, date values.Date, utcFlag, saveFlag
 		dt.Date = values.Today(utcFlag)
 		cfg.Logger().Debug("save cache data", zap.Any("data", dt))
 		if err := cfg.exportCacheData(dt); err != nil {
-			return nil, errs.Wrap(ecode.ErrNoContent, errs.WithContext("date", date.String()))
+			return nil, errs.Wrap(ecode.ErrNoContent, errs.WithContext("date", date.String()), errs.WithContext("save", saveFlag))
 		}
 
 	}

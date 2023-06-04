@@ -3,46 +3,41 @@ package facade
 import (
 	"errors"
 	"os"
+	"strings"
 
 	"github.com/goark/errs"
 	"github.com/goark/errs/zapobject"
 	"github.com/goark/gocli/rwi"
-	"github.com/goark/toolbox/apod"
 	"github.com/goark/toolbox/bluesky"
-	"github.com/goark/toolbox/ecode"
+	"github.com/goark/toolbox/bookmark"
 	"github.com/goark/toolbox/mastodon"
-	"github.com/goark/toolbox/values"
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
 )
 
-// newAPODPostCmd returns cobra.Command instance for show sub-command
-func newAPODPostCmd(ui *rwi.RWI) *cobra.Command {
-	apodPostCmd := &cobra.Command{
+// newBookmarkPostCmd returns cobra.Command instance for show sub-command
+func newBookmarkPostCmd(ui *rwi.RWI) *cobra.Command {
+	bookmarkPostCmd := &cobra.Command{
 		Use:     "post",
 		Aliases: []string{"pst", "p"},
-		Short:   "Post APOD data to TL",
-		Long:    "Post Astronomy Picture of the Day data to time lines.",
+		Short:   "Post Web page's information to Bluesky",
+		Long:    "Post Web page's information to Bluesky.",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			// Global options
 			gopts, err := getGlobalOptions()
 			if err != nil {
 				return debugPrint(ui, err)
 			}
-			apd, err := gopts.getAPOD()
+			cfg, err := gopts.getBookmark()
 			if err != nil {
 				return debugPrint(ui, err)
 			}
 			// local options
-			utcFlag, err := cmd.Flags().GetBool("utc")
+			urlStr, err := cmd.Flags().GetString("url")
 			if err != nil {
 				return debugPrint(ui, err)
 			}
-			dateStr, err := cmd.Flags().GetString("date")
-			if err != nil {
-				return debugPrint(ui, err)
-			}
-			date, err := values.DateFrom(dateStr, utcFlag)
+			saveFlag, err := cmd.Flags().GetBool("save")
 			if err != nil {
 				return debugPrint(ui, err)
 			}
@@ -54,38 +49,44 @@ func newAPODPostCmd(ui *rwi.RWI) *cobra.Command {
 			if err != nil {
 				return debugPrint(ui, err)
 			}
-			forceFlag, err := cmd.Flags().GetBool("force")
+			withImage, err := cmd.Flags().GetBool("with-image")
+			if err != nil {
+				return debugPrint(ui, err)
+			}
+			pmsg, err := cmd.Flags().GetString("prefix-message")
 			if err != nil {
 				return debugPrint(ui, err)
 			}
 
-			// lookup APOD data
-			res, err := apd.LookupWithoutCache(cmd.Context(), date, utcFlag, forceFlag)
+			// lookup Web page data
+			info, err := cfg.Lookup(cmd.Context(), urlStr, saveFlag)
 			if err != nil {
-				apd.Logger().Error("error in apod.Lookup", zap.Object("error", zapobject.New(err)))
+				gopts.Logger.Desugar().Error("error in bookmark.Lookup", zap.Object("error", zapobject.New(err)))
 				return debugPrint(ui, err)
 			}
 
 			// get image file
-			fname, err := res.ImageFile(cmd.Context(), gopts.CacheDir)
-			if err != nil && !errs.Is(err, ecode.ErrNoAPODImage) {
-				return debugPrint(ui, err)
-			}
 			var imgs []string
-			if len(fname) > 0 {
-				defer os.Remove(fname)
-				imgs = []string{fname}
+			if withImage && len(info.ImageURL) > 0 {
+				fname, err := info.ImageFile(cmd.Context(), gopts.CacheDir)
+				if err != nil {
+					return debugPrint(ui, err)
+				}
+				if len(fname) > 0 {
+					defer os.Remove(fname)
+					imgs = []string{fname}
+				}
 			}
 
 			// make message
-			msg := apod.MakeMessage(res)
+			msg := bookmark.MakeMessage(info, strings.TrimSpace(pmsg))
 
 			var lastErrs []error
 
 			// post to Bluesky
 			if bskyFlag {
 				if bsky, err := gopts.getBluesky(); err != nil {
-					apd.Logger().Info("no Bluesky configuration", zap.Object("error", zapobject.New(err)))
+					cfg.Logger().Info("no Bluesky configuration", zap.Object("error", zapobject.New(err)))
 					lastErrs = append(lastErrs, err)
 				} else if resText, err := bsky.PostMessage(cmd.Context(), &bluesky.Message{Msg: msg, ImageFiles: imgs}); err != nil {
 					bsky.Logger().Error("error in bluesky.PostMessage", zap.Object("error", zapobject.New(err)))
@@ -97,12 +98,9 @@ func newAPODPostCmd(ui *rwi.RWI) *cobra.Command {
 			// post to Mastodon
 			if mastodonFlag {
 				if mstdn, err := gopts.getMastodon(); err != nil {
-					apd.Logger().Info("no Mastodon configuration", zap.Object("error", zapobject.New(err)))
+					cfg.Logger().Info("no Mastodon configuration", zap.Object("error", zapobject.New(err)))
 					lastErrs = append(lastErrs, err)
-				} else if resText, err := mstdn.PostMessage(cmd.Context(), &mastodon.Message{
-					Msg:        msg,
-					ImageFiles: imgs,
-				}); err != nil {
+				} else if resText, err := mstdn.PostMessage(cmd.Context(), &mastodon.Message{Msg: msg, ImageFiles: imgs}); err != nil {
 					mstdn.Logger().Error("error in mastodon.PostMessage", zap.Object("error", zapobject.New(err)))
 					lastErrs = append(lastErrs, err)
 				} else {
@@ -116,11 +114,12 @@ func newAPODPostCmd(ui *rwi.RWI) *cobra.Command {
 			return nil
 		},
 	}
-	apodPostCmd.Flags().BoolP("bluesky", "b", false, "Post to bluesky")
-	apodPostCmd.Flags().BoolP("mastodon", "m", false, "Post to Mastodon")
-	apodPostCmd.Flags().BoolP("force", "", false, "Force getting APOD data from cache")
+	bookmarkPostCmd.Flags().BoolP("bluesky", "b", false, "Post to bluesky")
+	bookmarkPostCmd.Flags().BoolP("mastodon", "m", false, "Post to Mastodon")
+	bookmarkPostCmd.Flags().BoolP("with-image", "", false, "Post with image")
+	bookmarkPostCmd.Flags().StringP("prefix-message", "p", "", "Message")
 
-	return apodPostCmd
+	return bookmarkPostCmd
 }
 
 /* Copyright 2023 Spiegel

@@ -40,8 +40,8 @@ func (cfg *APOD) importCacheData() (*cacheData, error) {
 	if err := json.NewDecoder(file).Decode(&data); err != nil {
 		return nil, errs.Wrap(err, errs.WithContext("cache_dir", cfg.cacheDir), errs.WithContext("path", path))
 	}
-	data.sort()
 	cfg.Logger().Debug("complete importing cache file", zap.String("path", path))
+	data.sort()
 	return &data, nil
 }
 

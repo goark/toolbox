@@ -10,7 +10,7 @@ import (
 	"go.uber.org/zap"
 )
 
-// newBlueskyCmd returns cobra.Command instance for show sub-command
+// newAPODCmd returns cobra.Command instance for show sub-command
 func newAPODCmd(ui *rwi.RWI) *cobra.Command {
 	apodCmd := &cobra.Command{
 		Use:     "apod",

@@ -11,7 +11,7 @@ import (
 	"go.uber.org/zap"
 )
 
-// newBlueskyCmd returns cobra.Command instance for show sub-command
+// newMastodonPostCmd returns cobra.Command instance for show sub-command
 func newMastodonPostCmd(ui *rwi.RWI) *cobra.Command {
 	mastodonPostCmd := &cobra.Command{
 		Use:     "post",

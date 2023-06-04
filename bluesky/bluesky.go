@@ -8,6 +8,7 @@ import (
 	"github.com/goark/errs"
 	"github.com/goark/toolbox/ecode"
 	"github.com/goark/toolbox/logger"
+	"github.com/goark/toolbox/webpage"
 	"github.com/ipfs/go-log/v2"
 	"go.uber.org/zap"
 )
@@ -22,6 +23,7 @@ type Bluesky struct {
 	Handle   string `json:"handle"`
 	Password string `json:"password"`
 	baseDir  string
+	webCache *webpage.Cache
 	logger   *log.ZapEventLogger
 	client   *xrpc.Client
 }
@@ -44,7 +46,12 @@ func New(path, dir string, logger *log.ZapEventLogger) (*Bluesky, error) {
 	if len(cfg.Handle) == 0 {
 		return nil, errs.Wrap(ecode.ErrNoBlueskyHandle, errs.WithContext("path", path), errs.WithContext("die", dir))
 	}
+	cache, err := webpage.NewCache(dir)
+	if err != nil {
+		return nil, errs.Wrap(err, errs.WithContext("cache_dir", dir))
+	}
 	cfg.baseDir = dir
+	cfg.webCache = cache
 	cfg.logger = logger
 	return &cfg, nil
 }

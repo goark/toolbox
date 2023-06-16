@@ -44,7 +44,7 @@ func FetchFromFile(fn string) ([]byte, error) {
 
 const (
 	imageMaxSize     = 1000
-	imageFileMaxSize = 1024 * 1024
+	imageFileMaxSize = 1000 * 1000
 )
 
 func AjustImage(src []byte) (io.Reader, error) {

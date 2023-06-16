@@ -9,7 +9,6 @@ import (
 	"github.com/goark/errs/zapobject"
 	"github.com/goark/gocli/rwi"
 	"github.com/goark/toolbox/bluesky"
-	"github.com/goark/toolbox/bookmark"
 	"github.com/goark/toolbox/mastodon"
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
@@ -20,8 +19,8 @@ func newBookmarkPostCmd(ui *rwi.RWI) *cobra.Command {
 	bookmarkPostCmd := &cobra.Command{
 		Use:     "post",
 		Aliases: []string{"pst", "p"},
-		Short:   "Post Web page's information to Bluesky",
-		Long:    "Post Web page's information to Bluesky.",
+		Short:   "Post Web page's information to TL",
+		Long:    "Post Web page's information to time lines.",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			// Global options
 			gopts, err := getGlobalOptions()
@@ -79,7 +78,7 @@ func newBookmarkPostCmd(ui *rwi.RWI) *cobra.Command {
 			}
 
 			// make message
-			msg := bookmark.MakeMessage(info, strings.TrimSpace(pmsg))
+			msg := info.MakeMessage(strings.TrimSpace(pmsg))
 
 			var lastErrs []error
 

@@ -3,35 +3,35 @@ package facade
 import (
 	"github.com/goark/errs"
 	"github.com/goark/gocli/rwi"
-	"github.com/goark/toolbox/bookmark"
 	"github.com/goark/toolbox/ecode"
+	"github.com/goark/toolbox/webpage"
 	"github.com/spf13/cobra"
 )
 
 // newBookmarkCmd returns cobra.Command instance for show sub-command
-func newBookmarkCmd(ui *rwi.RWI) *cobra.Command {
-	bookmarkCmd := &cobra.Command{
-		Use:     "bookmark",
-		Aliases: []string{"book", "bm"},
+func newWebpageCmd(ui *rwi.RWI) *cobra.Command {
+	webpageCmd := &cobra.Command{
+		Use:     "webpage",
+		Aliases: []string{"web", "w", "bookmark", "book", "bm"},
 		Short:   "Handling information for Web pages",
 		Long:    "Handling information for Web pages.",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return debugPrint(ui, errs.Wrap(ecode.ErrNoCommand))
 		},
 	}
-	bookmarkCmd.PersistentFlags().StringP("url", "u", "", "Web page URL")
-	_ = bookmarkCmd.MarkFlagRequired("url")
-	bookmarkCmd.PersistentFlags().BoolP("save", "", false, "Save APOD data to cache")
+	webpageCmd.PersistentFlags().StringP("url", "u", "", "Web page URL")
+	_ = webpageCmd.MarkFlagRequired("url")
+	webpageCmd.PersistentFlags().BoolP("save", "", false, "Save APOD data to cache")
 
-	bookmarkCmd.AddCommand(
+	webpageCmd.AddCommand(
 		newBookmarkDLookupCmd(ui),
 		newBookmarkPostCmd(ui),
 	)
-	return bookmarkCmd
+	return webpageCmd
 }
 
-func (gopts *globalOptions) getBookmark() (*bookmark.Config, error) {
-	cfg, err := bookmark.New(gopts.CacheDir, gopts.Logger)
+func (gopts *globalOptions) getBookmark() (*webpage.Bookmark, error) {
+	cfg, err := webpage.New(gopts.CacheDir, gopts.Logger)
 	if err != nil {
 		return nil, errs.Wrap(err)
 	}

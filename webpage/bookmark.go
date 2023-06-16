@@ -1,38 +1,36 @@
-package bookmark
+package webpage
 
 import (
-	"context"
 	"fmt"
 	"strings"
 
 	"github.com/goark/errs"
-	"github.com/goark/toolbox/ecode"
-	"github.com/goark/toolbox/webpage"
+	"github.com/goark/toolbox/logger"
+	"github.com/ipfs/go-log/v2"
+	"go.uber.org/zap"
 )
 
-func (cfg *Config) Lookup(ctx context.Context, urlStr string, saveFlag bool) (*webpage.Info, error) {
-	if cfg == nil {
-		return nil, errs.Wrap(ecode.ErrNullPointer)
-	}
-	if info := cfg.cacheData.Get(urlStr); info != nil {
-		return info, nil
-	}
-
-	info, err := webpage.ReadPage(ctx, urlStr)
-	if err != nil {
-		return nil, errs.Wrap(err, errs.WithContext("url", urlStr))
-	}
-	cfg.cacheData.Put(info)
-
-	if saveFlag {
-		if err := cfg.cacheData.Save(); err != nil {
-			return nil, errs.Wrap(err, errs.WithContext("url", urlStr), errs.WithContext("save", saveFlag))
-		}
-	}
-	return info, nil
+// Config is configuration for bookmark
+type Bookmark struct {
+	cacheDir  string
+	cacheData *Cache
+	logger    *log.ZapEventLogger
 }
 
-func MakeMessage(info *webpage.Info, prefixMsg string) string {
+// New functions creates new Config instance.
+func New(cacheDir string, logger *log.ZapEventLogger) (*Bookmark, error) {
+	data, err := NewCache(cacheDir)
+	if err != nil {
+		return nil, errs.Wrap(err, errs.WithContext("cache_dir", cacheDir))
+	}
+	return &Bookmark{
+		cacheDir:  cacheDir,
+		cacheData: data,
+		logger:    logger,
+	}, nil
+}
+
+func (info *Info) MakeMessage(prefixMsg string) string {
 	if info == nil {
 		return ""
 	}
@@ -45,6 +43,14 @@ func MakeMessage(info *webpage.Info, prefixMsg string) string {
 	// URL
 	bld.WriteString(fmt.Sprintln(info.URL))
 	return bld.String()
+}
+
+// Logger method returns zap.Logger instance.
+func (wp *Bookmark) Logger() *zap.Logger {
+	if wp == nil || wp.logger == nil {
+		return logger.Nop().Desugar()
+	}
+	return wp.logger.Desugar()
 }
 
 /* Copyright 2023 Spiegel

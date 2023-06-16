@@ -85,7 +85,7 @@ func newRootCmd(ui *rwi.RWI, args []string) *cobra.Command {
 		newBlueskyCmd(ui),
 		newMastodonCmd(ui),
 		newAPODCmd(ui),
-		newBookmarkCmd(ui),
+		newWebpageCmd(ui),
 	)
 	return rootCmd
 }

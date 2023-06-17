@@ -52,7 +52,7 @@ func newBookmarkPostCmd(ui *rwi.RWI) *cobra.Command {
 			if err != nil {
 				return debugPrint(ui, err)
 			}
-			pmsg, err := cmd.Flags().GetString("prefix-message")
+			pmsg, err := cmd.Flags().GetString("prefix-text")
 			if err != nil {
 				return debugPrint(ui, err)
 			}
@@ -116,7 +116,7 @@ func newBookmarkPostCmd(ui *rwi.RWI) *cobra.Command {
 	bookmarkPostCmd.Flags().BoolP("bluesky", "b", false, "Post to bluesky")
 	bookmarkPostCmd.Flags().BoolP("mastodon", "m", false, "Post to Mastodon")
 	bookmarkPostCmd.Flags().BoolP("with-image", "", false, "Post with image")
-	bookmarkPostCmd.Flags().StringP("prefix-message", "p", "", "Message")
+	bookmarkPostCmd.Flags().StringP("prefix-text", "t", "", "prefix text message")
 
 	return bookmarkPostCmd
 }

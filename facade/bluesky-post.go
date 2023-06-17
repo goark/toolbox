@@ -37,7 +37,7 @@ func newBlueskyPostCmd(ui *rwi.RWI) *cobra.Command {
 				return debugPrint(ui, err)
 			}
 			replyTo = strings.TrimSpace(replyTo)
-			msg, err := cmd.Flags().GetString("message")
+			msg, err := cmd.Flags().GetString("text")
 			if err != nil {
 				return debugPrint(ui, err)
 			}
@@ -71,10 +71,10 @@ func newBlueskyPostCmd(ui *rwi.RWI) *cobra.Command {
 			return debugPrint(ui, ui.Outputln(resText))
 		},
 	}
-	blueskyPostCmd.Flags().StringP("message", "m", "", "Message")
+	blueskyPostCmd.Flags().StringP("text", "t", "", "Text message")
 	blueskyPostCmd.Flags().BoolP("pipe", "", false, "Input from standard-input")
 	blueskyPostCmd.Flags().BoolP("edit", "", false, "Edit message")
-	blueskyPostCmd.MarkFlagsMutuallyExclusive("message", "pipe", "edit")
+	blueskyPostCmd.MarkFlagsMutuallyExclusive("text", "pipe", "edit")
 	blueskyPostCmd.Flags().StringSliceP("image-file", "i", nil, "Image file")
 	blueskyPostCmd.Flags().StringP("reply-to", "r", "", "Replry URI")
 	return blueskyPostCmd

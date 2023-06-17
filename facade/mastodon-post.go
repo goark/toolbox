@@ -45,7 +45,7 @@ func newMastodonPostCmd(ui *rwi.RWI) *cobra.Command {
 			if err != nil {
 				return debugPrint(ui, err)
 			}
-			msg, err := cmd.Flags().GetString("message")
+			msg, err := cmd.Flags().GetString("text")
 			if err != nil {
 				return debugPrint(ui, err)
 			}
@@ -84,10 +84,10 @@ func newMastodonPostCmd(ui *rwi.RWI) *cobra.Command {
 			return debugPrint(ui, ui.Outputln(resText))
 		},
 	}
-	mastodonPostCmd.Flags().StringP("message", "m", "", "Message")
+	mastodonPostCmd.Flags().StringP("text", "t", "", "Text message")
 	mastodonPostCmd.Flags().BoolP("pipe", "", false, "Input from standard-input")
 	mastodonPostCmd.Flags().BoolP("edit", "", false, "Edit message")
-	mastodonPostCmd.MarkFlagsMutuallyExclusive("message", "pipe", "edit")
+	mastodonPostCmd.MarkFlagsMutuallyExclusive("text", "pipe", "edit")
 	mastodonPostCmd.Flags().StringSliceP("image-file", "i", nil, "Image file")
 	mastodonPostCmd.Flags().StringP("visibility", "v", mastodon.DefaultVisibility().String(), "Visibility ["+strings.Join(mastodon.VisibilityList(), "|")+"]")
 	mastodonPostCmd.Flags().StringP("spoiler-text", "s", "", "Spoiler text")

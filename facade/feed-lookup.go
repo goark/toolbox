@@ -3,12 +3,9 @@ package facade
 import (
 	"encoding/json"
 
-	"github.com/goark/errs/zapobject"
 	"github.com/goark/gocli/rwi"
-	"github.com/goark/toolbox/ecode"
 	"github.com/goark/toolbox/webpage"
 	"github.com/spf13/cobra"
-	"go.uber.org/zap"
 )
 
 // newFeedLookupCmd returns cobra.Command instance for show sub-command
@@ -29,36 +26,15 @@ func newFeedLookupCmd(ui *rwi.RWI) *cobra.Command {
 				return debugPrint(ui, err)
 			}
 			// local options
-			urlStr, err := cmd.Flags().GetString("url")
-			if err != nil {
-				return debugPrint(ui, err)
-			}
-			flickrID, err := cmd.Flags().GetString("flickr-id")
-			if err != nil {
-				return debugPrint(ui, err)
-			}
-			if len(urlStr) == 0 && len(flickrID) == 0 {
-				return debugPrint(ui, ecode.ErrNoFeed)
-			}
 			saveFlag, err := cmd.Flags().GetBool("save")
 			if err != nil {
 				return debugPrint(ui, err)
 			}
 
 			// lookup feed
-			var list []*webpage.Info
-			if len(flickrID) > 0 {
-				list, err = cfg.FeedFlickr(cmd.Context(), flickrID)
-				if err != nil {
-					gopts.Logger.Desugar().Error("error in feed.Lookup", zap.Object("error", zapobject.New(err)))
-					return debugPrint(ui, err)
-				}
-			} else {
-				list, err = cfg.Feed(cmd.Context(), urlStr)
-				if err != nil {
-					gopts.Logger.Desugar().Error("error in feed.Lookup", zap.Object("error", zapobject.New(err)))
-					return debugPrint(ui, err)
-				}
+			list, err := getFeedAll(cmd, cfg)
+			if err != nil {
+				return debugPrint(ui, err)
 			}
 			if saveFlag {
 				if err := cfg.SaveCache(); err != nil {

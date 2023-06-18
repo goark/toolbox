@@ -186,6 +186,43 @@ Global Flags:
 Use "toolbox webpage [command] --help" for more information about a command.
 ```
 
+### Usage feed command
+
+```
+$ toolbox apod -h
+Handling information for Web feed.
+
+Usage:
+  toolbox feed [flags]
+  toolbox feed [command]
+
+Aliases:
+  feed, rss
+
+Available Commands:
+  lookup      Lookup information for Web page
+  post        Post Web page's information to TL
+
+Flags:
+  -f, --feed-list-file string   path of Feed list file
+      --flickr-id string        Flickr ID
+  -h, --help                    help for feed
+      --save                    Save webpage data to cache
+  -u, --url string              Feed URL
+
+Global Flags:
+      --apod-config string       Config file for APOD (default "/home/username/.config/toolbox/nasaapi.json")
+      --bluesky-config string    Config file for Bluesky (default "/home/username/.config/toolbox/bluesky.json")
+      --cache-dir string         Directory for cache files (default "/home/username/.cache/toolbox")
+      --config string            Config file (default "/home/username/.config/toolbox/config.yaml")
+      --debug                    for debug
+      --log-dir string           Directory for log files (default "/home/username/.cache/toolbox")
+      --log-level string         Log level [nop|error|warn|info|debug|trace] (default "nop")
+      --mastodon-config string   Config file for Mastodon (default "/home/username/.config/toolbox/mastodon.json")
+
+Use "toolbox feed [command] --help" for more information about a command.
+```
+
 ## Modules Requirement Graph
 
 [![dependency.png](./dependency.png)](./dependency.png)

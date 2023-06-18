@@ -97,6 +97,7 @@ func ReadPage(ctx context.Context, urlStr string) (*Info, error) {
 	return link, nil
 }
 
+// SortInfo function sorts Info list.
 func SortInfo(info []*Info) {
 	if len(info) < 2 {
 		return
@@ -113,6 +114,32 @@ func SortInfo(info []*Info) {
 		}
 		return info[i].Published.Before(*info[j].Published)
 	})
+}
+
+// MergeInfo merges Info lists.
+func MergeInfo(lists ...[]*Info) []*Info {
+	if len(lists) == 0 {
+		return []*Info{}
+	}
+	infoMap := map[string]*Info{}
+	for _, list := range lists {
+		if len(list) > 0 {
+			for _, info := range list {
+				if info != nil {
+					infoMap[info.URL] = info
+				}
+			}
+		}
+	}
+	if len(infoMap) == 0 {
+		return []*Info{}
+	}
+	list := make([]*Info, 0, len(infoMap))
+	for _, v := range infoMap {
+		list = append(list, v)
+	}
+	SortInfo(list)
+	return list
 }
 
 // Encode putputs to io.Writer by JSON format.

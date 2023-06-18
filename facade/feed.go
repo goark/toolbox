@@ -4,6 +4,7 @@ import (
 	"github.com/goark/errs"
 	"github.com/goark/gocli/rwi"
 	"github.com/goark/toolbox/ecode"
+	"github.com/goark/toolbox/webpage"
 	"github.com/spf13/cobra"
 )
 
@@ -20,7 +21,7 @@ func newFeedCmd(ui *rwi.RWI) *cobra.Command {
 	}
 	webpageCmd.PersistentFlags().StringP("url", "u", "", "Feed URL")
 	webpageCmd.PersistentFlags().StringP("flickr-id", "", "", "Flickr ID")
-	webpageCmd.MarkFlagsMutuallyExclusive("url", "flickr-id")
+	webpageCmd.PersistentFlags().StringP("feed-list-file", "f", "", "path of Feed list file")
 	webpageCmd.PersistentFlags().BoolP("save", "", false, "Save webpage data to cache")
 
 	webpageCmd.AddCommand(
@@ -28,6 +29,48 @@ func newFeedCmd(ui *rwi.RWI) *cobra.Command {
 		newFeedPostCmd(ui),
 	)
 	return webpageCmd
+}
+
+func getFeedAll(cmd *cobra.Command, cfg *webpage.Webpage) ([]*webpage.Info, error) {
+	urlStr, err := cmd.Flags().GetString("url")
+	if err != nil {
+		return nil, errs.Wrap(err)
+	}
+	flickrID, err := cmd.Flags().GetString("flickr-id")
+	if err != nil {
+		return nil, errs.Wrap(err)
+	}
+	feedListPath, err := cmd.Flags().GetString("feed-list-file")
+	if err != nil {
+		return nil, errs.Wrap(err)
+	}
+
+	l1 := []*webpage.Info{}
+	l2 := []*webpage.Info{}
+	l3 := []*webpage.Info{}
+	if len(urlStr) > 0 {
+		l1, err = cfg.Feed(cmd.Context(), urlStr)
+		if err != nil {
+			return nil, errs.Wrap(err, errs.WithContext("url", urlStr))
+		}
+	}
+	if len(flickrID) > 0 {
+		l2, err = cfg.FeedFlickr(cmd.Context(), flickrID)
+		if err != nil {
+			return nil, errs.Wrap(err, errs.WithContext("flickr_id", flickrID))
+		}
+	}
+	if len(feedListPath) > 0 {
+		fl, err := webpage.NewFeedList(feedListPath)
+		if err != nil {
+			return nil, errs.Wrap(err, errs.WithContext("feed_list_file", feedListPath))
+		}
+		l3, err = fl.Parse(cmd.Context(), cfg)
+		if err != nil {
+			return nil, errs.Wrap(err, errs.WithContext("feed_list_file", feedListPath))
+		}
+	}
+	return webpage.MergeInfo(l1, l2, l3), nil
 }
 
 /* Copyright 2023 Spiegel

@@ -84,13 +84,29 @@ func (c *Cache) Get(s string) *Info {
 
 // Put method puts Web page data to cache.
 func (c *Cache) Put(i *Info) {
+	if c == nil {
+		return
+	}
+	if c.info == nil {
+		c.info = map[string]*Info{}
+	}
 	if i != nil && len(i.URL) > 0 {
 		c.info[i.URL] = i
 	}
 }
 
+// Puts method puts list of Web page data to cache.
+func (c *Cache) Puts(is ...*Info) {
+	for _, i := range is {
+		c.Put(i)
+	}
+}
+
 // PutURL reads Web page data from URL and puts to cache.
 func (c *Cache) PutURL(ctx context.Context, urlStr string) (*Info, error) {
+	if c == nil {
+		return nil, errs.Wrap(ecode.ErrNullPointer)
+	}
 	info, err := ReadPage(ctx, urlStr)
 	if err != nil {
 		return nil, errs.Wrap(err, errs.WithContext("url", urlStr))

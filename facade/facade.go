@@ -86,6 +86,7 @@ func newRootCmd(ui *rwi.RWI, args []string) *cobra.Command {
 		newMastodonCmd(ui),
 		newAPODCmd(ui),
 		newWebpageCmd(ui),
+		newFeedCmd(ui),
 	)
 	return rootCmd
 }

@@ -9,13 +9,15 @@ import (
 	"github.com/goark/errs/zapobject"
 	"github.com/goark/gocli/rwi"
 	"github.com/goark/toolbox/bluesky"
+	"github.com/goark/toolbox/ecode"
 	"github.com/goark/toolbox/mastodon"
+	"github.com/goark/toolbox/webpage"
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
 )
 
-// newBookmarkPostCmd returns cobra.Command instance for show sub-command
-func newBookmarkPostCmd(ui *rwi.RWI) *cobra.Command {
+// newFeedPostCmd returns cobra.Command instance for show sub-command
+func newFeedPostCmd(ui *rwi.RWI) *cobra.Command {
 	bookmarkPostCmd := &cobra.Command{
 		Use:     "post",
 		Aliases: []string{"pst", "p"},
@@ -35,6 +37,13 @@ func newBookmarkPostCmd(ui *rwi.RWI) *cobra.Command {
 			urlStr, err := cmd.Flags().GetString("url")
 			if err != nil {
 				return debugPrint(ui, err)
+			}
+			flickrID, err := cmd.Flags().GetString("flickr-id")
+			if err != nil {
+				return debugPrint(ui, err)
+			}
+			if len(urlStr) == 0 && len(flickrID) == 0 {
+				return debugPrint(ui, ecode.ErrNoFeed)
 			}
 			saveFlag, err := cmd.Flags().GetBool("save")
 			if err != nil {
@@ -57,53 +66,67 @@ func newBookmarkPostCmd(ui *rwi.RWI) *cobra.Command {
 				return debugPrint(ui, err)
 			}
 
-			// lookup Web page data
-			info, err := cfg.Lookup(cmd.Context(), urlStr, saveFlag)
-			if err != nil {
-				gopts.Logger.Desugar().Error("error in bookmark.Lookup", zap.Object("error", zapobject.New(err)))
-				return debugPrint(ui, err)
-			}
-
-			// get image file
-			var imgs []string
-			if withImage && len(info.ImageURL) > 0 {
-				fname, err := info.ImageFile(cmd.Context(), gopts.CacheDir)
+			// lookup feed
+			var list []*webpage.Info
+			if len(flickrID) > 0 {
+				list, err = cfg.FeedFlickr(cmd.Context(), flickrID)
 				if err != nil {
+					gopts.Logger.Desugar().Error("error in feed.Lookup", zap.Object("error", zapobject.New(err)))
 					return debugPrint(ui, err)
 				}
-				if len(fname) > 0 {
-					defer os.Remove(fname)
-					imgs = []string{fname}
+			} else {
+				list, err = cfg.Feed(cmd.Context(), urlStr)
+				if err != nil {
+					gopts.Logger.Desugar().Error("error in feed.Lookup", zap.Object("error", zapobject.New(err)))
+					return debugPrint(ui, err)
+				}
+			}
+			if saveFlag {
+				if err := cfg.SaveCache(); err != nil {
+					return debugPrint(ui, err)
 				}
 			}
 
-			// make message
-			msg := info.MakeMessage(strings.TrimSpace(pmsg))
-
+			// post feed data
 			var lastErrs []error
-
-			// post to Bluesky
-			if bskyFlag {
-				if bsky, err := gopts.getBluesky(); err != nil {
-					cfg.Logger().Info("no Bluesky configuration", zap.Object("error", zapobject.New(err)))
-					lastErrs = append(lastErrs, err)
-				} else if resText, err := bsky.PostMessage(cmd.Context(), &bluesky.Message{Msg: msg, ImageFiles: imgs}); err != nil {
-					bsky.Logger().Error("error in bluesky.PostMessage", zap.Object("error", zapobject.New(err)))
-					lastErrs = append(lastErrs, err)
-				} else {
-					_ = ui.Outputln("post to Bluesky:", resText)
+			for _, info := range list {
+				// get image file
+				var imgs []string
+				if withImage && len(info.ImageURL) > 0 {
+					fname, err := info.ImageFile(cmd.Context(), gopts.CacheDir)
+					if err != nil {
+						return debugPrint(ui, err)
+					}
+					if len(fname) > 0 {
+						defer os.Remove(fname)
+						imgs = []string{fname}
+					}
 				}
-			}
-			// post to Mastodon
-			if mastodonFlag {
-				if mstdn, err := gopts.getMastodon(); err != nil {
-					cfg.Logger().Info("no Mastodon configuration", zap.Object("error", zapobject.New(err)))
-					lastErrs = append(lastErrs, err)
-				} else if resText, err := mstdn.PostMessage(cmd.Context(), &mastodon.Message{Msg: msg, ImageFiles: imgs}); err != nil {
-					mstdn.Logger().Error("error in mastodon.PostMessage", zap.Object("error", zapobject.New(err)))
-					lastErrs = append(lastErrs, err)
-				} else {
-					_ = ui.Outputln("post to Mastodon:", resText)
+				// make message
+				msg := info.MakeMessage(strings.TrimSpace(pmsg))
+				// post to Bluesky
+				if bskyFlag {
+					if bsky, err := gopts.getBluesky(); err != nil {
+						cfg.Logger().Info("no Bluesky configuration", zap.Object("error", zapobject.New(err)))
+						lastErrs = append(lastErrs, err)
+					} else if resText, err := bsky.PostMessage(cmd.Context(), &bluesky.Message{Msg: msg, ImageFiles: imgs}); err != nil {
+						bsky.Logger().Error("error in bluesky.PostMessage", zap.Object("error", zapobject.New(err)))
+						lastErrs = append(lastErrs, err)
+					} else {
+						_ = ui.Outputln("post to Bluesky:", resText)
+					}
+				}
+				// post to Mastodon
+				if mastodonFlag {
+					if mstdn, err := gopts.getMastodon(); err != nil {
+						cfg.Logger().Info("no Mastodon configuration", zap.Object("error", zapobject.New(err)))
+						lastErrs = append(lastErrs, err)
+					} else if resText, err := mstdn.PostMessage(cmd.Context(), &mastodon.Message{Msg: msg, ImageFiles: imgs}); err != nil {
+						mstdn.Logger().Error("error in mastodon.PostMessage", zap.Object("error", zapobject.New(err)))
+						lastErrs = append(lastErrs, err)
+					} else {
+						_ = ui.Outputln("post to Mastodon:", resText)
+					}
 				}
 			}
 

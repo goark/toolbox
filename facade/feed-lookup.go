@@ -1,15 +1,19 @@
 package facade
 
 import (
+	"encoding/json"
+
 	"github.com/goark/errs/zapobject"
 	"github.com/goark/gocli/rwi"
+	"github.com/goark/toolbox/ecode"
+	"github.com/goark/toolbox/webpage"
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
 )
 
-// newBookmarkDLookupCmd returns cobra.Command instance for show sub-command
-func newBookmarkLookupCmd(ui *rwi.RWI) *cobra.Command {
-	bookmarkLookupCmd := &cobra.Command{
+// newFeedLookupCmd returns cobra.Command instance for show sub-command
+func newFeedLookupCmd(ui *rwi.RWI) *cobra.Command {
+	feedLookupCmd := &cobra.Command{
 		Use:     "lookup",
 		Aliases: []string{"look", "l"},
 		Short:   "Lookup information for Web page",
@@ -29,21 +33,42 @@ func newBookmarkLookupCmd(ui *rwi.RWI) *cobra.Command {
 			if err != nil {
 				return debugPrint(ui, err)
 			}
+			flickrID, err := cmd.Flags().GetString("flickr-id")
+			if err != nil {
+				return debugPrint(ui, err)
+			}
+			if len(urlStr) == 0 && len(flickrID) == 0 {
+				return debugPrint(ui, ecode.ErrNoFeed)
+			}
 			saveFlag, err := cmd.Flags().GetBool("save")
 			if err != nil {
 				return debugPrint(ui, err)
 			}
 
-			// lookup Web page data
-			info, err := cfg.Lookup(cmd.Context(), urlStr, saveFlag)
-			if err != nil {
-				gopts.Logger.Desugar().Error("error in bookmark.Lookup", zap.Object("error", zapobject.New(err)))
-				return debugPrint(ui, err)
+			// lookup feed
+			var info []*webpage.Info
+			if len(flickrID) > 0 {
+				info, err = cfg.FeedFlickr(cmd.Context(), flickrID)
+				if err != nil {
+					gopts.Logger.Desugar().Error("error in feed.Lookup", zap.Object("error", zapobject.New(err)))
+					return debugPrint(ui, err)
+				}
+			} else {
+				info, err = cfg.Feed(cmd.Context(), urlStr)
+				if err != nil {
+					gopts.Logger.Desugar().Error("error in feed.Lookup", zap.Object("error", zapobject.New(err)))
+					return debugPrint(ui, err)
+				}
 			}
-			return debugPrint(ui, info.Encode(ui.Writer()))
+			if saveFlag {
+				if err := cfg.SaveCache(); err != nil {
+					return debugPrint(ui, err)
+				}
+			}
+			return debugPrint(ui, json.NewEncoder(ui.Writer()).Encode(info))
 		},
 	}
-	return bookmarkLookupCmd
+	return feedLookupCmd
 }
 
 /* Copyright 2023 Spiegel

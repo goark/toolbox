@@ -46,15 +46,15 @@ func newFeedLookupCmd(ui *rwi.RWI) *cobra.Command {
 			}
 
 			// lookup feed
-			var info []*webpage.Info
+			var list []*webpage.Info
 			if len(flickrID) > 0 {
-				info, err = cfg.FeedFlickr(cmd.Context(), flickrID)
+				list, err = cfg.FeedFlickr(cmd.Context(), flickrID)
 				if err != nil {
 					gopts.Logger.Desugar().Error("error in feed.Lookup", zap.Object("error", zapobject.New(err)))
 					return debugPrint(ui, err)
 				}
 			} else {
-				info, err = cfg.Feed(cmd.Context(), urlStr)
+				list, err = cfg.Feed(cmd.Context(), urlStr)
 				if err != nil {
 					gopts.Logger.Desugar().Error("error in feed.Lookup", zap.Object("error", zapobject.New(err)))
 					return debugPrint(ui, err)
@@ -65,7 +65,8 @@ func newFeedLookupCmd(ui *rwi.RWI) *cobra.Command {
 					return debugPrint(ui, err)
 				}
 			}
-			return debugPrint(ui, json.NewEncoder(ui.Writer()).Encode(info))
+			webpage.SortInfo(list)
+			return debugPrint(ui, json.NewEncoder(ui.Writer()).Encode(list))
 		},
 	}
 	return feedLookupCmd

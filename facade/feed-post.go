@@ -86,6 +86,7 @@ func newFeedPostCmd(ui *rwi.RWI) *cobra.Command {
 					return debugPrint(ui, err)
 				}
 			}
+			webpage.SortInfo(list)
 
 			// post feed data
 			var lastErrs []error

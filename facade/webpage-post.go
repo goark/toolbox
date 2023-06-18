@@ -63,6 +63,7 @@ func newBookmarkPostCmd(ui *rwi.RWI) *cobra.Command {
 				gopts.Logger.Desugar().Error("error in bookmark.Lookup", zap.Object("error", zapobject.New(err)))
 				return debugPrint(ui, err)
 			}
+			gopts.Logger.Desugar().Debug("start posting web page info", zap.Any("info", info))
 
 			// get image file
 			var imgs []string
@@ -110,6 +111,7 @@ func newBookmarkPostCmd(ui *rwi.RWI) *cobra.Command {
 			if len(lastErrs) > 0 {
 				return debugPrint(ui, errs.Wrap(errors.Join(lastErrs...)))
 			}
+			gopts.Logger.Desugar().Debug("end posting web page info", zap.Any("info", info))
 			return nil
 		},
 	}

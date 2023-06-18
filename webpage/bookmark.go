@@ -58,6 +58,7 @@ func (wp *Webpage) SaveCache() error {
 	if wp == nil {
 		return errs.Wrap(ecode.ErrNullPointer)
 	}
+	wp.Logger().Info("save cache of web pages")
 	return wp.cacheData.Save()
 }
 

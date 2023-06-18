@@ -7,6 +7,7 @@ import (
 	"github.com/goark/errs"
 	"github.com/goark/toolbox/ecode"
 	"github.com/goark/toolbox/webpage/feed"
+	"go.uber.org/zap"
 )
 
 // Feed fetches feed URL and gets webpage informations.
@@ -39,6 +40,7 @@ func (wp *Webpage) getNewDataList(infos []*Info) []*Info {
 		if i := wp.cacheData.Get(info.URL); i == nil {
 			list = append(list, info)
 			wp.cacheData.Put(info)
+			wp.Logger().Debug("put web page to cache", zap.Any("info", i))
 		}
 	}
 	return list

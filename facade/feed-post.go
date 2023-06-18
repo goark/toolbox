@@ -69,6 +69,7 @@ func newFeedPostCmd(ui *rwi.RWI) *cobra.Command {
 			// post feed data
 			var lastErrs []error
 			for _, info := range list {
+				gopts.Logger.Desugar().Debug("start posting web page info", zap.Any("info", info))
 				// get image file
 				var imgs []string
 				if withImage && len(info.ImageURL) > 0 {
@@ -107,6 +108,7 @@ func newFeedPostCmd(ui *rwi.RWI) *cobra.Command {
 						_ = ui.Outputln("post to Mastodon:", resText)
 					}
 				}
+				gopts.Logger.Desugar().Debug("end posting web page info", zap.Any("info", info))
 			}
 
 			if len(lastErrs) > 0 {

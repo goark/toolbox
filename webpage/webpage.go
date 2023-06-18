@@ -19,7 +19,6 @@ import (
 
 type Info struct {
 	URL         string `json:"url,omitempty"`
-	Location    string `json:"location,omitempty"`
 	Canonical   string `json:"canonical,omitempty"`
 	Title       string `json:"title,omitempty"`
 	Description string `json:"description,omitempty"`
@@ -54,7 +53,7 @@ func ReadPage(ctx context.Context, urlStr string) (*Info, error) {
 	}
 
 	// analysis web content
-	link := &Info{URL: urlStr, Location: resp.Request().URL.String()}
+	link := &Info{URL: urlStr}
 	doc, err := goquery.NewDocumentFromReader(r)
 	if err != nil {
 		return nil, errs.Wrap(err, errs.WithContext("url", u.String()))

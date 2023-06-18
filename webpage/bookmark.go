@@ -5,25 +5,26 @@ import (
 	"strings"
 
 	"github.com/goark/errs"
+	"github.com/goark/toolbox/ecode"
 	"github.com/goark/toolbox/logger"
 	"github.com/ipfs/go-log/v2"
 	"go.uber.org/zap"
 )
 
-// Config is configuration for bookmark
-type Bookmark struct {
+// Webpage is configuration for bookmark
+type Webpage struct {
 	cacheDir  string
 	cacheData *Cache
 	logger    *log.ZapEventLogger
 }
 
 // New functions creates new Config instance.
-func New(cacheDir string, logger *log.ZapEventLogger) (*Bookmark, error) {
+func New(cacheDir string, logger *log.ZapEventLogger) (*Webpage, error) {
 	data, err := NewCache(cacheDir)
 	if err != nil {
 		return nil, errs.Wrap(err, errs.WithContext("cache_dir", cacheDir))
 	}
-	return &Bookmark{
+	return &Webpage{
 		cacheDir:  cacheDir,
 		cacheData: data,
 		logger:    logger,
@@ -46,11 +47,18 @@ func (info *Info) MakeMessage(prefixMsg string) string {
 }
 
 // Logger method returns zap.Logger instance.
-func (wp *Bookmark) Logger() *zap.Logger {
+func (wp *Webpage) Logger() *zap.Logger {
 	if wp == nil || wp.logger == nil {
 		return logger.Nop().Desugar()
 	}
 	return wp.logger.Desugar()
+}
+
+func (wp *Webpage) SaveCache() error {
+	if wp == nil {
+		return errs.Wrap(ecode.ErrNullPointer)
+	}
+	return wp.cacheData.Save()
 }
 
 /* Copyright 2023 Spiegel

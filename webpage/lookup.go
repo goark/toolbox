@@ -7,7 +7,7 @@ import (
 	"github.com/goark/toolbox/ecode"
 )
 
-func (wp *Bookmark) Lookup(ctx context.Context, urlStr string, saveFlag bool) (*Info, error) {
+func (wp *Webpage) Lookup(ctx context.Context, urlStr string, saveFlag bool) (*Info, error) {
 	if wp == nil {
 		return nil, errs.Wrap(ecode.ErrNullPointer)
 	}
@@ -22,7 +22,7 @@ func (wp *Bookmark) Lookup(ctx context.Context, urlStr string, saveFlag bool) (*
 	wp.cacheData.Put(info)
 
 	if saveFlag {
-		if err := wp.cacheData.Save(); err != nil {
+		if err := wp.SaveCache(); err != nil {
 			return nil, errs.Wrap(err, errs.WithContext("url", urlStr), errs.WithContext("save", saveFlag))
 		}
 	}

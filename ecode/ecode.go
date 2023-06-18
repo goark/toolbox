@@ -13,6 +13,7 @@ var (
 	ErrTooLargeImage           = errors.New("too large image (>1MB)")
 	ErrNoAPODImage             = errors.New("no APOD image")
 	ErrExistAPODData           = errors.New("exist APOD data")
+	ErrNoFeed                  = errors.New("no feed")
 )
 
 /* Copyright 2023 Spiegel

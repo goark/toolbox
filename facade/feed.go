@@ -4,38 +4,30 @@ import (
 	"github.com/goark/errs"
 	"github.com/goark/gocli/rwi"
 	"github.com/goark/toolbox/ecode"
-	"github.com/goark/toolbox/webpage"
 	"github.com/spf13/cobra"
 )
 
-// newBookmarkCmd returns cobra.Command instance for show sub-command
-func newWebpageCmd(ui *rwi.RWI) *cobra.Command {
+// newFeedCmd returns cobra.Command instance for show sub-command
+func newFeedCmd(ui *rwi.RWI) *cobra.Command {
 	webpageCmd := &cobra.Command{
-		Use:     "webpage",
-		Aliases: []string{"web", "w", "bookmark", "book", "bm"},
-		Short:   "Handling information for Web pages",
-		Long:    "Handling information for Web pages.",
+		Use:     "feed",
+		Aliases: []string{"rss"},
+		Short:   "Handling information for Web feed",
+		Long:    "Handling information for Web feed.",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return debugPrint(ui, errs.Wrap(ecode.ErrNoCommand))
 		},
 	}
-	webpageCmd.PersistentFlags().StringP("url", "u", "", "Web page URL")
-	_ = webpageCmd.MarkFlagRequired("url")
-	webpageCmd.PersistentFlags().BoolP("save", "", false, "Save APOD data to cache")
+	webpageCmd.PersistentFlags().StringP("url", "u", "", "Feed URL")
+	webpageCmd.PersistentFlags().StringP("flickr-id", "", "", "Flickr ID")
+	webpageCmd.MarkFlagsMutuallyExclusive("url", "flickr-id")
+	webpageCmd.PersistentFlags().BoolP("save", "", false, "Save webpage data to cache")
 
 	webpageCmd.AddCommand(
-		newBookmarkLookupCmd(ui),
-		newBookmarkPostCmd(ui),
+		newFeedLookupCmd(ui),
+		newFeedPostCmd(ui),
 	)
 	return webpageCmd
-}
-
-func (gopts *globalOptions) getBookmark() (*webpage.Webpage, error) {
-	cfg, err := webpage.New(gopts.CacheDir, gopts.Logger)
-	if err != nil {
-		return nil, errs.Wrap(err)
-	}
-	return cfg, nil
 }
 
 /* Copyright 2023 Spiegel

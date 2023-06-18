@@ -85,6 +85,7 @@ func importWebpage(ctx context.Context, item *feed.Item) (*Info, error) {
 		URL:         item.Link,
 		Title:       item.Title,
 		Description: item.Description,
+		Published:   item.Published,
 	}
 	if len(item.Images) > 0 {
 		info.ImageURL = item.Images[0].URL

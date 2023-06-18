@@ -7,7 +7,9 @@ import (
 	"io"
 	"net/url"
 	"os"
+	"sort"
 	"strings"
+	"time"
 
 	"github.com/PuerkitoBio/goquery"
 	"github.com/goark/errs"
@@ -18,11 +20,12 @@ import (
 )
 
 type Info struct {
-	URL         string `json:"url,omitempty"`
-	Canonical   string `json:"canonical,omitempty"`
-	Title       string `json:"title,omitempty"`
-	Description string `json:"description,omitempty"`
-	ImageURL    string `json:"image_url,omitempty"`
+	URL         string     `json:"url,omitempty"`
+	Canonical   string     `json:"canonical,omitempty"`
+	Title       string     `json:"title,omitempty"`
+	Description string     `json:"description,omitempty"`
+	ImageURL    string     `json:"image_url,omitempty"`
+	Published   *time.Time `json:"published,omitempty"`
 }
 
 // ReadPage function reads web page from URL, and analysis information.
@@ -92,6 +95,24 @@ func ReadPage(ctx context.Context, urlStr string) (*Info, error) {
 		})
 	})
 	return link, nil
+}
+
+func SortInfo(info []*Info) {
+	if len(info) < 2 {
+		return
+	}
+	sort.SliceStable(info, func(i, j int) bool {
+		if info[i].Published == nil && info[j].Published == nil {
+			return true
+		}
+		if info[i].Published == nil {
+			return true
+		}
+		if info[j].Published == nil {
+			return false
+		}
+		return info[i].Published.Before(*info[j].Published)
+	})
 }
 
 // Encode putputs to io.Writer by JSON format.

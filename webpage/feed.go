@@ -19,7 +19,7 @@ func (wp *Webpage) Feed(ctx context.Context, urlStr string) ([]*Info, error) {
 	if err != nil {
 		return nil, errs.Wrap(err, errs.WithContext("feed_url", urlStr))
 	}
-	return wp.getNewDataList(resp), nil
+	return wp.getNewDataList(ctx, resp)
 }
 
 // Feed fetches feed URL and gets webpage informations.
@@ -31,22 +31,26 @@ func (wp *Webpage) FeedFlickr(ctx context.Context, flickrId string) ([]*Info, er
 	if err != nil {
 		return nil, errs.Wrap(err, errs.WithContext("flickr_id", flickrId))
 	}
-	return wp.getNewDataList(resp), nil
+	return wp.getNewDataList(ctx, resp)
 }
 
-func (wp *Webpage) getNewDataList(infos []*Info) []*Info {
+func (wp *Webpage) getNewDataList(ctx context.Context, items []*feed.Item) ([]*Info, error) {
 	list := []*Info{}
-	for _, info := range infos {
-		if i := wp.cacheData.Get(info.URL); i == nil {
+	for _, item := range items {
+		if i := wp.cacheData.Get(item.Link); i == nil {
+			info, err := importWebpage(ctx, item)
+			if err != nil {
+				return nil, errs.Wrap(err, errs.WithContext("flickr_id", errs.WithContext("url", item.Link)))
+			}
 			list = append(list, info)
 			wp.cacheData.Put(info)
-			wp.Logger().Debug("put web page to cache", zap.Any("info", i))
+			wp.Logger().Debug("put web page to cache", zap.Any("info", info))
 		}
 	}
-	return list
+	return list, nil
 }
 
-func inmortFeed(ctx context.Context, urlStr string) ([]*Info, error) {
+func inmortFeed(ctx context.Context, urlStr string) ([]*feed.Item, error) {
 	u, err := url.Parse(urlStr)
 	if err != nil {
 		return nil, errs.Wrap(err, errs.WithContext("url", urlStr))
@@ -55,31 +59,21 @@ func inmortFeed(ctx context.Context, urlStr string) ([]*Info, error) {
 	if err != nil {
 		return nil, errs.Wrap(err, errs.WithContext("url", urlStr))
 	}
-	list := []*Info{}
-	for _, item := range data.Items {
-		info, err := importWebpage(ctx, item)
-		if err != nil {
-			return nil, errs.Wrap(err)
-		}
-		list = append(list, info)
+	if data == nil || data.Items == nil {
+		return []*feed.Item{}, nil
 	}
-	return list, nil
+	return data.Items, nil
 }
 
-func inmortFeedFlickr(ctx context.Context, flickrId string) ([]*Info, error) {
+func inmortFeedFlickr(ctx context.Context, flickrId string) ([]*feed.Item, error) {
 	data, err := feed.FeedFlickr(ctx, flickrId)
 	if err != nil {
 		return nil, errs.Wrap(err, errs.WithContext("flickr_id", flickrId))
 	}
-	list := []*Info{}
-	for _, item := range data.Items {
-		info, err := importWebpage(ctx, item)
-		if err != nil {
-			return nil, errs.Wrap(err)
-		}
-		list = append(list, info)
+	if data == nil || data.Items == nil {
+		return []*feed.Item{}, nil
 	}
-	return list, nil
+	return data.Items, nil
 }
 
 func importWebpage(ctx context.Context, item *feed.Item) (*Info, error) {

@@ -4,9 +4,9 @@ go 1.20
 
 require (
 	github.com/PuerkitoBio/goquery v1.8.1
-	github.com/bluesky-social/indigo v0.0.0-20230615184942-2d17f95a5f92
-	github.com/goark/errs v1.2.2
-	github.com/goark/errs/zapobject v0.1.1
+	github.com/bluesky-social/indigo v0.0.0-20230620230951-6330d5bcd267
+	github.com/goark/errs v1.2.3
+	github.com/goark/errs/zapobject v0.1.2
 	github.com/goark/fetch v0.4.1
 	github.com/goark/gocli v0.13.0
 	github.com/hymkor/go-multiline-ny v0.11.1
@@ -76,7 +76,7 @@ require (
 	github.com/subosito/gotenv v1.4.2 // indirect
 	github.com/tomnomnom/linkheader v0.0.0-20180905144013-02ca5825eb80 // indirect
 	github.com/whyrusleeping/cbor-gen v0.0.0-20230331140348-1f892b517e70 // indirect
-	go.uber.org/atomic v1.10.0 // indirect
+	go.uber.org/atomic v1.11.0 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
 	golang.org/x/crypto v0.10.0 // indirect
 	golang.org/x/sys v0.9.0 // indirect

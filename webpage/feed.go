@@ -3,11 +3,16 @@ package webpage
 import (
 	"context"
 	"net/url"
+	"strings"
 
 	"github.com/goark/errs"
 	"github.com/goark/toolbox/ecode"
 	"github.com/goark/toolbox/webpage/feed"
 	"go.uber.org/zap"
+)
+
+const (
+	githubDomainInURL = "//github.com/"
 )
 
 // Feed fetches feed URL and gets webpage informations.
@@ -86,12 +91,17 @@ func importWebpage(ctx context.Context, item *feed.Item) (*Info, error) {
 	if len(item.Images) > 0 {
 		info.ImageURL = item.Images[0].URL
 	}
-	if len(info.ImageURL) == 0 {
+	if len(info.ImageURL) == 0 || strings.Contains(item.Link, githubDomainInURL) {
 		i, err := ReadPage(ctx, info.URL)
 		if err != nil {
 			return nil, errs.Wrap(err, errs.WithContext("url", info.URL))
 		}
-		info.ImageURL = i.ImageURL
+		if strings.Contains(item.Link, githubDomainInURL) {
+			info.Title = i.Title
+		}
+		if len(info.ImageURL) == 0 {
+			info.ImageURL = i.ImageURL
+		}
 	}
 	return info, nil
 }

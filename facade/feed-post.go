@@ -10,7 +10,6 @@ import (
 	"github.com/goark/gocli/rwi"
 	"github.com/goark/toolbox/bluesky"
 	"github.com/goark/toolbox/mastodon"
-	"github.com/goark/toolbox/webpage"
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
 )
@@ -64,7 +63,6 @@ func newFeedPostCmd(ui *rwi.RWI) *cobra.Command {
 					return debugPrint(ui, err)
 				}
 			}
-			webpage.SortInfo(list)
 
 			// post feed data
 			var lastErrs []error

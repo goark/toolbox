@@ -49,12 +49,12 @@ func (fl FeedList) Parse(ctx context.Context, wp *Webpage) error {
 		go func() {
 			defer wg.Done()
 			if err := wp.Feed(ctx, urlStr); err != nil {
-				errList.Add(errs.Wrap(err, errs.WithContext("feed_url", urlStr)))
+				errList.add(errs.Wrap(err, errs.WithContext("feed_url", urlStr)))
 			}
 		}()
 	}
 	wg.Wait()
-	return errList.GetError()
+	return errList.getError()
 }
 
 /* Copyright 2023 Spiegel

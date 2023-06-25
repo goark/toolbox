@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 
 	"github.com/goark/gocli/rwi"
-	"github.com/goark/toolbox/webpage"
 	"github.com/spf13/cobra"
 )
 
@@ -41,7 +40,6 @@ func newFeedLookupCmd(ui *rwi.RWI) *cobra.Command {
 					return debugPrint(ui, err)
 				}
 			}
-			webpage.SortInfo(list)
 			return debugPrint(ui, json.NewEncoder(ui.Writer()).Encode(list))
 		},
 	}

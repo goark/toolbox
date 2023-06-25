@@ -14,7 +14,7 @@ func newErrorList() *errorList {
 	return &errorList{errList: []error{}}
 }
 
-func (el *errorList) Add(err error) {
+func (el *errorList) add(err error) {
 	if el == nil {
 		return
 	}
@@ -23,7 +23,7 @@ func (el *errorList) Add(err error) {
 	el.errList = append(el.errList, err)
 }
 
-func (el *errorList) GetError() error {
+func (el *errorList) getError() error {
 	if el == nil {
 		return nil
 	}

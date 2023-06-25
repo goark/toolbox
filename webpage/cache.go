@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"os"
 	"path/filepath"
+	"sync"
 
 	"github.com/goark/errs"
 	"github.com/goark/toolbox/ecode"
@@ -16,6 +17,7 @@ const (
 
 // Cache is cache data for Web page informations.
 type Cache struct {
+	mu   sync.RWMutex
 	dir  string
 	info map[string]*Info
 }
@@ -48,6 +50,8 @@ func (c *Cache) Save() error {
 	if len(c.info) == 0 {
 		c.Remove()
 	}
+	c.mu.Lock()
+	defer c.mu.Unlock()
 
 	var infos []*Info
 	for _, v := range c.info {
@@ -71,6 +75,8 @@ func (c *Cache) Remove() {
 	if c == nil {
 		return
 	}
+	c.mu.Lock()
+	defer c.mu.Unlock()
 	_ = os.Remove(c.path())
 }
 
@@ -79,6 +85,8 @@ func (c *Cache) Get(s string) *Info {
 	if c == nil {
 		return nil
 	}
+	c.mu.RLock()
+	defer c.mu.RUnlock()
 	return c.info[s]
 }
 
@@ -87,6 +95,8 @@ func (c *Cache) Put(i *Info) {
 	if c == nil {
 		return
 	}
+	c.mu.Lock()
+	defer c.mu.Unlock()
 	if c.info == nil {
 		c.info = map[string]*Info{}
 	}
@@ -111,7 +121,7 @@ func (c *Cache) PutURL(ctx context.Context, urlStr string) (*Info, error) {
 	if err != nil {
 		return nil, errs.Wrap(err, errs.WithContext("url", urlStr))
 	}
-	c.info[info.URL] = info
+	c.Put(info)
 	return info, nil
 }
 

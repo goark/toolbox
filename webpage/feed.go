@@ -3,7 +3,6 @@ package webpage
 import (
 	"context"
 	"net/url"
-	"strings"
 
 	"github.com/goark/errs"
 	"github.com/goark/toolbox/ecode"
@@ -11,48 +10,42 @@ import (
 	"go.uber.org/zap"
 )
 
-const (
-	githubDomainInURL = "//github.com/"
-)
-
 // Feed fetches feed URL and gets webpage informations.
-func (wp *Webpage) Feed(ctx context.Context, urlStr string) ([]*Info, error) {
+func (wp *Webpage) Feed(ctx context.Context, urlStr string) error {
 	if wp == nil {
-		return nil, errs.Wrap(ecode.ErrNullPointer)
+		return errs.Wrap(ecode.ErrNullPointer)
 	}
 	resp, err := inmortFeed(ctx, urlStr)
 	if err != nil {
-		return nil, errs.Wrap(err, errs.WithContext("feed_url", urlStr))
+		return errs.Wrap(err, errs.WithContext("feed_url", urlStr))
 	}
-	return wp.getNewDataList(ctx, resp)
+	wp.getNewDataList(ctx, resp)
+	return nil
 }
 
 // Feed fetches feed URL and gets webpage informations.
-func (wp *Webpage) FeedFlickr(ctx context.Context, flickrId string) ([]*Info, error) {
+func (wp *Webpage) FeedFlickr(ctx context.Context, flickrId string) error {
 	if wp == nil {
-		return nil, errs.Wrap(ecode.ErrNullPointer)
+		return errs.Wrap(ecode.ErrNullPointer)
 	}
 	resp, err := inmortFeedFlickr(ctx, flickrId)
 	if err != nil {
-		return nil, errs.Wrap(err, errs.WithContext("flickr_id", flickrId))
+		return errs.Wrap(err, errs.WithContext("flickr_id", flickrId))
 	}
-	return wp.getNewDataList(ctx, resp)
+	wp.getNewDataList(ctx, resp)
+	return nil
 }
 
-func (wp *Webpage) getNewDataList(ctx context.Context, items []*feed.Item) ([]*Info, error) {
-	list := []*Info{}
+func (wp *Webpage) getNewDataList(ctx context.Context, items []*feed.Item) {
+	if wp.itemPool == nil {
+		wp.CreatePool()
+	}
 	for _, item := range items {
 		if i := wp.cacheData.Get(item.Link); i == nil {
-			info, err := importWebpage(ctx, item)
-			if err != nil {
-				return nil, errs.Wrap(err, errs.WithContext("flickr_id", errs.WithContext("url", item.Link)))
-			}
-			list = append(list, info)
-			wp.cacheData.Put(info)
-			wp.Logger().Debug("put web page to cache", zap.Any("info", info))
+			wp.itemPool.put(ctx, item)
+			wp.Logger().Debug("new item", zap.Any("item", item))
 		}
 	}
-	return list, nil
 }
 
 func inmortFeed(ctx context.Context, urlStr string) ([]*feed.Item, error) {
@@ -79,31 +72,6 @@ func inmortFeedFlickr(ctx context.Context, flickrId string) ([]*feed.Item, error
 		return []*feed.Item{}, nil
 	}
 	return data.Items, nil
-}
-
-func importWebpage(ctx context.Context, item *feed.Item) (*Info, error) {
-	info := &Info{
-		URL:         item.Link,
-		Title:       item.Title,
-		Description: item.Description,
-		Published:   item.Published,
-	}
-	if len(item.Images) > 0 {
-		info.ImageURL = item.Images[0].URL
-	}
-	if len(info.ImageURL) == 0 || strings.Contains(item.Link, githubDomainInURL) {
-		i, err := ReadPage(ctx, info.URL)
-		if err != nil {
-			return nil, errs.Wrap(err, errs.WithContext("url", info.URL))
-		}
-		if strings.Contains(item.Link, githubDomainInURL) {
-			info.Title = i.Title
-		}
-		if len(info.ImageURL) == 0 {
-			info.ImageURL = i.ImageURL
-		}
-	}
-	return info, nil
 }
 
 /* Copyright 2023 Spiegel

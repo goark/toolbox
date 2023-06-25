@@ -44,19 +44,13 @@ func getFeedAll(cmd *cobra.Command, cfg *webpage.Webpage) ([]*webpage.Info, erro
 	if err != nil {
 		return nil, errs.Wrap(err)
 	}
-
-	l1 := []*webpage.Info{}
-	l2 := []*webpage.Info{}
-	l3 := []*webpage.Info{}
 	if len(urlStr) > 0 {
-		l1, err = cfg.Feed(cmd.Context(), urlStr)
-		if err != nil {
+		if err := cfg.Feed(cmd.Context(), urlStr); err != nil {
 			return nil, errs.Wrap(err, errs.WithContext("url", urlStr))
 		}
 	}
 	if len(flickrID) > 0 {
-		l2, err = cfg.FeedFlickr(cmd.Context(), flickrID)
-		if err != nil {
+		if err := cfg.FeedFlickr(cmd.Context(), flickrID); err != nil {
 			return nil, errs.Wrap(err, errs.WithContext("flickr_id", flickrID))
 		}
 	}
@@ -65,12 +59,17 @@ func getFeedAll(cmd *cobra.Command, cfg *webpage.Webpage) ([]*webpage.Info, erro
 		if err != nil {
 			return nil, errs.Wrap(err, errs.WithContext("feed_list_file", feedListPath))
 		}
-		l3, err = fl.Parse(cmd.Context(), cfg)
-		if err != nil {
+		if err := fl.Parse(cmd.Context(), cfg); err != nil {
 			return nil, errs.Wrap(err, errs.WithContext("feed_list_file", feedListPath))
 		}
 	}
-	return webpage.MergeInfo(l1, l2, l3), nil
+	cfg.StopPool()
+	if err := cfg.GetErrorInPool(); err != nil {
+		return nil, errs.Wrap(err, errs.WithContext("feed_list_file", feedListPath))
+	}
+	list := cfg.GetInfoInPool()
+	webpage.SortInfo(list)
+	return list, nil
 }
 
 /* Copyright 2023 Spiegel

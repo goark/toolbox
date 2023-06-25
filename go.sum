@@ -75,10 +75,10 @@ github.com/go-gl/glfw v0.0.0-20190409004039-e6da0acd62b1/go.mod h1:vR7hzQXu2zJy9
 github.com/go-gl/glfw/v3.3/glfw v0.0.0-20191125211704-12ad95a8df72/go.mod h1:tQ2UAYgL5IevRw8kRxooKSPJfGvJ9fJQFa0TUsXzTg8=
 github.com/go-gl/glfw/v3.3/glfw v0.0.0-20200222043503-6f7a984d4dc4/go.mod h1:tQ2UAYgL5IevRw8kRxooKSPJfGvJ9fJQFa0TUsXzTg8=
 github.com/go-yaml/yaml v2.1.0+incompatible/go.mod h1:w2MrLa16VYP0jy6N7M5kHaCkaLENm+P+Tv+MfurjSw0=
-github.com/goark/errs v1.2.3 h1:ATChtJki69yLftoXzvp1PnrSXXFJcLW3mDRExdu+Gu4=
-github.com/goark/errs v1.2.3/go.mod h1:ZsQucxaDFVfSB8I99j4bxkDRfNOrlKINwg72QMuRWKw=
-github.com/goark/errs/zapobject v0.1.2 h1:jCTSfAK58reHPSe8lTXjfalG5ybuXoRHxXdb22cDFcY=
-github.com/goark/errs/zapobject v0.1.2/go.mod h1:8zZlr4j0NWdtF3rO503P7pfTUlOB++3KGfLAY0NOTbE=
+github.com/goark/errs v1.3.0 h1:faiMaXCIgCt98Vmn9PGyFp7XL+zHqEK0WfBGRT1/Yz4=
+github.com/goark/errs v1.3.0/go.mod h1:ZsQucxaDFVfSB8I99j4bxkDRfNOrlKINwg72QMuRWKw=
+github.com/goark/errs/zapobject v0.1.3 h1:vNSRpyF55usuHRky4D/M341dsTiwHDPyI7LsaUHv3Zs=
+github.com/goark/errs/zapobject v0.1.3/go.mod h1:KtH1Jqm7945xT+lY2QIMpf/A3gqS3xLZsiaByEzLtpw=
 github.com/goark/fetch v0.4.1 h1:Y59g9sAdgqjPS7UADdLIoQGRxJE1WMo5ixlJi/ZcCfc=
 github.com/goark/fetch v0.4.1/go.mod h1:umZxLIJHa15J8EQSp5zft1dHDv0VGwmQL6pOfaJ60FY=
 github.com/goark/gocli v0.13.0 h1:hR/5E4JGMEcbQxkSqR7K/0XnYY2Hd6GDpuazXGC3jn4=

@@ -64,23 +64,31 @@ func (wp *Webpage) GetInfoInPool() []*Info {
 	return list
 }
 
-// Logger method returns zap.Logger instance.
-func (wp *Webpage) Logger() *zap.Logger {
-	if wp == nil || wp.logger == nil {
-		return logger.Nop().Desugar()
+func (wp *Webpage) SaveFeedToCache() []*Info {
+	if wp == nil {
+		return nil
 	}
-	return wp.logger.Desugar()
+	wp.Logger().Info("save feed data to cache")
+	list := wp.GetInfoInPool()
+	SortInfo(list)
+	wp.cacheData.Puts(list...)
+	return list
 }
 
 func (wp *Webpage) SaveCache() error {
 	if wp == nil {
 		return errs.Wrap(ecode.ErrNullPointer)
 	}
-	wp.Logger().Info("save cache of web pages")
-	list := wp.GetInfoInPool()
-	wp.Logger().Info("save data", zap.Any("list", list))
-	wp.cacheData.Puts(list...)
+	wp.Logger().Info("save webpage cache to file")
 	return wp.cacheData.Save()
+}
+
+// Logger method returns zap.Logger instance.
+func (wp *Webpage) Logger() *zap.Logger {
+	if wp == nil || wp.logger == nil {
+		return logger.Nop().Desugar()
+	}
+	return wp.logger.Desugar()
 }
 
 /* Copyright 2023 Spiegel

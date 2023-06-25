@@ -67,9 +67,7 @@ func getFeedAll(cmd *cobra.Command, cfg *webpage.Webpage) ([]*webpage.Info, erro
 	if err := cfg.GetErrorInPool(); err != nil {
 		return nil, errs.Wrap(err, errs.WithContext("feed_list_file", feedListPath))
 	}
-	list := cfg.GetInfoInPool()
-	webpage.SortInfo(list)
-	return list, nil
+	return cfg.SaveFeedToCache(), nil
 }
 
 /* Copyright 2023 Spiegel

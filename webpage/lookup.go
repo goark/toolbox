@@ -22,7 +22,6 @@ func (wp *Webpage) Lookup(ctx context.Context, urlStr string, saveFlag bool) (*I
 	wp.cacheData.Put(info)
 
 	if saveFlag {
-		wp.Logger().Info("save cache of web pages")
 		if err := wp.SaveCache(); err != nil {
 			return nil, errs.Wrap(err, errs.WithContext("url", urlStr), errs.WithContext("save", saveFlag))
 		}

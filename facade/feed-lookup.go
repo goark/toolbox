@@ -35,7 +35,7 @@ func newFeedLookupCmd(ui *rwi.RWI) *cobra.Command {
 			if err != nil {
 				return debugPrint(ui, err)
 			}
-			if saveFlag {
+			if saveFlag && len(list) > 0 {
 				if err := cfg.SaveCache(); err != nil {
 					return debugPrint(ui, err)
 				}

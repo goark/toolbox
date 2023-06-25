@@ -52,7 +52,7 @@ func (wp *Webpage) GetErrorInPool() error {
 	if wp == nil {
 		return nil
 	}
-	return wp.itemPool.errList.getError()
+	return wp.itemPool.errList.ErrorOrNil()
 }
 
 func (wp *Webpage) GetInfoInPool() []*Info {

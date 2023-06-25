@@ -68,11 +68,11 @@ type itemPool struct {
 	ch      chan *feed.Item
 	wg      sync.WaitGroup
 	pool    *infoPool
-	errList errorList
+	errList *errs.Errors
 }
 
 func newItemPool() *itemPool {
-	pool := &itemPool{ch: make(chan *feed.Item), pool: newPool(), errList: *newErrorList()}
+	pool := &itemPool{ch: make(chan *feed.Item), pool: newPool(), errList: &errs.Errors{}}
 	pool.pool.start()
 	return pool
 }
@@ -86,7 +86,7 @@ func (ip *itemPool) put(ctx context.Context, item *feed.Item) {
 		defer ip.wg.Done()
 		info, err := convWebpageInfo(ctx, item)
 		if err != nil {
-			ip.errList.add(err)
+			ip.errList.Add(err)
 			return
 		}
 		ip.pool.put(info)

@@ -10,12 +10,14 @@ import (
 )
 
 type infoPool struct {
+	mu   sync.RWMutex
 	ch   chan *Info
+	done chan struct{}
 	pool []*Info
 }
 
 func newPool() *infoPool {
-	return &infoPool{ch: make(chan *Info), pool: []*Info{}}
+	return &infoPool{ch: make(chan *Info), done: make(chan struct{}), pool: []*Info{}}
 }
 
 func (p *infoPool) put(i *Info) {
@@ -35,9 +37,31 @@ func (p *infoPool) start() {
 			if !ok {
 				break
 			}
-			p.pool = append(p.pool, i)
+			func() {
+				p.mu.Lock()
+				defer p.mu.Unlock()
+				p.pool = append(p.pool, i)
+			}()
 		}
+		p.done <- struct{}{}
 	}()
+}
+
+func (p *infoPool) getList() []*Info {
+	if p == nil {
+		return []*Info{}
+	}
+	p.mu.RLock()
+	defer p.mu.RUnlock()
+	return p.pool
+}
+
+func (p *infoPool) stop() {
+	if p == nil {
+		return
+	}
+	close(p.ch)
+	<-p.done
 }
 
 type itemPool struct {
@@ -62,7 +86,7 @@ func (ip *itemPool) put(ctx context.Context, item *feed.Item) {
 		defer ip.wg.Done()
 		info, err := convWebpageInfo(ctx, item)
 		if err != nil {
-			ip.errList.Add(err)
+			ip.errList.add(err)
 			return
 		}
 		ip.pool.put(info)
@@ -74,6 +98,14 @@ func (ip *itemPool) done() {
 		return
 	}
 	ip.wg.Wait()
+	ip.pool.stop()
+}
+
+func (ip *itemPool) getInfo() []*Info {
+	if ip == nil {
+		return []*Info{}
+	}
+	return ip.pool.getList()
 }
 
 const (

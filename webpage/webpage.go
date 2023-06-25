@@ -52,14 +52,16 @@ func (wp *Webpage) GetErrorInPool() error {
 	if wp == nil {
 		return nil
 	}
-	return wp.itemPool.errList.GetError()
+	return wp.itemPool.errList.getError()
 }
 
 func (wp *Webpage) GetInfoInPool() []*Info {
 	if wp == nil {
 		return []*Info{}
 	}
-	return wp.itemPool.pool.pool
+	list := wp.itemPool.getInfo()
+	wp.Logger().Debug("GetInfoInPool", zap.Any("info", list))
+	return list
 }
 
 // Logger method returns zap.Logger instance.
@@ -75,6 +77,9 @@ func (wp *Webpage) SaveCache() error {
 		return errs.Wrap(ecode.ErrNullPointer)
 	}
 	wp.Logger().Info("save cache of web pages")
+	list := wp.GetInfoInPool()
+	wp.Logger().Info("save data", zap.Any("list", list))
+	wp.cacheData.Puts(list...)
 	return wp.cacheData.Save()
 }
 

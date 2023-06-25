@@ -42,19 +42,19 @@ func (fl FeedList) Parse(ctx context.Context, wp *Webpage) error {
 		return errs.Wrap(ecode.ErrNullPointer)
 	}
 	var wg sync.WaitGroup
-	errList := newErrorList()
+	errList := &errs.Errors{}
 	for _, urlStr := range fl {
 		urlStr := urlStr
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
 			if err := wp.Feed(ctx, urlStr); err != nil {
-				errList.add(errs.Wrap(err, errs.WithContext("feed_url", urlStr)))
+				errList.Add(errs.Wrap(err, errs.WithContext("feed_url", urlStr)))
 			}
 		}()
 	}
 	wg.Wait()
-	return errList.getError()
+	return errList.ErrorOrNil()
 }
 
 /* Copyright 2023 Spiegel

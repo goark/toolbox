@@ -5,6 +5,7 @@ import (
 	"context"
 	"os"
 	"strings"
+	"sync"
 
 	"github.com/goark/errs"
 	"github.com/goark/toolbox/ecode"
@@ -36,19 +37,24 @@ func NewFeedList(path string) (FeedList, error) {
 }
 
 // Parse method parses feeds.
-func (fl FeedList) Parse(ctx context.Context, wp *Webpage) ([]*Info, error) {
+func (fl FeedList) Parse(ctx context.Context, wp *Webpage) error {
 	if wp == nil {
-		return nil, errs.Wrap(ecode.ErrNullPointer)
+		return errs.Wrap(ecode.ErrNullPointer)
 	}
-	list := []*Info{}
+	var wg sync.WaitGroup
+	errList := newErrorList()
 	for _, urlStr := range fl {
-		l, err := wp.Feed(ctx, urlStr)
-		if err != nil {
-			return nil, errs.Wrap(err, errs.WithContext("feed_url", urlStr))
-		}
-		list = MergeInfo(list, l)
+		urlStr := urlStr
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			if err := wp.Feed(ctx, urlStr); err != nil {
+				errList.Add(errs.Wrap(err, errs.WithContext("feed_url", urlStr)))
+			}
+		}()
 	}
-	return list, nil
+	wg.Wait()
+	return errList.GetError()
 }
 
 /* Copyright 2023 Spiegel

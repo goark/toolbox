@@ -9,70 +9,14 @@ import (
 	"github.com/goark/toolbox/webpage/feed"
 )
 
-type infoPool struct {
-	mu   sync.RWMutex
-	ch   chan *Info
-	done chan struct{}
-	pool []*Info
-}
-
-func newPool() *infoPool {
-	return &infoPool{ch: make(chan *Info), done: make(chan struct{}), pool: []*Info{}}
-}
-
-func (p *infoPool) put(i *Info) {
-	if p == nil {
-		return
-	}
-	p.ch <- i
-}
-
-func (p *infoPool) start() {
-	if p == nil {
-		return
-	}
-	go func() {
-		for {
-			i, ok := <-p.ch
-			if !ok {
-				break
-			}
-			func() {
-				p.mu.Lock()
-				defer p.mu.Unlock()
-				p.pool = append(p.pool, i)
-			}()
-		}
-		p.done <- struct{}{}
-	}()
-}
-
-func (p *infoPool) getList() []*Info {
-	if p == nil {
-		return []*Info{}
-	}
-	p.mu.RLock()
-	defer p.mu.RUnlock()
-	return p.pool
-}
-
-func (p *infoPool) stop() {
-	if p == nil {
-		return
-	}
-	close(p.ch)
-	<-p.done
-}
-
 type itemPool struct {
-	ch      chan *feed.Item
 	wg      sync.WaitGroup
 	pool    *infoPool
 	errList *errs.Errors
 }
 
 func newItemPool() *itemPool {
-	pool := &itemPool{ch: make(chan *feed.Item), pool: newPool(), errList: &errs.Errors{}}
+	pool := &itemPool{pool: newPool(), errList: &errs.Errors{}}
 	pool.pool.start()
 	return pool
 }

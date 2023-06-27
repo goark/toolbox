@@ -117,32 +117,6 @@ func SortInfo(info []*Info) {
 	})
 }
 
-// // MergeInfo merges Info lists.
-// func MergeInfo(lists ...[]*Info) []*Info {
-// 	if len(lists) == 0 {
-// 		return []*Info{}
-// 	}
-// 	infoMap := map[string]*Info{}
-// 	for _, list := range lists {
-// 		if len(list) > 0 {
-// 			for _, info := range list {
-// 				if info != nil {
-// 					infoMap[info.URL] = info
-// 				}
-// 			}
-// 		}
-// 	}
-// 	if len(infoMap) == 0 {
-// 		return []*Info{}
-// 	}
-// 	list := make([]*Info, 0, len(infoMap))
-// 	for _, v := range infoMap {
-// 		list = append(list, v)
-// 	}
-// 	SortInfo(list)
-// 	return list
-// }
-
 // Encode putputs to io.Writer by JSON format.
 func (i *Info) Encode(w io.Writer) error {
 	if err := json.NewEncoder(w).Encode(i); err != nil {

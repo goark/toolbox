@@ -46,8 +46,8 @@ github.com/atotto/clipboard v0.1.4 h1:EH0zSVneZPSuFR11BlR9YppQTVDbh5+16AmcJi4g1z
 github.com/atotto/clipboard v0.1.4/go.mod h1:ZY9tmq7sm5xIbd9bOK4onWV4S6X0u6GY7Vn0Yu86PYI=
 github.com/benbjohnson/clock v1.1.0 h1:Q92kusRqC1XV2MjkWETPvjJVqKetz1OzxZB7mHJLju8=
 github.com/benbjohnson/clock v1.1.0/go.mod h1:J11/hYXuz8f4ySSvYwY0FKfm+ezbsZBKZxNJlLklBHA=
-github.com/bluesky-social/indigo v0.0.0-20230620230951-6330d5bcd267 h1:6dUhMx9TYZ15/9v7db0S6pLX8SjI+eI0JmSzNrLB4uk=
-github.com/bluesky-social/indigo v0.0.0-20230620230951-6330d5bcd267/go.mod h1:oDI5NiD0XzShv5VITWyUJNP3pSh4prTDEzhKbkdKORA=
+github.com/bluesky-social/indigo v0.0.0-20230629183626-1495fe3cf3ab h1:V3VkwUXFNhgYvbc9gj5w1ZhM5qFiTxqjT4NbaeIjBsw=
+github.com/bluesky-social/indigo v0.0.0-20230629183626-1495fe3cf3ab/go.mod h1:oDI5NiD0XzShv5VITWyUJNP3pSh4prTDEzhKbkdKORA=
 github.com/census-instrumentation/opencensus-proto v0.2.1/go.mod h1:f6KPmirojxKA12rnyqOA5BBL4O983OfeGPqjHWSTneU=
 github.com/chzyer/logex v1.1.10/go.mod h1:+Ywpsq7O8HXn0nuIou7OrIPyXbp3wmkHB+jjWRnGsAI=
 github.com/chzyer/readline v0.0.0-20180603132655-2972be24d48e/go.mod h1:nSuG5e5PlCu98SY8svDHJxuZscDgtXS6KTTbou5AhLI=

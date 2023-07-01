@@ -17,4 +17,5 @@
 # Other folders and files
 dist/
 .task/
+work/
 *.bak

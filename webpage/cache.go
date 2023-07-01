@@ -81,13 +81,13 @@ func (c *Cache) Remove() {
 }
 
 // Get method gets Web page data from cache.
-func (c *Cache) Get(s string) *Info {
+func (c *Cache) Get(urlStr string) *Info {
 	if c == nil {
 		return nil
 	}
 	c.mu.RLock()
 	defer c.mu.RUnlock()
-	return c.info[s]
+	return c.info[urlStr]
 }
 
 // Put method puts Web page data to cache.
@@ -116,6 +116,9 @@ func (c *Cache) Puts(is ...*Info) {
 func (c *Cache) PutURL(ctx context.Context, urlStr string) (*Info, error) {
 	if c == nil {
 		return nil, errs.Wrap(ecode.ErrNullPointer)
+	}
+	if info := c.Get(urlStr); info != nil {
+		return info, nil
 	}
 	info, err := ReadPage(ctx, urlStr)
 	if err != nil {

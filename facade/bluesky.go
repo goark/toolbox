@@ -30,7 +30,13 @@ func newBlueskyCmd(ui *rwi.RWI) *cobra.Command {
 }
 
 func (gopts *globalOptions) getBluesky() (*bluesky.Bluesky, error) {
-	bcfg, err := bluesky.New(gopts.bskyConfigPath, gopts.CacheDir, gopts.Logger)
+	wp, err := gopts.getWebpage()
+	if err != nil {
+		err = errs.Wrap(err)
+		gopts.Logger.Desugar().Error("cannot get configuration for Bluesky", zap.Object("error", zapobject.New(err)))
+		return nil, err
+	}
+	bcfg, err := bluesky.New(gopts.bskyConfigPath, gopts.CacheDir, wp, gopts.Logger)
 	if err != nil {
 		err = errs.Wrap(err)
 		gopts.Logger.Desugar().Error("cannot get configuration for Bluesky", zap.Object("error", zapobject.New(err)))

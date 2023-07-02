@@ -1,7 +1,10 @@
 package webpage
 
 import (
+	"context"
+
 	"github.com/goark/errs"
+	"github.com/goark/toolbox/ecode"
 	"github.com/goark/toolbox/logger"
 	"github.com/ipfs/go-log/v2"
 	"go.uber.org/zap"
@@ -34,6 +37,14 @@ func (wp *Webpage) Logger() *zap.Logger {
 		return logger.Nop().Desugar()
 	}
 	return wp.logger.Desugar()
+}
+
+// PutURLToCache method puts Info of web page, and returns Info.
+func (wp *Webpage) PutURLToCache(ctx context.Context, urlStr string) (*Info, error) {
+	if wp == nil {
+		return nil, errs.Wrap(ecode.ErrNullPointer)
+	}
+	return wp.cacheData.PutURL(ctx, urlStr)
 }
 
 /* Copyright 2023 Spiegel

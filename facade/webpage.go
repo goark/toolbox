@@ -30,7 +30,7 @@ func newWebpageCmd(ui *rwi.RWI) *cobra.Command {
 	return webpageCmd
 }
 
-func (gopts *globalOptions) getBookmark() (*webpage.Webpage, error) {
+func (gopts *globalOptions) getWebpage() (*webpage.Webpage, error) {
 	cfg, err := webpage.New(gopts.CacheDir, gopts.Logger)
 	if err != nil {
 		return nil, errs.Wrap(err)

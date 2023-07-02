@@ -27,7 +27,7 @@ func newFeedPostCmd(ui *rwi.RWI) *cobra.Command {
 			if err != nil {
 				return debugPrint(ui, err)
 			}
-			cfg, err := gopts.getBookmark()
+			cfg, err := gopts.getWebpage()
 			if err != nil {
 				return debugPrint(ui, err)
 			}

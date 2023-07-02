@@ -20,6 +20,7 @@ import (
 	"golang.org/x/net/html/charset"
 )
 
+// Info is information of web page
 type Info struct {
 	URL         string     `json:"url,omitempty"`
 	Canonical   string     `json:"canonical,omitempty"`

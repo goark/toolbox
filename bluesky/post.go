@@ -80,7 +80,7 @@ func (cfg *Bluesky) PostMessage(ctx context.Context, msg *Message) (string, erro
 		}
 		if post.Embed.EmbedExternal == nil {
 			// get information of web page
-			if link, err := cfg.webCache.PutURL(ctx, e.text); err != nil {
+			if link, err := cfg.wp.PutURLToCache(ctx, e.text); err != nil {
 				cfg.Logger().Info("cannot read web page", zap.Object("error", zapobject.New(errs.Wrap(err))), zap.String("web_page", e.text))
 			} else {
 				post.Embed.EmbedExternal = &bsky.EmbedExternal{

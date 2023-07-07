@@ -74,7 +74,7 @@ func (cfg *APOD) LookupWithoutCache(ctx context.Context, date values.Date, utcFl
 			cfg.Logger().Debug("find data in cache", zap.Bool("force", forceFlag), zap.Any("data", res))
 			return res, nil
 		} else {
-			return nil, errs.Wrap(ecode.ErrExistAPODData, errs.WithContext("force", forceFlag))
+			return nil, errs.Wrap(ecode.ErrExistAPODData, errs.WithContext("force", forceFlag), errs.WithContext("date", date.String()))
 		}
 	}
 
@@ -86,11 +86,11 @@ func (cfg *APOD) LookupWithoutCache(ctx context.Context, date values.Date, utcFl
 		nasaapod.WithThumbs(true),
 	).Get(ctx)
 	if err != nil {
-		return nil, errs.Wrap(err, errs.WithContext("date", date.String()))
+		return nil, errs.Wrap(err, errs.WithContext("force", forceFlag), errs.WithContext("date", date.String()))
 	}
 	cfg.Logger().Debug("complete reading APOD data", zap.String("date", date.String()), zap.Any("response", res))
 	if len(res) == 0 {
-		return nil, errs.Wrap(ecode.ErrNoContent, errs.WithContext("date", date.String()))
+		return nil, errs.Wrap(ecode.ErrNoContent, errs.WithContext("force", forceFlag), errs.WithContext("date", date.String()))
 	}
 
 	// save APOD data
@@ -98,7 +98,7 @@ func (cfg *APOD) LookupWithoutCache(ctx context.Context, date values.Date, utcFl
 	dt.Date = values.Today(utcFlag)
 	cfg.Logger().Debug("save cache data", zap.Any("data", dt))
 	if err := cfg.exportCacheData(dt); err != nil {
-		return nil, errs.Wrap(ecode.ErrNoContent, errs.WithContext("date", date.String()))
+		return nil, errs.Wrap(ecode.ErrNoContent, errs.WithContext("force", forceFlag), errs.WithContext("date", date.String()))
 	}
 	return res[0], nil
 }

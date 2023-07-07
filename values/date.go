@@ -20,7 +20,11 @@ func NewDate(tm time.Time) Date {
 
 // Today returns Date instance in today.
 func Today(utcFlag bool) Date {
-	return NewDate(time.Now())
+	dt := time.Now()
+	if utcFlag {
+		dt = dt.UTC()
+	}
+	return NewDate(dt)
 }
 
 // Stringer with YYYY-MM-DD format.
@@ -49,15 +53,18 @@ func DateFrom(s string, utcFlag bool) (Date, error) {
 	if len(s) == 0 || strings.EqualFold(s, "null") {
 		return NewDate(time.Time{}), nil
 	}
-	var lastErr error
+	errlist := &errs.Errors{}
 	for _, tmplt := range timeTemplate {
 		if tm, err := time.Parse(tmplt, s); err != nil {
-			lastErr = errs.Wrap(err, errs.WithContext("time_string", s), errs.WithContext("time_template", tmplt))
+			errlist.Add(errs.Wrap(err, errs.WithContext("time_string", s), errs.WithContext("time_template", tmplt)))
 		} else {
+			if utcFlag {
+				tm = tm.UTC()
+			}
 			return NewDate(tm), nil
 		}
 	}
-	return NewDate(time.Time{}), lastErr
+	return NewDate(time.Time{}), errlist.ErrorOrNil()
 }
 
 // UnmarshalJSON implements the json.UnmarshalJSON interface.

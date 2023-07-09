@@ -58,28 +58,29 @@ func newBookmarkPostCmd(ui *rwi.RWI) *cobra.Command {
 			}
 
 			// lookup Web page data
-			info, err := cfg.Lookup(cmd.Context(), urlStr)
+			page, err := cfg.Lookup(cmd.Context(), urlStr)
 			if err != nil {
 				gopts.Logger.Desugar().Error("error in bookmark.Lookup", zap.Object("error", zapobject.New(err)))
 				return debugPrint(ui, err)
 			}
 
 			// get image file
-			gopts.Logger.Desugar().Debug("start posting web page info", zap.Any("info", info))
+			gopts.Logger.Desugar().Debug("start posting web page info", zap.Any("info", page))
 			var imgs []string
-			if withImage && len(info.ImageURL) > 0 {
-				fname, err := info.ImageFile(cmd.Context(), gopts.CacheDir)
+			if withImage && len(page.ImageURL) > 0 {
+				fname, err := page.ImageFile(cmd.Context(), gopts.CacheDir)
 				if err != nil {
 					return debugPrint(ui, err)
 				}
 				if len(fname) > 0 {
+					gopts.Logger.Desugar().Debug("downloaded image file", zap.String("url", page.ImageURL), zap.String("local", fname))
 					defer os.Remove(fname)
 					imgs = []string{fname}
 				}
 			}
 
 			// make message
-			msg := info.MakeMessage(strings.TrimSpace(pmsg))
+			msg := page.MakeMessage(strings.TrimSpace(pmsg))
 
 			var lastErrs []error
 
@@ -111,7 +112,7 @@ func newBookmarkPostCmd(ui *rwi.RWI) *cobra.Command {
 			if len(lastErrs) > 0 {
 				return debugPrint(ui, errs.Wrap(errors.Join(lastErrs...)))
 			}
-			gopts.Logger.Desugar().Debug("end posting web page info", zap.Any("info", info))
+			gopts.Logger.Desugar().Debug("end posting web page info", zap.Any("page", page))
 
 			if saveFlag {
 				list, err := cfg.StopPool()

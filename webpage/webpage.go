@@ -99,8 +99,8 @@ func ReadPage(ctx context.Context, urlStr string) (*Webpage, error) {
 	return link, nil
 }
 
-// SortInfo function sorts Info list.
-func SortInfo(webpages []*Webpage) {
+// SortPages function sorts Info list.
+func SortPages(webpages []*Webpage) {
 	if len(webpages) < 2 {
 		return
 	}

@@ -1,6 +1,8 @@
 package facade
 
 import (
+	"context"
+
 	"github.com/goark/errs"
 	"github.com/goark/errs/zapobject"
 	"github.com/goark/gocli/rwi"
@@ -32,8 +34,8 @@ func newAPODCmd(ui *rwi.RWI) *cobra.Command {
 	return apodCmd
 }
 
-func (gopts *globalOptions) getAPOD() (*apod.APOD, error) {
-	acfg, err := apod.New(gopts.apodConfigPath, gopts.CacheDir, gopts.Logger)
+func (gopts *globalOptions) getAPOD(ctx context.Context) (*apod.APOD, error) {
+	acfg, err := apod.New(ctx, gopts.apodConfigPath, gopts.CacheDir, gopts.Logger)
 	if err != nil {
 		err = errs.Wrap(err)
 		gopts.Logger.Desugar().Error("cannot get configuration for Mastodon", zap.Object("error", zapobject.New(err)))

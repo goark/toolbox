@@ -20,7 +20,7 @@ func newBookmarkLookupCmd(ui *rwi.RWI) *cobra.Command {
 			if err != nil {
 				return debugPrint(ui, err)
 			}
-			cfg, err := gopts.getWebpage()
+			cfg, err := gopts.getWebpage(cmd.Context())
 			if err != nil {
 				return debugPrint(ui, err)
 			}
@@ -35,12 +35,22 @@ func newBookmarkLookupCmd(ui *rwi.RWI) *cobra.Command {
 			}
 
 			// lookup Web page data
-			info, err := cfg.Lookup(cmd.Context(), urlStr, saveFlag)
+			page, err := cfg.Lookup(cmd.Context(), urlStr)
 			if err != nil {
-				gopts.Logger.Desugar().Error("error in bookmark.Lookup", zap.Object("error", zapobject.New(err)))
+				gopts.Logger.Desugar().Error("error in webpage.Lookup", zap.Object("error", zapobject.New(err)))
 				return debugPrint(ui, err)
 			}
-			return debugPrint(ui, info.Encode(ui.Writer()))
+			if saveFlag {
+				list, err := cfg.StopPool()
+				if err != nil {
+					return debugPrint(ui, err)
+				}
+				if err := cfg.Save(cmd.Context(), list); err != nil {
+					gopts.Logger.Desugar().Error("error in webpage.Lookup", zap.Object("error", zapobject.New(err)))
+					return debugPrint(ui, err)
+				}
+			}
+			return debugPrint(ui, page.Encode(ui.Writer()))
 		},
 	}
 	return bookmarkLookupCmd

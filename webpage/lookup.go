@@ -5,28 +5,39 @@ import (
 
 	"github.com/goark/errs"
 	"github.com/goark/toolbox/ecode"
+	"go.uber.org/zap"
 )
 
-func (wp *Webpage) Lookup(ctx context.Context, urlStr string, saveFlag bool) (*Info, error) {
-	if wp == nil {
-		return nil, errs.Wrap(ecode.ErrNullPointer)
-	}
-	if info := wp.cacheData.Get(urlStr); info != nil {
-		return info, nil
-	}
-
-	info, err := ReadPage(ctx, urlStr)
+func (cfg *Config) Lookup(ctx context.Context, urlStr string) (*Webpage, error) {
+	page, exist, err := cfg.GetWebpage(ctx, urlStr)
 	if err != nil {
 		return nil, errs.Wrap(err, errs.WithContext("url", urlStr))
 	}
-	wp.cacheData.Put(info)
-
-	if saveFlag {
-		if err := wp.SaveCache(); err != nil {
-			return nil, errs.Wrap(err, errs.WithContext("url", urlStr), errs.WithContext("save", saveFlag))
-		}
+	if !exist {
+		cfg.Logger().Debug("put webpage data to pool", zap.Any("webpage", page))
+		cfg.itemPool.putPage(page)
 	}
-	return info, nil
+	return page, nil
+}
+
+func (cfg *Config) GetWebpage(ctx context.Context, urlStr string) (*Webpage, bool, error) {
+	if cfg == nil {
+		return nil, false, errs.Wrap(ecode.ErrNullPointer)
+	}
+	// find data from cache or database
+	if page, err := cfg.find(ctx, urlStr); err != nil {
+		return nil, false, errs.Wrap(err, errs.WithContext("url", urlStr))
+	} else if page != nil {
+		cfg.Logger().Debug("get webpage data from database", zap.Any("webpage", page))
+		return page, true, nil
+	}
+	// fetch webpage.
+	page, err := ReadPage(ctx, urlStr)
+	if err != nil {
+		return nil, false, errs.Wrap(err, errs.WithContext("url", urlStr))
+	}
+	cfg.Logger().Debug("fetch webpage data", zap.Any("webpage", page))
+	return page, false, nil
 }
 
 /* Copyright 2023 Spiegel

@@ -1,14 +1,20 @@
-package apod
+package model
 
-import "github.com/ipfs/go-log/v2"
+import (
+	"context"
 
-// Register function makes configuration for APOD operations
-func Register(apiKey, cacheDir string, logger *log.ZapEventLogger) *APOD {
-	cfg := fallthroughCfg(cacheDir, nil, logger)
-	if len(apiKey) > 0 {
-		cfg.APIKey = apiKey
+	"github.com/goark/errs"
+	"gorm.io/gorm"
+)
+
+func Migration(ctx context.Context, db *gorm.DB) error {
+	if err := db.WithContext(ctx).AutoMigrate(
+		&ApodData{},
+		&Webpage{},
+	); err != nil {
+		return errs.Wrap(err)
 	}
-	return cfg
+	return nil
 }
 
 /* Copyright 2023 Spiegel

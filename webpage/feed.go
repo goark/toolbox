@@ -11,39 +11,39 @@ import (
 )
 
 // Feed fetches feed URL and gets webpage informations.
-func (wp *Webpage) Feed(ctx context.Context, urlStr string) error {
-	if wp == nil {
+func (cfg *Config) Feed(ctx context.Context, urlStr string) error {
+	if cfg == nil {
 		return errs.Wrap(ecode.ErrNullPointer)
 	}
 	resp, err := inmortFeed(ctx, urlStr)
 	if err != nil {
 		return errs.Wrap(err, errs.WithContext("feed_url", urlStr))
 	}
-	wp.getNewDataList(ctx, resp)
+	cfg.getNewDataList(ctx, resp)
 	return nil
 }
 
 // Feed fetches feed URL and gets webpage informations.
-func (wp *Webpage) FeedFlickr(ctx context.Context, flickrId string) error {
-	if wp == nil {
+func (cfg *Config) FeedFlickr(ctx context.Context, flickrId string) error {
+	if cfg == nil {
 		return errs.Wrap(ecode.ErrNullPointer)
 	}
 	resp, err := inmortFeedFlickr(ctx, flickrId)
 	if err != nil {
 		return errs.Wrap(err, errs.WithContext("flickr_id", flickrId))
 	}
-	wp.getNewDataList(ctx, resp)
+	cfg.getNewDataList(ctx, resp)
 	return nil
 }
 
-func (wp *Webpage) getNewDataList(ctx context.Context, items []*feed.Item) {
-	if wp.itemPool == nil {
-		wp.CreatePool()
+func (cfg *Config) getNewDataList(ctx context.Context, items []*feed.Item) {
+	if cfg.itemPool == nil {
+		cfg.CreatePool()
 	}
 	for _, item := range items {
-		if i := wp.cacheData.Get(item.Link); i == nil {
-			wp.itemPool.put(ctx, item)
-			wp.Logger().Debug("new item", zap.Any("item", item))
+		if page, err := cfg.find(ctx, item.Link); err != nil || page == nil {
+			cfg.itemPool.putFeedItem(ctx, item)
+			cfg.Logger().Debug("new item", zap.Any("item", item))
 		}
 	}
 }

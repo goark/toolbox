@@ -1,23 +1,25 @@
 package webpage
 
-import "sync"
+import (
+	"sync"
+)
 
 type infoPool struct {
 	mu   sync.RWMutex
-	ch   chan *Info
+	ch   chan *Webpage
 	done chan struct{}
-	pool []*Info
+	pool []*Webpage
 }
 
 func newPool() *infoPool {
-	return &infoPool{ch: make(chan *Info), done: make(chan struct{}, 1), pool: []*Info{}}
+	return &infoPool{ch: make(chan *Webpage), done: make(chan struct{}, 1), pool: []*Webpage{}}
 }
 
-func (p *infoPool) put(i *Info) {
+func (p *infoPool) put(page *Webpage) {
 	if p == nil {
 		return
 	}
-	p.ch <- i
+	p.ch <- page
 }
 
 func (p *infoPool) start() {
@@ -26,27 +28,27 @@ func (p *infoPool) start() {
 	}
 	go func() {
 		for {
-			i, ok := <-p.ch
+			page, ok := <-p.ch
 			if !ok {
 				break
 			}
 			func() {
 				p.mu.Lock()
 				defer p.mu.Unlock()
-				p.pool = append(p.pool, i)
+				p.pool = append(p.pool, page)
 			}()
 		}
 		p.done <- struct{}{}
 	}()
 }
 
-func (p *infoPool) getList() []*Info {
+func (p *infoPool) getList() []*Webpage {
 	if p == nil {
-		return []*Info{}
+		return []*Webpage{}
 	}
 	p.mu.RLock()
 	defer p.mu.RUnlock()
-	cpy := make([]*Info, len(p.pool), cap(p.pool))
+	cpy := make([]*Webpage, len(p.pool), cap(p.pool))
 	copy(cpy, p.pool)
 	return cpy
 }
@@ -55,6 +57,7 @@ func (p *infoPool) stop() {
 	if p == nil {
 		return
 	}
+	// time.Sleep(1 * time.Second)
 	close(p.ch)
 	<-p.done
 }

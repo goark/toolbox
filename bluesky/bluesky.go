@@ -23,13 +23,13 @@ type Bluesky struct {
 	Handle   string `json:"handle"`
 	Password string `json:"password"`
 	baseDir  string
-	wp       *webpage.Webpage
+	wcfg     *webpage.Config
 	logger   *log.ZapEventLogger
 	client   *xrpc.Client
 }
 
 // New creates new Bluesky instance.
-func New(path, dir string, wp *webpage.Webpage, logger *log.ZapEventLogger) (*Bluesky, error) {
+func New(path, dir string, wcfg *webpage.Config, logger *log.ZapEventLogger) (*Bluesky, error) {
 	file, err := os.Open(path)
 	if err != nil {
 		return nil, errs.Wrap(err, errs.WithContext("path", path), errs.WithContext("die", dir))
@@ -47,7 +47,7 @@ func New(path, dir string, wp *webpage.Webpage, logger *log.ZapEventLogger) (*Bl
 		return nil, errs.Wrap(ecode.ErrNoBlueskyHandle, errs.WithContext("path", path), errs.WithContext("die", dir))
 	}
 	cfg.baseDir = dir
-	cfg.wp = wp
+	cfg.wcfg = wcfg
 	cfg.logger = logger
 	return &cfg, nil
 }

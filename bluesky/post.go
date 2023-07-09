@@ -80,24 +80,24 @@ func (cfg *Bluesky) PostMessage(ctx context.Context, msg *Message) (string, erro
 		}
 		if post.Embed.EmbedExternal == nil {
 			// get information of web page
-			if link, err := cfg.wp.PutURLToCache(ctx, e.text); err != nil {
+			if page, _, err := cfg.wcfg.GetWebpage(ctx, e.text); err != nil {
 				cfg.Logger().Info("cannot read web page", zap.Object("error", zapobject.New(errs.Wrap(err))), zap.String("web_page", e.text))
 			} else {
 				post.Embed.EmbedExternal = &bsky.EmbedExternal{
 					External: &bsky.EmbedExternal_External{
-						Description: link.Description,
-						Title:       link.Title,
-						Uri:         link.URL,
+						Description: page.Description,
+						Title:       page.Title,
+						Uri:         page.URL,
 					},
 				}
-				cfg.Logger().Debug("web page info", zap.String("title", link.Title), zap.String("description", link.Description), zap.String("url", link.URL))
+				cfg.Logger().Debug("web page info", zap.String("title", page.Title), zap.String("description", page.Description), zap.String("url", page.URL))
 				// get attention image
-				if len(link.ImageURL) > 0 {
-					if res, err := cfg.getEmbedImage(ctx, link.ImageURL); err != nil {
-						cfg.Logger().Info("cannot get embeded image", zap.Object("error", zapobject.New(errs.Wrap(err))), zap.String("image_url", link.ImageURL))
+				if len(page.ImageURL) > 0 {
+					if res, err := cfg.getEmbedImage(ctx, page.ImageURL); err != nil {
+						cfg.Logger().Info("cannot get embeded image", zap.Object("error", zapobject.New(errs.Wrap(err))), zap.String("image_url", page.ImageURL))
 					} else {
 						post.Embed.EmbedExternal.External.Thumb = res.Blob
-						cfg.Logger().Info("embeded image", zap.String("content_type", res.Blob.MimeType), zap.Int64("size", res.Blob.Size), zap.String("url", link.ImageURL))
+						cfg.Logger().Info("embeded image", zap.String("content_type", res.Blob.MimeType), zap.Int64("size", res.Blob.Size), zap.String("url", page.ImageURL))
 					}
 				}
 			}

@@ -1,13 +1,16 @@
 package apod
 
 import (
+	"context"
 	"encoding/json"
 	"os"
 
 	"github.com/goark/errs"
+	"github.com/goark/toolbox/db"
 	"github.com/goark/toolbox/ecode"
 	"github.com/goark/toolbox/logger"
 	"github.com/goark/toolbox/nasaapi"
+	"github.com/goark/toolbox/nasaapi/nasaapod"
 	"github.com/ipfs/go-log/v2"
 	"go.uber.org/zap"
 )
@@ -17,34 +20,48 @@ type APOD struct {
 	APIKey   string `json:"api_key"`
 	cacheDir string
 	logger   *log.ZapEventLogger
+	repos    *db.Repository
+	cache    map[string]*nasaapod.Response
+	saveData []*nasaapod.Response
 }
 
 // New functions creates new APOD instance from file.
-func New(path, cacheDir string, logger *log.ZapEventLogger) (*APOD, error) {
-	if len(path) == 0 {
-		return fallthroughCfg(cacheDir, logger), nil
+func New(ctx context.Context, path, cacheDir string, logger *log.ZapEventLogger) (*APOD, error) {
+	// open database
+	repos, err := db.Open(ctx, cacheDir, logger)
+	if err != nil {
+		return nil, errs.Wrap(err, errs.WithContext("cache_dir", cacheDir))
 	}
 
+	// read configuration file
+	if len(path) == 0 {
+		return fallthroughCfg(cacheDir, repos, logger), nil
+	}
 	file, err := os.Open(path)
 	if err != nil {
-		return fallthroughCfg(cacheDir, logger), nil
+		return fallthroughCfg(cacheDir, repos, logger), nil
 	}
 	defer file.Close()
-
 	var cfg APOD
 	if err := json.NewDecoder(file).Decode(&cfg); err != nil {
 		return nil, errs.Wrap(err, errs.WithContext("path", path))
 	}
 	cfg.logger = logger
 	cfg.cacheDir = cacheDir
+	cfg.repos = repos
+	cfg.cache = map[string]*nasaapod.Response{}
+	cfg.saveData = []*nasaapod.Response{}
 
 	return &cfg, nil
 }
 
-func fallthroughCfg(cacheDir string, logger *log.ZapEventLogger) *APOD {
+func fallthroughCfg(cacheDir string, repos *db.Repository, logger *log.ZapEventLogger) *APOD {
 	return &APOD{
-		APIKey: nasaapi.DefaultAPIKey,
-		logger: logger,
+		APIKey:   nasaapi.DefaultAPIKey,
+		logger:   logger,
+		repos:    repos,
+		cache:    map[string]*nasaapod.Response{},
+		saveData: []*nasaapod.Response{},
 	}
 }
 

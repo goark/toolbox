@@ -21,7 +21,7 @@ func newAPODLookupCmd(ui *rwi.RWI) *cobra.Command {
 			if err != nil {
 				return debugPrint(ui, err)
 			}
-			apd, err := gopts.getAPOD()
+			apd, err := gopts.getAPOD(cmd.Context())
 			if err != nil {
 				return debugPrint(ui, err)
 			}

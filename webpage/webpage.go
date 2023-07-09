@@ -146,7 +146,7 @@ func (wp *Webpage) ImageFile(ctx context.Context, dir string) (string, error) {
 	defer img.Close()
 
 	// copy to temporary file
-	file, err := os.CreateTemp(dir, "webpage.*.bin")
+	file, err := os.CreateTemp(dir, "webpage.*.jpg")
 	if err != nil {
 		return "", errs.Wrap(err)
 	}

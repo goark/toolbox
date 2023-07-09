@@ -68,22 +68,23 @@ func newFeedPostCmd(ui *rwi.RWI) *cobra.Command {
 			var lastErrs []error
 			var bsky *bluesky.Bluesky
 			var mstdn *mastodon.Mastodon
-			for _, info := range list {
-				gopts.Logger.Desugar().Debug("start posting web page info", zap.Any("info", info))
+			for _, page := range list {
+				gopts.Logger.Desugar().Debug("start posting web page info", zap.Any("info", page))
 				// get image file
 				var imgs []string
-				if withImage && len(info.ImageURL) > 0 {
-					fname, err := info.ImageFile(cmd.Context(), gopts.CacheDir)
+				if withImage && len(page.ImageURL) > 0 {
+					fname, err := page.ImageFile(cmd.Context(), gopts.CacheDir)
 					if err != nil {
 						return debugPrint(ui, err)
 					}
 					if len(fname) > 0 {
+						gopts.Logger.Desugar().Debug("downloaded image file", zap.String("url", page.ImageURL), zap.String("local", fname))
 						defer os.Remove(fname)
 						imgs = []string{fname}
 					}
 				}
 				// make message
-				msg := info.MakeMessage(strings.TrimSpace(pmsg))
+				msg := page.MakeMessage(strings.TrimSpace(pmsg))
 				// post to Bluesky
 				if bskyFlag {
 					if bsky == nil {
@@ -116,7 +117,7 @@ func newFeedPostCmd(ui *rwi.RWI) *cobra.Command {
 						_ = ui.Outputln("post to Mastodon:", resText)
 					}
 				}
-				gopts.Logger.Desugar().Debug("end posting web page info", zap.Any("info", info))
+				gopts.Logger.Desugar().Debug("end posting web page info", zap.Any("info", page))
 			}
 
 			if len(lastErrs) > 0 {

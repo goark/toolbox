@@ -41,7 +41,10 @@ func (cfg *Config) GetPagesFromPool() []*Webpage {
 		return []*Webpage{}
 	}
 	list := cfg.itemPool.getPages()
-	cfg.Logger().Debug("GetPagesFromPool", zap.Any("@ages", list))
+	if len(list) > 1 {
+		SortPages(list)
+	}
+	cfg.Logger().Debug("GetPagesFromPool", zap.Any("pages", list))
 	return list
 }
 

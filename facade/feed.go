@@ -31,7 +31,7 @@ func newFeedCmd(ui *rwi.RWI) *cobra.Command {
 	return webpageCmd
 }
 
-func getFeedAll(cmd *cobra.Command, cfg *webpage.Webpage) ([]*webpage.Info, error) {
+func getFeedAll(cmd *cobra.Command, cfg *webpage.Config) ([]*webpage.Webpage, error) {
 	urlStr, err := cmd.Flags().GetString("url")
 	if err != nil {
 		return nil, errs.Wrap(err)
@@ -63,11 +63,7 @@ func getFeedAll(cmd *cobra.Command, cfg *webpage.Webpage) ([]*webpage.Info, erro
 			return nil, errs.Wrap(err, errs.WithContext("feed_list_file", feedListPath))
 		}
 	}
-	cfg.StopPool()
-	if err := cfg.GetErrorInPool(); err != nil {
-		return nil, errs.Wrap(err, errs.WithContext("feed_list_file", feedListPath))
-	}
-	return cfg.SaveInfoToCache(), nil
+	return cfg.StopPool()
 }
 
 /* Copyright 2023 Spiegel

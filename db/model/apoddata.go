@@ -1,14 +1,18 @@
-package apod
+package model
 
-import "github.com/ipfs/go-log/v2"
+import "gorm.io/gorm"
 
-// Register function makes configuration for APOD operations
-func Register(apiKey, cacheDir string, logger *log.ZapEventLogger) *APOD {
-	cfg := fallthroughCfg(cacheDir, nil, logger)
-	if len(apiKey) > 0 {
-		cfg.APIKey = apiKey
-	}
-	return cfg
+type ApodData struct {
+	gorm.Model
+	Date           string `gorm:"unique"`
+	Copyright      string
+	Explanation    string
+	HdUrl          string
+	MediaType      string
+	ServiceVersion string
+	Title          string
+	Url            string
+	ThumbnailUrl   string
 }
 
 /* Copyright 2023 Spiegel

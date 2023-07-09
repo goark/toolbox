@@ -6,6 +6,7 @@ import (
 	"github.com/goark/gocli/rwi"
 	"github.com/goark/toolbox/bluesky"
 	"github.com/goark/toolbox/ecode"
+	"github.com/goark/toolbox/webpage"
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
 )
@@ -29,14 +30,8 @@ func newBlueskyCmd(ui *rwi.RWI) *cobra.Command {
 	return blueskyCmd
 }
 
-func (gopts *globalOptions) getBluesky() (*bluesky.Bluesky, error) {
-	wp, err := gopts.getWebpage()
-	if err != nil {
-		err = errs.Wrap(err)
-		gopts.Logger.Desugar().Error("cannot get configuration for Bluesky", zap.Object("error", zapobject.New(err)))
-		return nil, err
-	}
-	bcfg, err := bluesky.New(gopts.bskyConfigPath, gopts.CacheDir, wp, gopts.Logger)
+func (gopts *globalOptions) getBluesky(wcfg *webpage.Config) (*bluesky.Bluesky, error) {
+	bcfg, err := bluesky.New(gopts.bskyConfigPath, gopts.CacheDir, wcfg, gopts.Logger)
 	if err != nil {
 		err = errs.Wrap(err)
 		gopts.Logger.Desugar().Error("cannot get configuration for Bluesky", zap.Object("error", zapobject.New(err)))

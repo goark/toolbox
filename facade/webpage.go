@@ -1,6 +1,8 @@
 package facade
 
 import (
+	"context"
+
 	"github.com/goark/errs"
 	"github.com/goark/gocli/rwi"
 	"github.com/goark/toolbox/ecode"
@@ -30,8 +32,8 @@ func newWebpageCmd(ui *rwi.RWI) *cobra.Command {
 	return webpageCmd
 }
 
-func (gopts *globalOptions) getWebpage() (*webpage.Webpage, error) {
-	cfg, err := webpage.New(gopts.CacheDir, gopts.Logger)
+func (gopts *globalOptions) getWebpage(ctx context.Context) (*webpage.Config, error) {
+	cfg, err := webpage.New(ctx, gopts.CacheDir, gopts.Logger)
 	if err != nil {
 		return nil, errs.Wrap(err)
 	}

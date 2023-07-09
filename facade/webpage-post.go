@@ -27,7 +27,7 @@ func newBookmarkPostCmd(ui *rwi.RWI) *cobra.Command {
 			if err != nil {
 				return debugPrint(ui, err)
 			}
-			cfg, err := gopts.getWebpage()
+			cfg, err := gopts.getWebpage(cmd.Context())
 			if err != nil {
 				return debugPrint(ui, err)
 			}
@@ -58,14 +58,14 @@ func newBookmarkPostCmd(ui *rwi.RWI) *cobra.Command {
 			}
 
 			// lookup Web page data
-			info, err := cfg.Lookup(cmd.Context(), urlStr, saveFlag)
+			info, err := cfg.Lookup(cmd.Context(), urlStr)
 			if err != nil {
 				gopts.Logger.Desugar().Error("error in bookmark.Lookup", zap.Object("error", zapobject.New(err)))
 				return debugPrint(ui, err)
 			}
-			gopts.Logger.Desugar().Debug("start posting web page info", zap.Any("info", info))
 
 			// get image file
+			gopts.Logger.Desugar().Debug("start posting web page info", zap.Any("info", info))
 			var imgs []string
 			if withImage && len(info.ImageURL) > 0 {
 				fname, err := info.ImageFile(cmd.Context(), gopts.CacheDir)
@@ -85,7 +85,7 @@ func newBookmarkPostCmd(ui *rwi.RWI) *cobra.Command {
 
 			// post to Bluesky
 			if bskyFlag {
-				if bsky, err := gopts.getBluesky(); err != nil {
+				if bsky, err := gopts.getBluesky(cfg); err != nil {
 					cfg.Logger().Info("no Bluesky configuration", zap.Object("error", zapobject.New(err)))
 					lastErrs = append(lastErrs, err)
 				} else if resText, err := bsky.PostMessage(cmd.Context(), &bluesky.Message{Msg: msg, ImageFiles: imgs}); err != nil {
@@ -112,6 +112,17 @@ func newBookmarkPostCmd(ui *rwi.RWI) *cobra.Command {
 				return debugPrint(ui, errs.Wrap(errors.Join(lastErrs...)))
 			}
 			gopts.Logger.Desugar().Debug("end posting web page info", zap.Any("info", info))
+
+			if saveFlag {
+				list, err := cfg.StopPool()
+				if err != nil {
+					return debugPrint(ui, err)
+				}
+				if err := cfg.Save(cmd.Context(), list); err != nil {
+					gopts.Logger.Desugar().Error("error in webpage.Lookup", zap.Object("error", zapobject.New(err)))
+					return debugPrint(ui, err)
+				}
+			}
 			return nil
 		},
 	}

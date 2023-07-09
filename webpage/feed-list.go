@@ -37,8 +37,8 @@ func NewFeedList(path string) (FeedList, error) {
 }
 
 // Parse method parses feeds.
-func (fl FeedList) Parse(ctx context.Context, wp *Webpage) error {
-	if wp == nil {
+func (fl FeedList) Parse(ctx context.Context, cfg *Config) error {
+	if cfg == nil {
 		return errs.Wrap(ecode.ErrNullPointer)
 	}
 	var wg sync.WaitGroup
@@ -48,7 +48,7 @@ func (fl FeedList) Parse(ctx context.Context, wp *Webpage) error {
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
-			if err := wp.Feed(ctx, urlStr); err != nil {
+			if err := cfg.Feed(ctx, urlStr); err != nil {
 				errList.Add(errs.Wrap(err, errs.WithContext("feed_url", urlStr)))
 			}
 		}()

@@ -21,20 +21,27 @@ func newItemPool() *itemPool {
 	return pool
 }
 
-func (ip *itemPool) put(ctx context.Context, item *feed.Item) {
+func (ip *itemPool) putFeedItem(ctx context.Context, item *feed.Item) {
 	if ip == nil {
 		return
 	}
 	ip.wg.Add(1)
 	go func() {
 		defer ip.wg.Done()
-		info, err := convWebpageInfo(ctx, item)
+		page, err := convWebpageFromFeedItem(ctx, item)
 		if err != nil {
 			ip.errList.Add(err)
 			return
 		}
-		ip.pool.put(info)
+		ip.putPage(page)
 	}()
+}
+
+func (ip *itemPool) putPage(page *Webpage) {
+	if ip == nil {
+		return
+	}
+	ip.pool.put(page)
 }
 
 func (ip *itemPool) done() {
@@ -45,9 +52,9 @@ func (ip *itemPool) done() {
 	ip.pool.stop()
 }
 
-func (ip *itemPool) getInfo() []*Info {
+func (ip *itemPool) getPages() []*Webpage {
 	if ip == nil {
-		return []*Info{}
+		return []*Webpage{}
 	}
 	return ip.pool.getList()
 }
@@ -56,29 +63,29 @@ const (
 	githubDomainInURL = "//github.com/"
 )
 
-func convWebpageInfo(ctx context.Context, item *feed.Item) (*Info, error) {
-	info := &Info{
+func convWebpageFromFeedItem(ctx context.Context, item *feed.Item) (*Webpage, error) {
+	page := &Webpage{
 		URL:         item.Link,
 		Title:       item.Title,
 		Description: item.Description,
 		Published:   item.Published,
 	}
 	if len(item.Images) > 0 {
-		info.ImageURL = item.Images[0].URL
+		page.ImageURL = item.Images[0].URL
 	}
-	if len(info.ImageURL) == 0 || strings.Contains(item.Link, githubDomainInURL) {
-		i, err := ReadPage(ctx, info.URL)
+	if len(page.ImageURL) == 0 || strings.Contains(item.Link, githubDomainInURL) {
+		i, err := ReadPage(ctx, page.URL)
 		if err != nil {
-			return nil, errs.Wrap(err, errs.WithContext("url", info.URL))
+			return nil, errs.Wrap(err, errs.WithContext("url", page.URL))
 		}
 		if strings.Contains(item.Link, githubDomainInURL) {
-			info.Title = i.Title
+			page.Title = i.Title
 		}
-		if len(info.ImageURL) == 0 {
-			info.ImageURL = i.ImageURL
+		if len(page.ImageURL) == 0 {
+			page.ImageURL = i.ImageURL
 		}
 	}
-	return info, nil
+	return page, nil
 }
 
 /* Copyright 2023 Spiegel

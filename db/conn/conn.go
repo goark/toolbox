@@ -1,14 +1,25 @@
-package apod
+package conn
 
-import "github.com/ipfs/go-log/v2"
+import (
+	"github.com/glebarez/sqlite"
+	"github.com/goark/errs"
+	"github.com/ipfs/go-log/v2"
+	"gorm.io/gorm"
+	gormlogger "gorm.io/gorm/logger"
+)
 
-// Register function makes configuration for APOD operations
-func Register(apiKey, cacheDir string, logger *log.ZapEventLogger) *APOD {
-	cfg := fallthroughCfg(cacheDir, nil, logger)
-	if len(apiKey) > 0 {
-		cfg.APIKey = apiKey
+func Open(path string, zlogger *log.ZapEventLogger) (*gorm.DB, error) {
+	// logger
+	gcfg := &gorm.Config{}
+	if lggr, lvl := getLogger(zlogger); lvl != gormlogger.Silent {
+		gcfg.Logger = lggr
 	}
-	return cfg
+	// open SQLite database
+	db, err := gorm.Open(sqlite.Open(path), gcfg)
+	if err != nil {
+		return nil, errs.Wrap(err, errs.WithContext("dbfile", path))
+	}
+	return db, nil
 }
 
 /* Copyright 2023 Spiegel

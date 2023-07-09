@@ -23,7 +23,11 @@ func newBlueskyProfileCmd(ui *rwi.RWI) *cobra.Command {
 			if err != nil {
 				return debugPrint(ui, err)
 			}
-			bsky, err := gopts.getBluesky()
+			wp, err := gopts.getWebpage(cmd.Context())
+			if err != nil {
+				return debugPrint(ui, err)
+			}
+			bsky, err := gopts.getBluesky(wp)
 			if err != nil {
 				return debugPrint(ui, err)
 			}

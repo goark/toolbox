@@ -20,7 +20,7 @@ func newFeedLookupCmd(ui *rwi.RWI) *cobra.Command {
 			if err != nil {
 				return debugPrint(ui, err)
 			}
-			cfg, err := gopts.getWebpage()
+			cfg, err := gopts.getWebpage(cmd.Context())
 			if err != nil {
 				return debugPrint(ui, err)
 			}
@@ -36,7 +36,7 @@ func newFeedLookupCmd(ui *rwi.RWI) *cobra.Command {
 				return debugPrint(ui, err)
 			}
 			if saveFlag && len(list) > 0 {
-				if err := cfg.SaveCache(); err != nil {
+				if err := cfg.Save(cmd.Context(), list); err != nil {
 					return debugPrint(ui, err)
 				}
 			}

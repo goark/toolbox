@@ -20,12 +20,12 @@ func (cfg *APOD) Lookup(ctx context.Context, date values.Date, utcFlag, saveFlag
 	if date.IsZero() {
 		date = values.Today(utcFlag)
 	}
-	dt, err := cfg.importCacheData()
-	if err != nil {
-		return nil, errs.Wrap(err)
-	}
-	if res := dt.find(date); res != nil {
-		cfg.Logger().Debug("find data in cache", zap.Any("data", res))
+
+	// find data from database
+	if res, err := cfg.find(ctx, date); err != nil {
+		return nil, errs.Wrap(err, errs.WithContext("date", date.String()))
+	} else if res != nil {
+		cfg.Logger().Debug("find APOD data from database", zap.String("date", date.String()), zap.Any("data", res))
 		return res, nil
 	}
 
@@ -43,16 +43,14 @@ func (cfg *APOD) Lookup(ctx context.Context, date values.Date, utcFlag, saveFlag
 	if len(res) == 0 {
 		return nil, errs.Wrap(ecode.ErrNoContent, errs.WithContext("date", date.String()))
 	}
+	cfg.Logger().Debug("find APOD data from NASA API", zap.String("date", date.String()), zap.Any("response", res))
+	cfg.put(res[0])
 
 	// save APOD data
 	if saveFlag {
-		dt.Caches = append(dt.Caches, res[0])
-		dt.Date = values.Today(utcFlag)
-		cfg.Logger().Debug("save cache data", zap.Any("data", dt))
-		if err := cfg.exportCacheData(dt); err != nil {
-			return nil, errs.Wrap(ecode.ErrNoContent, errs.WithContext("date", date.String()), errs.WithContext("save", saveFlag))
+		if err := cfg.saveDB(ctx); err != nil {
+			return nil, errs.Wrap(err, errs.WithContext("date", date.String()), errs.WithContext("save", saveFlag))
 		}
-
 	}
 	return res[0], nil
 }
@@ -65,17 +63,16 @@ func (cfg *APOD) LookupWithoutCache(ctx context.Context, date values.Date, utcFl
 	if date.IsZero() {
 		date = values.Today(utcFlag)
 	}
-	dt, err := cfg.importCacheData()
-	if err != nil {
-		return nil, errs.Wrap(err)
-	}
-	if res := dt.find(date); res != nil {
+
+	// find data from database
+	if res, err := cfg.find(ctx, date); err != nil {
+		return nil, errs.Wrap(err, errs.WithContext("date", date.String()))
+	} else if res != nil {
 		if forceFlag {
-			cfg.Logger().Debug("find data in cache", zap.Bool("force", forceFlag), zap.Any("data", res))
+			cfg.Logger().Debug("find APOD data from database", zap.String("date", date.String()), zap.Bool("force", forceFlag), zap.Any("data", res))
 			return res, nil
-		} else {
-			return nil, errs.Wrap(ecode.ErrExistAPODData, errs.WithContext("force", forceFlag), errs.WithContext("date", date.String()))
 		}
+		return nil, errs.Wrap(ecode.ErrExistAPODData, errs.WithContext("force", forceFlag), errs.WithContext("date", date.String()))
 	}
 
 	// get APOD data by NASA API
@@ -92,13 +89,12 @@ func (cfg *APOD) LookupWithoutCache(ctx context.Context, date values.Date, utcFl
 	if len(res) == 0 {
 		return nil, errs.Wrap(ecode.ErrNoContent, errs.WithContext("force", forceFlag), errs.WithContext("date", date.String()))
 	}
+	cfg.Logger().Debug("find APOD data from NASA API", zap.String("date", date.String()), zap.Any("response", res))
+	cfg.put(res[0])
 
 	// save APOD data
-	dt.Caches = append(dt.Caches, res[0])
-	dt.Date = values.Today(utcFlag)
-	cfg.Logger().Debug("save cache data", zap.Any("data", dt))
-	if err := cfg.exportCacheData(dt); err != nil {
-		return nil, errs.Wrap(ecode.ErrNoContent, errs.WithContext("force", forceFlag), errs.WithContext("date", date.String()))
+	if err := cfg.saveDB(ctx); err != nil {
+		return nil, errs.Wrap(err, errs.WithContext("force", forceFlag), errs.WithContext("date", date.String()))
 	}
 	return res[0], nil
 }

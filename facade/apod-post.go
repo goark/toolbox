@@ -29,7 +29,7 @@ func newAPODPostCmd(ui *rwi.RWI) *cobra.Command {
 			if err != nil {
 				return debugPrint(ui, err)
 			}
-			apd, err := gopts.getAPOD()
+			apd, err := gopts.getAPOD(cmd.Context())
 			if err != nil {
 				return debugPrint(ui, err)
 			}
@@ -84,7 +84,11 @@ func newAPODPostCmd(ui *rwi.RWI) *cobra.Command {
 
 			// post to Bluesky
 			if bskyFlag {
-				if bsky, err := gopts.getBluesky(); err != nil {
+				wp, err := gopts.getWebpage(cmd.Context())
+				if err != nil {
+					return debugPrint(ui, err)
+				}
+				if bsky, err := gopts.getBluesky(wp); err != nil {
 					apd.Logger().Info("no Bluesky configuration", zap.Object("error", zapobject.New(err)))
 					lastErrs = append(lastErrs, err)
 				} else if resText, err := bsky.PostMessage(cmd.Context(), &bluesky.Message{Msg: msg, ImageFiles: imgs}); err != nil {

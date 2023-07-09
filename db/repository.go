@@ -36,7 +36,7 @@ func Open(ctx context.Context, dir string, zlogger *log.ZapEventLogger) (*Reposi
 	path, existFlag := existFile(dir)
 	zlogger.Desugar().Debug("database file", zap.String("path", path), zap.Bool("file exist", existFlag))
 	// open SQLite database
-	db, err := conn.Open(path, zlogger)
+	db, err := conn.GetDB(path, zlogger)
 	if err != nil {
 		return nil, errs.Wrap(err, errs.WithContext("dbfile", path))
 	}

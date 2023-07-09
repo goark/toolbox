@@ -1,6 +1,8 @@
 package conn
 
 import (
+	"sync"
+
 	"github.com/glebarez/sqlite"
 	"github.com/goark/errs"
 	"github.com/ipfs/go-log/v2"
@@ -8,7 +10,25 @@ import (
 	gormlogger "gorm.io/gorm/logger"
 )
 
-func Open(path string, zlogger *log.ZapEventLogger) (*gorm.DB, error) {
+var (
+	connDB  *gorm.DB
+	errorDB error
+	onceDB  sync.Once
+)
+
+func GetDB(path string, zlogger *log.ZapEventLogger) (*gorm.DB, error) {
+	onceDB.Do(func() {
+		conn, err := openDB(path, zlogger)
+		if err != nil {
+			errorDB = errs.Wrap(err, errs.WithContext("dbfile", path))
+		} else {
+			connDB = conn
+		}
+	})
+	return connDB, errorDB
+}
+
+func openDB(path string, zlogger *log.ZapEventLogger) (*gorm.DB, error) {
 	// logger
 	gcfg := &gorm.Config{}
 	if lggr, lvl := getLogger(zlogger); lvl != gormlogger.Silent {

@@ -4,8 +4,8 @@ go 1.20
 
 require (
 	github.com/PuerkitoBio/goquery v1.8.1
-	github.com/bluesky-social/indigo v0.0.0-20230706164817-fdb5f9774705
-	github.com/glebarez/sqlite v1.8.0
+	github.com/bluesky-social/indigo v0.0.0-20230714174244-57d75d8cfc65
+	github.com/glebarez/sqlite v1.9.0
 	github.com/goark/errs v1.3.2
 	github.com/goark/errs/zapobject v0.1.3
 	github.com/goark/fetch v0.4.1
@@ -22,7 +22,7 @@ require (
 	go.uber.org/zap v1.24.0
 	golang.org/x/image v0.9.0
 	golang.org/x/net v0.12.0
-	gorm.io/gorm v1.25.1
+	gorm.io/gorm v1.25.2
 	moul.io/zapgorm2 v1.3.0
 )
 
@@ -31,7 +31,7 @@ require (
 	github.com/atotto/clipboard v0.1.4 // indirect
 	github.com/dustin/go-humanize v1.0.1 // indirect
 	github.com/fsnotify/fsnotify v1.6.0 // indirect
-	github.com/glebarez/go-sqlite v1.21.1 // indirect
+	github.com/glebarez/go-sqlite v1.21.2 // indirect
 	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/google/uuid v1.3.0 // indirect
 	github.com/gorilla/websocket v1.5.0 // indirect
@@ -94,8 +94,8 @@ require (
 	gopkg.in/ini.v1 v1.67.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 	lukechampine.com/blake3 v1.1.7 // indirect
-	modernc.org/libc v1.22.3 // indirect
+	modernc.org/libc v1.22.5 // indirect
 	modernc.org/mathutil v1.5.0 // indirect
 	modernc.org/memory v1.5.0 // indirect
-	modernc.org/sqlite v1.21.1 // indirect
+	modernc.org/sqlite v1.23.1 // indirect
 )

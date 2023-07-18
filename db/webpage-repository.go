@@ -31,17 +31,20 @@ func (repos *Repository) FindWebpageByURL(ctx context.Context, url string) (*mod
 }
 
 // InsertAPODData method inserts APOD data to database.
-func (repos *Repository) InsertWebpage(ctx context.Context, data []model.Webpage) error {
+func (repos *Repository) InsertWebpage(ctx context.Context, datalist []model.Webpage) error {
 	if repos == nil {
 		return errs.Wrap(ecode.ErrNullPointer)
 	}
-	if err := repos.Db().WithContext(ctx).Transaction(func(tx *gorm.DB) error {
-		if t := tx.Create(data); t.Error != nil {
-			return errs.Wrap(t.Error)
+	for _, data := range datalist {
+		data := data
+		if err := repos.Db().WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+			if t := tx.Create(&data); t.Error != nil {
+				return errs.Wrap(t.Error)
+			}
+			return nil
+		}); err != nil {
+			return err
 		}
-		return nil
-	}); err != nil {
-		return err
 	}
 	return nil
 }

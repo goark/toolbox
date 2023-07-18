@@ -40,7 +40,12 @@ func (cfg *Config) getNewDataList(ctx context.Context, items []*feed.Item) {
 	if cfg.itemPool == nil {
 		cfg.CreatePool()
 	}
+	urls := map[string]bool{}
 	for _, item := range items {
+		if urls[item.Link] {
+			continue
+		}
+		urls[item.Link] = true
 		if page, err := cfg.find(ctx, item.Link); err != nil || page == nil {
 			cfg.itemPool.putFeedItem(ctx, item)
 			cfg.Logger().Debug("new item", zap.Any("item", item))

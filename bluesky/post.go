@@ -121,6 +121,19 @@ func (cfg *Bluesky) PostMessage(ctx context.Context, msg *Message) (string, erro
 		})
 	}
 
+	// add tags metadata
+	for _, entry := range getTagsFrom(msg.Msg) {
+		post.Facets = append(post.Facets, &bsky.RichtextFacet{
+			Features: []*bsky.RichtextFacet_Features_Elem{
+				{RichtextFacet_Tag: &bsky.RichtextFacet_Tag{Tag: entry.text}},
+			},
+			Index: &bsky.RichtextFacet_ByteSlice{
+				ByteStart: entry.start,
+				ByteEnd:   entry.end,
+			},
+		})
+	}
+
 	// embeded images
 	if len(msg.ImageFiles) > 0 {
 		for _, fn := range msg.ImageFiles {
@@ -191,6 +204,7 @@ func (cfg *Bluesky) getEmbedImage(ctx context.Context, urlStr string) (*atproto.
 var (
 	urlRegexp     = regexp.MustCompile(`https?://[-A-Za-z0-9+&@#\/%?=~_|!:,.;\(\)]+`)
 	mentionRegexp = regexp.MustCompile(`@[a-zA-Z0-9.]+`)
+	tagsRegexp    = regexp.MustCompile(`\B#\S+`)
 )
 
 type entry struct {
@@ -225,7 +239,20 @@ func getMentionsFrom(msg string) []entry {
 	return result
 }
 
-/* Copyright 2023 Spiegel
+func getTagsFrom(msg string) []entry {
+	var result []entry
+	matches := tagsRegexp.FindAllStringSubmatchIndex(msg, -1)
+	for _, m := range matches {
+		result = append(result, entry{
+			text:  strings.TrimPrefix(msg[m[0]:m[1]], "#"),
+			start: int64(len(msg[0:m[0]])),
+			end:   int64(len(msg[0:m[1]]))},
+		)
+	}
+	return result
+}
+
+/* Copyright 2023-2024 Spiegel
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.

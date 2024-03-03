@@ -55,9 +55,6 @@ changelog:
       - Merge pull request
       - Merge branch
 
-sboms:
-  - artifacts: archive
-
 snapshot:
   name_template: SNAPSHOT-{{ .Commit }}
 

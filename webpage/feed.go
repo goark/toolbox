@@ -5,6 +5,7 @@ import (
 	"net/url"
 
 	"github.com/goark/errs"
+	"github.com/goark/errs/zapobject"
 	"github.com/goark/toolbox/ecode"
 	"github.com/goark/toolbox/webpage/feed"
 	"go.uber.org/zap"
@@ -15,8 +16,9 @@ func (cfg *Config) Feed(ctx context.Context, urlStr string) error {
 	if cfg == nil {
 		return errs.Wrap(ecode.ErrNullPointer)
 	}
-	resp, err := inmortFeed(ctx, urlStr)
+	resp, err := importFeed(ctx, urlStr)
 	if err != nil {
+		cfg.Logger().Error("error in importFeed", zap.Object("error", zapobject.New(err)), zap.String("url", urlStr))
 		return errs.Wrap(err, errs.WithContext("feed_url", urlStr))
 	}
 	cfg.getNewDataList(ctx, resp)
@@ -28,8 +30,9 @@ func (cfg *Config) FeedFlickr(ctx context.Context, flickrId string) error {
 	if cfg == nil {
 		return errs.Wrap(ecode.ErrNullPointer)
 	}
-	resp, err := inmortFeedFlickr(ctx, flickrId)
+	resp, err := imortFeedFlickr(ctx, flickrId)
 	if err != nil {
+		cfg.Logger().Error("error in imortFeedFlickr", zap.Object("error", zapobject.New(err)), zap.String("flickrId", flickrId))
 		return errs.Wrap(err, errs.WithContext("flickr_id", flickrId))
 	}
 	cfg.getNewDataList(ctx, resp)
@@ -53,7 +56,7 @@ func (cfg *Config) getNewDataList(ctx context.Context, items []*feed.Item) {
 	}
 }
 
-func inmortFeed(ctx context.Context, urlStr string) ([]*feed.Item, error) {
+func importFeed(ctx context.Context, urlStr string) ([]*feed.Item, error) {
 	u, err := url.Parse(urlStr)
 	if err != nil {
 		return nil, errs.Wrap(err, errs.WithContext("url", urlStr))
@@ -68,7 +71,7 @@ func inmortFeed(ctx context.Context, urlStr string) ([]*feed.Item, error) {
 	return data.Items, nil
 }
 
-func inmortFeedFlickr(ctx context.Context, flickrId string) ([]*feed.Item, error) {
+func imortFeedFlickr(ctx context.Context, flickrId string) ([]*feed.Item, error) {
 	data, err := feed.FeedFlickr(ctx, flickrId)
 	if err != nil {
 		return nil, errs.Wrap(err, errs.WithContext("flickr_id", flickrId))

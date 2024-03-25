@@ -2,7 +2,7 @@ module github.com/goark/toolbox
 
 go 1.22
 
-toolchain go1.22.0
+toolchain go1.22.1
 
 require (
 	github.com/PuerkitoBio/goquery v1.9.1

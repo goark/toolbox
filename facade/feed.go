@@ -2,10 +2,12 @@ package facade
 
 import (
 	"github.com/goark/errs"
+	"github.com/goark/errs/zapobject"
 	"github.com/goark/gocli/rwi"
 	"github.com/goark/toolbox/ecode"
 	"github.com/goark/toolbox/webpage"
 	"github.com/spf13/cobra"
+	"go.uber.org/zap"
 )
 
 // newFeedCmd returns cobra.Command instance for show sub-command
@@ -44,26 +46,39 @@ func getFeedAll(cmd *cobra.Command, cfg *webpage.Config) ([]*webpage.Webpage, er
 	if err != nil {
 		return nil, errs.Wrap(err)
 	}
+	errList := &errs.Errors{}
 	if len(urlStr) > 0 {
 		if err := cfg.Feed(cmd.Context(), urlStr); err != nil {
-			return nil, errs.Wrap(err, errs.WithContext("url", urlStr))
+			errList.Add(errs.Wrap(err, errs.WithContext("feed_url", urlStr)))
 		}
 	}
 	if len(flickrID) > 0 {
 		if err := cfg.FeedFlickr(cmd.Context(), flickrID); err != nil {
-			return nil, errs.Wrap(err, errs.WithContext("flickr_id", flickrID))
+			errList.Add(errs.Wrap(err, errs.WithContext("flickr_id", flickrID)))
 		}
 	}
 	if len(feedListPath) > 0 {
 		fl, err := webpage.NewFeedList(feedListPath)
 		if err != nil {
-			return nil, errs.Wrap(err, errs.WithContext("feed_list_file", feedListPath))
+			errList.Add(errs.Wrap(err, errs.WithContext("feed_list_file", feedListPath)))
 		}
 		if err := fl.Parse(cmd.Context(), cfg); err != nil {
-			return nil, errs.Wrap(err, errs.WithContext("feed_list_file", feedListPath))
+			errList.Add(errs.Wrap(err, errs.WithContext("feed_list_file", feedListPath)))
 		}
 	}
-	return cfg.StopPool()
+	pages, err := cfg.StopPool()
+	if err != nil {
+		errList.Add(errs.Wrap(err))
+	}
+	cfg.Logger().Debug("web pages", zap.Int("length", len(pages)))
+	errAll := errList.ErrorOrNil()
+	if errAll != nil {
+		cfg.Logger().Error("error in getFeedAll", zap.Object("error", zapobject.New(errAll)))
+	}
+	if len(pages) > 0 {
+		return pages, nil
+	}
+	return pages, errAll
 }
 
 /* Copyright 2023 Spiegel

@@ -8,7 +8,9 @@ import (
 	"sync"
 
 	"github.com/goark/errs"
+	"github.com/goark/errs/zapobject"
 	"github.com/goark/toolbox/ecode"
+	"go.uber.org/zap"
 )
 
 // FeedList is list of feed URLs.
@@ -18,7 +20,7 @@ type FeedList []string
 func NewFeedList(path string) (FeedList, error) {
 	file, err := os.Open(path)
 	if err != nil {
-		return nil, errs.Wrap(err, errs.WithContext("path", path))
+		return FeedList{}, errs.Wrap(err, errs.WithContext("path", path))
 	}
 	defer file.Close()
 
@@ -31,7 +33,7 @@ func NewFeedList(path string) (FeedList, error) {
 		}
 	}
 	if err := s.Err(); err != nil {
-		return nil, errs.Wrap(err, errs.WithContext("path", path))
+		return FeedList{}, errs.Wrap(err, errs.WithContext("path", path))
 	}
 	return list, nil
 }
@@ -40,6 +42,9 @@ func NewFeedList(path string) (FeedList, error) {
 func (fl FeedList) Parse(ctx context.Context, cfg *Config) error {
 	if cfg == nil {
 		return errs.Wrap(ecode.ErrNullPointer)
+	}
+	if len(fl) == 0 {
+		return nil
 	}
 	var wg sync.WaitGroup
 	errList := &errs.Errors{}
@@ -54,7 +59,14 @@ func (fl FeedList) Parse(ctx context.Context, cfg *Config) error {
 		}()
 	}
 	wg.Wait()
-	return errList.ErrorOrNil()
+	if err := errList.ErrorOrNil(); err != nil {
+		if cfg.itemPool.length() > 0 {
+			cfg.Logger().Error("through errors in FeedList.Parse", zap.Object("error", zapobject.New(err)))
+			return nil
+		}
+		return err
+	}
+	return nil
 }
 
 /* Copyright 2023 Spiegel

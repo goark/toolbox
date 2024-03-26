@@ -52,6 +52,13 @@ func (ip *itemPool) done() {
 	ip.pool.stop()
 }
 
+func (ip *itemPool) length() int {
+	if ip == nil {
+		return 0
+	}
+	return ip.pool.length()
+}
+
 func (ip *itemPool) getPages() []*Webpage {
 	if ip == nil {
 		return []*Webpage{}

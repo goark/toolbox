@@ -42,6 +42,15 @@ func (p *infoPool) start() {
 	}()
 }
 
+func (p *infoPool) length() int {
+	if p == nil {
+		return 0
+	}
+	p.mu.RLock()
+	defer p.mu.RUnlock()
+	return len(p.pool)
+}
+
 func (p *infoPool) getList() []*Webpage {
 	if p == nil {
 		return []*Webpage{}

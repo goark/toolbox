@@ -249,10 +249,14 @@ Available Commands:
   post        Post astronomical calendar data to TL
 
 Flags:
+      --eclipse           output eclipse
       --end string        end of date (YYYY-MM-DD)
-      --ephemeris         output ephemeris
+      --ephemeris-all     output all ephemeris
   -h, --help              help for calendar
       --holiday           output holiday
+      --moon-phase        output moon-phase
+      --planet            output planet
+      --solar-term        output solar-term
       --start string      start of date (YYYY-MM-DD)
       --template string   template file for Output format
 

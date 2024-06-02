@@ -22,7 +22,11 @@ func newCalendarCmd(ui *rwi.RWI) *cobra.Command {
 	calendarCmd.PersistentFlags().StringP("start", "", "", "start of date (YYYY-MM-DD)")
 	calendarCmd.PersistentFlags().StringP("end", "", "", "end of date (YYYY-MM-DD)")
 	calendarCmd.PersistentFlags().BoolP("holiday", "", false, "output holiday")
-	calendarCmd.PersistentFlags().BoolP("ephemeris", "", false, "output ephemeris")
+	calendarCmd.PersistentFlags().BoolP("ephemeris-all", "", false, "output all ephemeris")
+	calendarCmd.PersistentFlags().BoolP("moon-phase", "", false, "output moon-phase")
+	calendarCmd.PersistentFlags().BoolP("solar-term", "", false, "output solar-term")
+	calendarCmd.PersistentFlags().BoolP("eclipse", "", false, "output eclipse")
+	calendarCmd.PersistentFlags().BoolP("planet", "", false, "output planet")
 	calendarCmd.PersistentFlags().StringP("template", "", "", "template file for Output format")
 
 	calendarCmd.AddCommand(
@@ -45,15 +49,37 @@ func getCalendarConfig(cmd *cobra.Command, gopts *globalOptions) (*calendar.Conf
 	if err != nil {
 		return nil, errs.Wrap(err)
 	}
-	ephemerisFlag, err := cmd.Flags().GetBool("ephemeris")
+	moonPhaseFlag, err := cmd.Flags().GetBool("moon-phase")
 	if err != nil {
 		return nil, errs.Wrap(err)
+	}
+	solarTermFlag, err := cmd.Flags().GetBool("solar-term")
+	if err != nil {
+		return nil, errs.Wrap(err)
+	}
+	eclipseFlag, err := cmd.Flags().GetBool("eclipse")
+	if err != nil {
+		return nil, errs.Wrap(err)
+	}
+	planetFlag, err := cmd.Flags().GetBool("planet")
+	if err != nil {
+		return nil, errs.Wrap(err)
+	}
+	ephemerisAllFlag, err := cmd.Flags().GetBool("ephemeris-all")
+	if err != nil {
+		return nil, errs.Wrap(err)
+	}
+	if ephemerisAllFlag {
+		moonPhaseFlag = true
+		solarTermFlag = true
+		eclipseFlag = true
+		planetFlag = true
 	}
 	templateFile, err := cmd.Flags().GetString("template")
 	if err != nil {
 		return nil, errs.Wrap(err)
 	}
-	return calendar.NewConfig(start, end, holidayFlag, ephemerisFlag, gopts.TempDir, templateFile)
+	return calendar.NewConfig(start, end, holidayFlag, moonPhaseFlag, solarTermFlag, eclipseFlag, planetFlag, gopts.TempDir, templateFile)
 }
 
 /* Copyright 2024 Spiegel

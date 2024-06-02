@@ -18,6 +18,11 @@ func newCalendarLookupCmd(ui *rwi.RWI) *cobra.Command {
 			if err != nil {
 				return debugPrint(ui, err)
 			}
+			// make temporary directory
+			if err := gopts.TempDir.MakeDir(); err != nil {
+				return debugPrint(ui, err)
+			}
+			defer func() { _ = gopts.TempDir.CleanUp() }()
 			// local options
 			ccfg, err := getCalendarConfig(cmd, gopts)
 			if err != nil {

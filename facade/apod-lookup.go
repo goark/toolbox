@@ -13,7 +13,7 @@ func newAPODLookupCmd(ui *rwi.RWI) *cobra.Command {
 	apodLookupCmd := &cobra.Command{
 		Use:     "lookup",
 		Aliases: []string{"look", "l"},
-		Short:   "Lookup APOD data NASA API key",
+		Short:   "Lookup APOD data by NASA API",
 		Long:    "Lookup Astronomy Picture of the Day data.",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			// Global options

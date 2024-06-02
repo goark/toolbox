@@ -12,7 +12,7 @@ require (
 	github.com/goark/errs/zapobject v0.1.3
 	github.com/goark/fetch v0.4.1
 	github.com/goark/gocli v0.13.0
-	github.com/goark/koyomi v0.8.0
+	github.com/goark/koyomi v0.9.0
 	github.com/hymkor/go-multiline-ny v0.14.0
 	github.com/ipfs/go-log/v2 v2.5.1
 	github.com/joho/godotenv v1.5.1

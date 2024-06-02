@@ -31,6 +31,8 @@ Usage:
 Available Commands:
   apod        NASA APOD commands
   bluesky     Simple Bluesky commands
+  calendar    Astronomical calendar commands
+  feed        Handling information for Web feed
   help        Help about any command
   mastodon    Simple Mastodon commands
   version     Print the version number
@@ -46,6 +48,7 @@ Flags:
       --log-dir string           Directory for log files (default "/home/username/.cache/toolbox")
       --log-level string         Log level [nop|error|warn|info|debug|trace] (default "nop")
       --mastodon-config string   Config file for Mastodon (default "/home/username/.config/toolbox/mastodon.json")
+      --temp-dir string          Temporary directory (default /tmp)
 
 Use "toolbox [command] --help" for more information about a command.
 ```
@@ -80,6 +83,7 @@ Global Flags:
       --log-dir string           Directory for log files (default "/home/username/.cache/toolbox")
       --log-level string         Log level [nop|error|warn|info|debug|trace] (default "nop")
       --mastodon-config string   Config file for Mastodon (default "/home/username/.config/toolbox/mastodon.json")
+      --temp-dir string          Temporary directory (default /tmp)
 
 Use "toolbox mastodon [command] --help" for more information about a command.
 ```
@@ -114,6 +118,7 @@ Global Flags:
       --log-dir string           Directory for log files (default "/home/username/.cache/toolbox")
       --log-level string         Log level [nop|error|warn|info|debug|trace] (default "nop")
       --mastodon-config string   Config file for Mastodon (default "/home/username/.config/toolbox/mastodon.json")
+      --temp-dir string          Temporary directory (default /tmp)
 
 Use "toolbox bluesky [command] --help" for more information about a command.
 ```
@@ -129,7 +134,7 @@ Usage:
   toolbox apod [command]
 
 Available Commands:
-  lookup      Lookup APOD data NASA API key
+  lookup      Lookup APOD data by NASA API
   post        Post APOD data to TL
   register    Register NASA API key
 
@@ -147,6 +152,7 @@ Global Flags:
       --log-dir string           Directory for log files (default "/home/username/.cache/toolbox")
       --log-level string         Log level [nop|error|warn|info|debug|trace] (default "nop")
       --mastodon-config string   Config file for Mastodon (default "/home/username/.config/toolbox/mastodon.json")
+      --temp-dir string          Temporary directory (default /tmp)
 
 Use "toolbox apod [command] --help" for more information about a command.
 ```
@@ -154,7 +160,7 @@ Use "toolbox apod [command] --help" for more information about a command.
 ### Usage webpage command
 
 ```
-$ toolbox apod -h
+$ toolbox webpage -h
 Handling information for Web pages.
 
 Usage:
@@ -170,7 +176,7 @@ Available Commands:
 
 Flags:
   -h, --help         help for webpage
-      --save         Save APOD data to cache
+      --save         Save page data to cache
   -u, --url string   Web page URL
 
 Global Flags:
@@ -182,6 +188,7 @@ Global Flags:
       --log-dir string           Directory for log files (default "/home/username/.cache/toolbox")
       --log-level string         Log level [nop|error|warn|info|debug|trace] (default "nop")
       --mastodon-config string   Config file for Mastodon (default "/home/username/.config/toolbox/mastodon.json")
+      --temp-dir string          Temporary directory (default /tmp)
 
 Use "toolbox webpage [command] --help" for more information about a command.
 ```
@@ -189,7 +196,7 @@ Use "toolbox webpage [command] --help" for more information about a command.
 ### Usage feed command
 
 ```
-$ toolbox apod -h
+$ toolbox feed -h
 Handling information for Web feed.
 
 Usage:
@@ -219,8 +226,48 @@ Global Flags:
       --log-dir string           Directory for log files (default "/home/username/.cache/toolbox")
       --log-level string         Log level [nop|error|warn|info|debug|trace] (default "nop")
       --mastodon-config string   Config file for Mastodon (default "/home/username/.config/toolbox/mastodon.json")
+      --temp-dir string          Temporary directory (default /tmp)
 
 Use "toolbox feed [command] --help" for more information about a command.
+```
+
+### Usage calendar command
+
+```
+$ toolbox calendar -h
+Commands for Astronomical calendar by NAOJ https://eco.mtk.nao.ac.jp/koyomi/cande/calendar.html.
+
+Usage:
+  toolbox calendar [flags]
+  toolbox calendar [command]
+
+Aliases:
+  calendar, cal, c
+
+Available Commands:
+  lookup      Lookup astronomical calendar
+  post        Post astronomical calendar data to TL
+
+Flags:
+      --end string        end of date (YYYY-MM-DD)
+      --ephemeris         output ephemeris
+  -h, --help              help for calendar
+      --holiday           output holiday
+      --start string      start of date (YYYY-MM-DD)
+      --template string   template file for Output format
+
+Global Flags:
+      --apod-config string       Config file for APOD (default "/home/username/.config/toolbox/nasaapi.json")
+      --bluesky-config string    Config file for Bluesky (default "/home/username/.config/toolbox/bluesky.json")
+      --cache-dir string         Directory for cache files (default "/home/username/.cache/toolbox")
+      --config string            Config file (default "/home/username/.config/toolbox/config.yaml")
+      --debug                    for debug
+      --log-dir string           Directory for log files (default "/home/username/.cache/toolbox")
+      --log-level string         Log level [nop|error|warn|info|debug|trace] (default "nop")
+      --mastodon-config string   Config file for Mastodon (default "/home/username/.config/toolbox/mastodon.json")
+      --temp-dir string          Temporary directory (default /tmp)
+
+Use "toolbox calendar [command] --help" for more information about a command.
 ```
 
 ## Modules Requirement Graph

@@ -20,14 +20,18 @@ const defaultTemplate = `{{ range . }}{{ .Date }} {{ .Title }}
 
 // Config type is configurations for calendar package.
 type Config struct {
-	start, end         value.DateJp
-	holiday, ephemeris bool
-	tempDir            *tempdir.TempDir
-	templateFile       string
+	start, end   value.DateJp
+	holiday      bool
+	moonPhase    bool
+	solarTerm    bool
+	eclipse      bool
+	planet       bool
+	tempDir      *tempdir.TempDir
+	templateFile string
 }
 
 // NewConfig function creates new Config instance.
-func NewConfig(start, end string, holiday, ephemeris bool, tempDir *tempdir.TempDir, templateFile string) (*Config, error) {
+func NewConfig(start, end string, holiday, moonPhase, solarTerm, eclipse, planet bool, tempDir *tempdir.TempDir, templateFile string) (*Config, error) {
 	startdate := value.NewDate(time.Time{})
 	enddate := value.NewDate(time.Time{})
 	if len(start) == 0 && len(end) == 0 {
@@ -38,14 +42,32 @@ func NewConfig(start, end string, holiday, ephemeris bool, tempDir *tempdir.Temp
 		if len(start) > 0 {
 			dt, err := value.DateFrom(start)
 			if err != nil {
-				return nil, errs.Wrap(err, errs.WithContext("start", start), errs.WithContext("end", end), errs.WithContext("holiday", holiday), errs.WithContext("ephemeris", ephemeris), errs.WithContext("templateFile", templateFile))
+				return nil, errs.Wrap(
+					err,
+					errs.WithContext("start", start),
+					errs.WithContext("end", end),
+					errs.WithContext("holiday", holiday),
+					errs.WithContext("moonPhase", moonPhase),
+					errs.WithContext("solarTerm", solarTerm),
+					errs.WithContext("eclipse", eclipse),
+					errs.WithContext("planet", planet),
+					errs.WithContext("templateFile", templateFile))
 			}
 			startdate = dt
 		}
 		if len(start) > 0 {
 			dt, err := value.DateFrom(end)
 			if err != nil {
-				return nil, errs.Wrap(err, errs.WithContext("start", start), errs.WithContext("end", end), errs.WithContext("holiday", holiday), errs.WithContext("ephemeris", ephemeris), errs.WithContext("templateFile", templateFile))
+				return nil, errs.Wrap(
+					err,
+					errs.WithContext("start", start),
+					errs.WithContext("end", end),
+					errs.WithContext("holiday", holiday),
+					errs.WithContext("moonPhase", moonPhase),
+					errs.WithContext("solarTerm", solarTerm),
+					errs.WithContext("eclipse", eclipse),
+					errs.WithContext("planet", planet),
+					errs.WithContext("templateFile", templateFile))
 			}
 			enddate = dt
 		}
@@ -54,7 +76,10 @@ func NewConfig(start, end string, holiday, ephemeris bool, tempDir *tempdir.Temp
 		start:        startdate,
 		end:          enddate,
 		holiday:      holiday,
-		ephemeris:    ephemeris,
+		moonPhase:    moonPhase,
+		solarTerm:    solarTerm,
+		eclipse:      eclipse,
+		planet:       planet,
 		tempDir:      tempDir,
 		templateFile: templateFile,
 	}, nil
@@ -106,8 +131,17 @@ func (cal *Config) GetEvents() ([]koyomi.Event, error) {
 	if cal.holiday {
 		ids = append(ids, koyomi.Holiday)
 	}
-	if cal.ephemeris {
-		ids = append(ids, koyomi.MoonPhase, koyomi.SolarTerm, koyomi.Eclipse, koyomi.Planet)
+	if cal.moonPhase {
+		ids = append(ids, koyomi.MoonPhase)
+	}
+	if cal.solarTerm {
+		ids = append(ids, koyomi.SolarTerm)
+	}
+	if cal.eclipse {
+		ids = append(ids, koyomi.Eclipse)
+	}
+	if cal.planet {
+		ids = append(ids, koyomi.Planet)
 	}
 	if len(ids) == 0 {
 		return []koyomi.Event{}, nil

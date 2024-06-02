@@ -5,6 +5,7 @@ import (
 	"github.com/goark/gocli/cache"
 	"github.com/goark/gocli/config"
 	"github.com/goark/toolbox/logger"
+	"github.com/goark/toolbox/tempdir"
 	"github.com/ipfs/go-log/v2"
 	"github.com/spf13/viper"
 )
@@ -12,6 +13,7 @@ import (
 type globalOptions struct {
 	Logger          *log.ZapEventLogger
 	CacheDir        string
+	TempDir         *tempdir.TempDir
 	bskyConfigPath  string
 	mstdnConfigPath string
 	apodConfigPath  string
@@ -22,6 +24,7 @@ func getGlobalOptions() (*globalOptions, error) {
 	if len(cacheDir) == 0 {
 		cacheDir = cache.Dir(Name)
 	}
+	tempDir := tempdir.New(viper.GetString("temp-dir"))
 	golog, err := logger.New(
 		logger.LevelFrom(viper.GetString("log-level")),
 		Name,
@@ -46,13 +49,14 @@ func getGlobalOptions() (*globalOptions, error) {
 	return &globalOptions{
 		Logger:          golog,
 		CacheDir:        cacheDir,
+		TempDir:         tempDir,
 		bskyConfigPath:  bskyConfigPath,
 		mstdnConfigPath: mstdnConfigPath,
 		apodConfigPath:  apodConfigPath,
 	}, nil
 }
 
-/* Copyright 2023 Spiegel
+/* Copyright 2023-2024 Spiegel
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.

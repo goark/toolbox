@@ -3,15 +3,15 @@ package apod
 import "github.com/ipfs/go-log/v2"
 
 // Register function makes configuration for APOD operations
-func Register(apiKey, cacheDir string, logger *log.ZapEventLogger) *APOD {
-	cfg := fallthroughCfg(cacheDir, nil, logger)
+func Register(apiKey string, logger *log.ZapEventLogger) *APOD {
+	cfg := fallthroughCfg(nil, logger)
 	if len(apiKey) > 0 {
 		cfg.APIKey = apiKey
 	}
 	return cfg
 }
 
-/* Copyright 2023 Spiegel
+/* Copyright 2023-2024 Spiegel
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.

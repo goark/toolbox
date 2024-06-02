@@ -31,7 +31,7 @@ func newAPODRegisterCmd(ui *rwi.RWI) *cobra.Command {
 			if err != nil {
 				return debugPrint(ui, err)
 			}
-			mcfg := apod.Register(apiKey, gopts.CacheDir, gopts.Logger)
+			mcfg := apod.Register(apiKey, gopts.Logger)
 			if err := debugPrint(ui, mcfg.Export(gopts.apodConfigPath)); err != nil {
 				return debugPrint(ui, err)
 			}
@@ -58,7 +58,7 @@ func getAPODAPIKey(ctx context.Context) (string, error) {
 	}
 }
 
-/* Copyright 2023 Spiegel
+/* Copyright 2023-2024 Spiegel
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.

@@ -35,11 +35,11 @@ func New(ctx context.Context, path, cacheDir string, logger *log.ZapEventLogger)
 
 	// read configuration file
 	if len(path) == 0 {
-		return fallthroughCfg(cacheDir, repos, logger), nil
+		return fallthroughCfg(repos, logger), nil
 	}
 	file, err := os.Open(path)
 	if err != nil {
-		return fallthroughCfg(cacheDir, repos, logger), nil
+		return fallthroughCfg(repos, logger), nil
 	}
 	defer file.Close()
 	var cfg APOD
@@ -55,7 +55,7 @@ func New(ctx context.Context, path, cacheDir string, logger *log.ZapEventLogger)
 	return &cfg, nil
 }
 
-func fallthroughCfg(cacheDir string, repos *db.Repository, logger *log.ZapEventLogger) *APOD {
+func fallthroughCfg(repos *db.Repository, logger *log.ZapEventLogger) *APOD {
 	return &APOD{
 		APIKey:   nasaapi.DefaultAPIKey,
 		logger:   logger,
@@ -90,7 +90,7 @@ func (cfg *APOD) Export(path string) error {
 	return nil
 }
 
-/* Copyright 2023 Spiegel
+/* Copyright 2023-2024 Spiegel
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.

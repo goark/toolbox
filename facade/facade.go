@@ -16,6 +16,7 @@ import (
 	"github.com/goark/toolbox/consts"
 	"github.com/goark/toolbox/ecode"
 	"github.com/goark/toolbox/logger"
+	"github.com/goark/toolbox/tempdir"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -55,6 +56,7 @@ func newRootCmd(ui *rwi.RWI, args []string) *cobra.Command {
 	}
 	// global options (binding)
 	rootCmd.PersistentFlags().StringP("cache-dir", "", cache.Dir(Name), "Directory for cache files")
+	rootCmd.PersistentFlags().StringP("temp-dir", "", "", fmt.Sprintf("Temporary directory (default %v)", tempdir.New("")))
 	rootCmd.PersistentFlags().StringP("log-dir", "", logger.DefaultLogDir(Name), "Directory for log files")
 	rootCmd.PersistentFlags().StringP("log-level", "", "nop", fmt.Sprintf("Log level [%s]", strings.Join(logger.LevelList(), "|")))
 	rootCmd.PersistentFlags().StringP("bluesky-config", "", defaultBskyConfigPath, "Config file for Bluesky")
@@ -62,7 +64,8 @@ func newRootCmd(ui *rwi.RWI, args []string) *cobra.Command {
 	rootCmd.PersistentFlags().StringP("apod-config", "", defaultAPODConfigPath, "Config file for APOD")
 
 	//Bind config file
-	_ = viper.BindPFlag("cache-dir", rootCmd.PersistentFlags().Lookup("log-dir"))
+	_ = viper.BindPFlag("cache-dir", rootCmd.PersistentFlags().Lookup("cache-dir"))
+	_ = viper.BindPFlag("temp-dir", rootCmd.PersistentFlags().Lookup("temp-dir"))
 	_ = viper.BindPFlag("log-dir", rootCmd.PersistentFlags().Lookup("log-dir"))
 	_ = viper.BindPFlag("log-level", rootCmd.PersistentFlags().Lookup("log-level"))
 	_ = viper.BindPFlag("bluesky-config", rootCmd.PersistentFlags().Lookup("bluesky-config"))
@@ -87,6 +90,7 @@ func newRootCmd(ui *rwi.RWI, args []string) *cobra.Command {
 		newAPODCmd(ui),
 		newWebpageCmd(ui),
 		newFeedCmd(ui),
+		newCalendarCmd(ui),
 	)
 	return rootCmd
 }

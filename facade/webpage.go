@@ -23,7 +23,7 @@ func newWebpageCmd(ui *rwi.RWI) *cobra.Command {
 	}
 	webpageCmd.PersistentFlags().StringP("url", "u", "", "Web page URL")
 	_ = webpageCmd.MarkFlagRequired("url")
-	webpageCmd.PersistentFlags().BoolP("save", "", false, "Save APOD data to cache")
+	webpageCmd.PersistentFlags().BoolP("save", "", false, "Save page data to cache")
 
 	webpageCmd.AddCommand(
 		newBookmarkLookupCmd(ui),

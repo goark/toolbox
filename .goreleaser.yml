@@ -1,3 +1,5 @@
+version: 2
+
 project_name: toolbox
 release:
   github:
@@ -22,9 +24,8 @@ builds:
   flags:
   - -trimpath
   ldflags: -s -w -X github.com/goark/toolbox/facade.Version=v{{ .Version }}
+  binary: toolbox
 
-source:
-  rlcp: true
 archives:
 -
   format: tar.gz
@@ -56,7 +57,7 @@ changelog:
       - Merge branch
 
 snapshot:
-  name_template: SNAPSHOT-{{ .Commit }}
+  version_template: SNAPSHOT-{{ .Commit }}
 
 checksum:
   name_template: '{{ .ProjectName }}_{{ .Version }}_checksums.txt'

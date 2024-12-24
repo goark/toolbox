@@ -1,31 +1,31 @@
 module github.com/goark/toolbox
 
-go 1.22
+go 1.23
 
-toolchain go1.22.3
+toolchain go1.23.4
 
 require (
-	github.com/PuerkitoBio/goquery v1.9.2
-	github.com/bluesky-social/indigo v0.0.0-20240529174714-c1b16d4592a8
+	github.com/PuerkitoBio/goquery v1.10.0
+	github.com/bluesky-social/indigo v0.0.0-20241223053147-c130614850e5
 	github.com/glebarez/sqlite v1.11.0
 	github.com/goark/errs v1.3.2
 	github.com/goark/errs/zapobject v0.1.3
 	github.com/goark/fetch v0.4.1
 	github.com/goark/gocli v0.13.0
 	github.com/goark/koyomi v0.9.0
-	github.com/hymkor/go-multiline-ny v0.14.0
+	github.com/hymkor/go-multiline-ny v0.18.1
 	github.com/ipfs/go-log/v2 v2.5.1
 	github.com/joho/godotenv v1.5.1
 	github.com/mattn/go-encoding v0.0.2
-	github.com/mattn/go-mastodon v0.0.8
+	github.com/mattn/go-mastodon v0.0.9
 	github.com/mmcdole/gofeed v1.3.0
-	github.com/nyaosorg/go-readline-ny v1.3.1
-	github.com/spf13/cobra v1.8.0
-	github.com/spf13/viper v1.18.2
+	github.com/nyaosorg/go-readline-ny v1.6.2
+	github.com/spf13/cobra v1.8.1
+	github.com/spf13/viper v1.19.0
 	go.uber.org/zap v1.27.0
-	golang.org/x/image v0.16.0
-	golang.org/x/net v0.25.0
-	gorm.io/gorm v1.25.10
+	golang.org/x/image v0.23.0
+	golang.org/x/net v0.33.0
+	gorm.io/gorm v1.25.12
 	moul.io/zapgorm2 v1.3.0
 )
 
@@ -43,7 +43,7 @@ require (
 	github.com/google/uuid v1.4.0 // indirect
 	github.com/gorilla/websocket v1.5.1 // indirect
 	github.com/hashicorp/go-cleanhttp v0.5.2 // indirect
-	github.com/hashicorp/go-retryablehttp v0.7.5 // indirect
+	github.com/hashicorp/go-retryablehttp v0.7.7 // indirect
 	github.com/hashicorp/golang-lru v1.0.2 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
@@ -65,8 +65,8 @@ require (
 	github.com/klauspost/cpuid/v2 v2.2.7 // indirect
 	github.com/magiconair/properties v1.8.7 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
-	github.com/mattn/go-runewidth v0.0.15 // indirect
-	github.com/mattn/go-tty v0.0.5 // indirect
+	github.com/mattn/go-runewidth v0.0.16 // indirect
+	github.com/mattn/go-tty v0.0.7 // indirect
 	github.com/minio/sha256-simd v1.0.1 // indirect
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
 	github.com/mmcdole/goxpp v1.1.1-0.20240225020742-a0c311522b23 // indirect
@@ -79,7 +79,7 @@ require (
 	github.com/multiformats/go-multihash v0.2.3 // indirect
 	github.com/multiformats/go-varint v0.0.7 // indirect
 	github.com/opentracing/opentracing-go v1.2.0 // indirect
-	github.com/pelletier/go-toml/v2 v2.1.0 // indirect
+	github.com/pelletier/go-toml/v2 v2.2.2 // indirect
 	github.com/polydawn/refmt v0.89.1-0.20221221234430-40501e09de1f // indirect
 	github.com/remyoudompheng/bigfft v0.0.0-20230129092748-24d4a6f8daec // indirect
 	github.com/rivo/uniseg v0.4.7 // indirect
@@ -94,18 +94,18 @@ require (
 	github.com/spiegel-im-spiegel/iso8601duration v0.1.0 // indirect
 	github.com/subosito/gotenv v1.6.0 // indirect
 	github.com/tomnomnom/linkheader v0.0.0-20180905144013-02ca5825eb80 // indirect
-	github.com/whyrusleeping/cbor-gen v0.1.1-0.20240311221002-68b9f235c302 // indirect
-	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.46.1 // indirect
-	go.opentelemetry.io/otel v1.21.0 // indirect
-	go.opentelemetry.io/otel/metric v1.21.0 // indirect
-	go.opentelemetry.io/otel/trace v1.21.0 // indirect
+	github.com/whyrusleeping/cbor-gen v0.2.1-0.20241030202151-b7a6831be65e // indirect
+	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.49.0 // indirect
+	go.opentelemetry.io/otel v1.24.0 // indirect
+	go.opentelemetry.io/otel/metric v1.24.0 // indirect
+	go.opentelemetry.io/otel/trace v1.24.0 // indirect
 	go.uber.org/atomic v1.11.0 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
-	golang.org/x/crypto v0.23.0 // indirect
+	golang.org/x/crypto v0.31.0 // indirect
 	golang.org/x/exp v0.0.0-20231110203233-9a3e6036ecaa // indirect
-	golang.org/x/sys v0.20.0 // indirect
-	golang.org/x/term v0.20.0 // indirect
-	golang.org/x/text v0.15.0 // indirect
+	golang.org/x/sys v0.28.0 // indirect
+	golang.org/x/term v0.27.0 // indirect
+	golang.org/x/text v0.21.0 // indirect
 	golang.org/x/xerrors v0.0.0-20231012003039-104605ab7028 // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect

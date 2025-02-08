@@ -2,35 +2,35 @@ module github.com/goark/toolbox
 
 go 1.23
 
-toolchain go1.23.4
+toolchain go1.23.6
 
 require (
-	github.com/PuerkitoBio/goquery v1.10.0
-	github.com/bluesky-social/indigo v0.0.0-20241223053147-c130614850e5
+	github.com/PuerkitoBio/goquery v1.10.1
+	github.com/bluesky-social/indigo v0.0.0-20250205215759-9f7ea1d5a39f
 	github.com/glebarez/sqlite v1.11.0
 	github.com/goark/errs v1.3.2
 	github.com/goark/errs/zapobject v0.1.3
-	github.com/goark/fetch v0.4.1
+	github.com/goark/fetch v0.4.2
 	github.com/goark/gocli v0.13.0
-	github.com/goark/koyomi v0.9.0
-	github.com/hymkor/go-multiline-ny v0.18.1
+	github.com/goark/koyomi v0.11.0
+	github.com/hymkor/go-multiline-ny v0.19.2
 	github.com/ipfs/go-log/v2 v2.5.1
 	github.com/joho/godotenv v1.5.1
 	github.com/mattn/go-encoding v0.0.2
 	github.com/mattn/go-mastodon v0.0.9
 	github.com/mmcdole/gofeed v1.3.0
-	github.com/nyaosorg/go-readline-ny v1.6.2
+	github.com/nyaosorg/go-readline-ny v1.7.4
 	github.com/spf13/cobra v1.8.1
 	github.com/spf13/viper v1.19.0
 	go.uber.org/zap v1.27.0
-	golang.org/x/image v0.23.0
-	golang.org/x/net v0.33.0
+	golang.org/x/image v0.24.0
+	golang.org/x/net v0.34.0
 	gorm.io/gorm v1.25.12
 	moul.io/zapgorm2 v1.3.0
 )
 
 require (
-	github.com/andybalholm/cascadia v1.3.2 // indirect
+	github.com/andybalholm/cascadia v1.3.3 // indirect
 	github.com/atotto/clipboard v0.1.4 // indirect
 	github.com/carlmjohnson/versioninfo v0.22.5 // indirect
 	github.com/dustin/go-humanize v1.0.1 // indirect
@@ -90,8 +90,8 @@ require (
 	github.com/spf13/afero v1.11.0 // indirect
 	github.com/spf13/cast v1.6.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
-	github.com/spiegel-im-spiegel/ics-golang v0.1.0 // indirect
-	github.com/spiegel-im-spiegel/iso8601duration v0.1.0 // indirect
+	github.com/spiegel-im-spiegel/ics-golang v0.1.1 // indirect
+	github.com/spiegel-im-spiegel/iso8601duration v0.1.1 // indirect
 	github.com/subosito/gotenv v1.6.0 // indirect
 	github.com/tomnomnom/linkheader v0.0.0-20180905144013-02ca5825eb80 // indirect
 	github.com/whyrusleeping/cbor-gen v0.2.1-0.20241030202151-b7a6831be65e // indirect
@@ -101,11 +101,11 @@ require (
 	go.opentelemetry.io/otel/trace v1.24.0 // indirect
 	go.uber.org/atomic v1.11.0 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
-	golang.org/x/crypto v0.31.0 // indirect
+	golang.org/x/crypto v0.32.0 // indirect
 	golang.org/x/exp v0.0.0-20231110203233-9a3e6036ecaa // indirect
-	golang.org/x/sys v0.28.0 // indirect
-	golang.org/x/term v0.27.0 // indirect
-	golang.org/x/text v0.21.0 // indirect
+	golang.org/x/sys v0.29.0 // indirect
+	golang.org/x/term v0.28.0 // indirect
+	golang.org/x/text v0.22.0 // indirect
 	golang.org/x/xerrors v0.0.0-20231012003039-104605ab7028 // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect

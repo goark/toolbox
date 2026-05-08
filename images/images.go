@@ -7,6 +7,7 @@ import (
 	"image/jpeg"
 	"io"
 	"os"
+	"path/filepath"
 
 	"github.com/goark/errs"
 	"github.com/goark/fetch"
@@ -15,27 +16,33 @@ import (
 )
 
 // FetchFromURL returns binary image from URL.
-func FetchFromURL(ctx context.Context, urlStr string) ([]byte, error) {
-	u, err := fetch.URL(urlStr)
-	if err != nil {
-		return nil, errs.Wrap(err, errs.WithContext("url", urlStr))
+func FetchFromURL(ctx context.Context, urlStr string) (data []byte, err error) {
+	u, ferr := fetch.URL(urlStr)
+	if ferr != nil {
+		err = errs.Wrap(ferr, errs.WithContext("url", urlStr))
+		return
 	}
-	resp, err := fetch.New().GetWithContext(ctx, u)
-	if err != nil {
-		return nil, errs.Wrap(err, errs.WithContext("url", u.String()))
+	resp, ferr := fetch.New().GetWithContext(ctx, u)
+	if ferr != nil {
+		err = errs.Wrap(ferr, errs.WithContext("url", u.String()))
+		return
 	}
-	defer resp.Close()
+	defer func() {
+		err = errs.Join(err, resp.Close())
+	}()
 
-	b, err := io.ReadAll(resp.Body())
-	if err != nil {
-		return nil, errs.Wrap(err, errs.WithContext("url", u.String()))
+	b, ferr := io.ReadAll(resp.Body())
+	if ferr != nil {
+		err = errs.Wrap(ferr, errs.WithContext("url", u.String()))
+		return
 	}
-	return b, nil
+	data = b
+	return
 }
 
 // FetchFromFile returns binary image from local file.
 func FetchFromFile(fn string) ([]byte, error) {
-	b, err := os.ReadFile(fn)
+	b, err := os.ReadFile(filepath.Clean(fn))
 	if err != nil {
 		return nil, errs.Wrap(err, errs.WithContext("file_name", fn))
 	}

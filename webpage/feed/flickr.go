@@ -13,18 +13,23 @@ import (
 )
 
 // FeedFlickr fetches feed data from Flickr ID.
-func FeedFlickr(ctx context.Context, flickrId string) (*Metadata, error) {
-	u, err := makeFlickrFeedURL(flickrId)
-	if err != nil {
-		return nil, errs.Wrap(ErrInvalidFlickrId, errs.WithContext("flickr_id", flickrId))
+func FeedFlickr(ctx context.Context, flickrId string) (data *Metadata, err error) {
+	u, ferr := makeFlickrFeedURL(flickrId)
+	if ferr != nil {
+		err = errs.Wrap(ErrInvalidFlickrId, errs.WithContext("flickr_id", flickrId))
+		return
 	}
-	resp, err := ftch.New().GetWithContext(ctx, u)
-	if err != nil {
-		return nil, errs.Wrap(err, errs.WithContext("url", u.String()))
+	resp, ferr := ftch.New().GetWithContext(ctx, u)
+	if ferr != nil {
+		err = errs.Wrap(ferr, errs.WithContext("url", u.String()))
+		return
 	}
-	defer resp.Close()
+	defer func() {
+		err = errs.Join(err, resp.Close())
+	}()
 
-	return decodeFlickrFeed(resp.Body())
+	data, err = decodeFlickrFeed(resp.Body())
+	return
 }
 
 func makeFlickrFeedURL(flickrId string) (*url.URL, error) {
@@ -97,7 +102,7 @@ func decodeFlickrFeed(r io.Reader) (*Metadata, error) {
 	return data, nil
 }
 
-/* Copyright 2023 Spiegel
+/* Copyright 2023-2026 Spiegel
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.

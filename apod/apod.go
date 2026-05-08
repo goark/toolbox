@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"os"
+	"path/filepath"
 
 	"github.com/goark/errs"
 	"github.com/goark/toolbox/db"
@@ -26,33 +27,39 @@ type APOD struct {
 }
 
 // New functions creates new APOD instance from file.
-func New(ctx context.Context, path, cacheDir string, logger *log.ZapEventLogger) (*APOD, error) {
+func New(ctx context.Context, path, cacheDir string, logger *log.ZapEventLogger) (cfg *APOD, err error) {
 	// open database
-	repos, err := db.Open(ctx, cacheDir, logger)
-	if err != nil {
-		return nil, errs.Wrap(err, errs.WithContext("cache_dir", cacheDir))
+	repos, ferr := db.Open(ctx, cacheDir, logger)
+	if ferr != nil {
+		err = errs.Wrap(ferr, errs.WithContext("cache_dir", cacheDir))
+		return
 	}
 
 	// read configuration file
 	if len(path) == 0 {
-		return fallthroughCfg(repos, logger), nil
+		cfg = fallthroughCfg(repos, logger)
+		return
 	}
-	file, err := os.Open(path)
-	if err != nil {
-		return fallthroughCfg(repos, logger), nil
+	file, ferr := os.Open(filepath.Clean(path))
+	if ferr != nil {
+		cfg = fallthroughCfg(repos, logger)
+		return
 	}
-	defer file.Close()
-	var cfg APOD
-	if err := json.NewDecoder(file).Decode(&cfg); err != nil {
-		return nil, errs.Wrap(err, errs.WithContext("path", path))
+	defer func() {
+		err = errs.Join(err, file.Close())
+	}()
+	var vcfg APOD
+	if jerr := json.NewDecoder(file).Decode(&vcfg); jerr != nil {
+		err = errs.Wrap(jerr, errs.WithContext("path", path))
+		return
 	}
-	cfg.logger = logger
-	cfg.cacheDir = cacheDir
-	cfg.repos = repos
-	cfg.cache = map[string]*nasaapod.Response{}
-	cfg.saveData = []*nasaapod.Response{}
-
-	return &cfg, nil
+	vcfg.logger = logger
+	vcfg.cacheDir = cacheDir
+	vcfg.repos = repos
+	vcfg.cache = map[string]*nasaapod.Response{}
+	vcfg.saveData = []*nasaapod.Response{}
+	cfg = &vcfg
+	return
 }
 
 func fallthroughCfg(repos *db.Repository, logger *log.ZapEventLogger) *APOD {
@@ -74,23 +81,28 @@ func (cfg *APOD) Logger() *zap.Logger {
 }
 
 // Export methods exports configuration to config file.
-func (cfg *APOD) Export(path string) error {
+func (cfg *APOD) Export(path string) (err error) {
 	if cfg == nil {
-		return errs.Wrap(ecode.ErrNullPointer)
+		err = errs.Wrap(ecode.ErrNullPointer)
+		return
 	}
-	file, err := os.OpenFile(path, os.O_RDWR|os.O_CREATE, 0600)
-	if err != nil {
-		return errs.Wrap(err, errs.WithContext("path", path))
+	file, ferr := os.OpenFile(filepath.Clean(path), os.O_RDWR|os.O_CREATE, 0600)
+	if ferr != nil {
+		err = errs.Wrap(ferr, errs.WithContext("path", path))
+		return
 	}
-	defer file.Close()
+	defer func() {
+		err = errs.Join(err, file.Close())
+	}()
 
-	if err := json.NewEncoder(file).Encode(cfg); err != nil {
-		return errs.Wrap(err, errs.WithContext("path", path))
+	if jerr := json.NewEncoder(file).Encode(cfg); jerr != nil {
+		err = errs.Wrap(jerr, errs.WithContext("path", path))
+		return
 	}
-	return nil
+	return
 }
 
-/* Copyright 2023-2024 Spiegel
+/* Copyright 2023-2026 Spiegel
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.

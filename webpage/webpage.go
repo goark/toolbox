@@ -31,17 +31,21 @@ type Webpage struct {
 }
 
 // ReadPage function reads web page from URL, and analysis information.
-func ReadPage(ctx context.Context, urlStr string) (*Webpage, error) {
+func ReadPage(ctx context.Context, urlStr string) (link *Webpage, err error) {
 	// fetch web page
-	u, err := fetch.URL(urlStr)
-	if err != nil {
-		return nil, errs.Wrap(err, errs.WithContext("url", urlStr))
+	u, ferr := fetch.URL(urlStr)
+	if ferr != nil {
+		err = errs.Wrap(ferr, errs.WithContext("url", urlStr))
+		return
 	}
-	resp, err := fetch.New().GetWithContext(ctx, u)
-	if err != nil {
-		return nil, errs.Wrap(err, errs.WithContext("url", u.String()))
+	resp, ferr := fetch.New().GetWithContext(ctx, u)
+	if ferr != nil {
+		err = errs.Wrap(ferr, errs.WithContext("url", u.String()))
+		return
 	}
-	defer resp.Close()
+	defer func() {
+		err = errs.Join(err, resp.Close())
+	}()
 
 	// detect character encoding
 	br := bufio.NewReader(resp.Body())
@@ -58,10 +62,11 @@ func ReadPage(ctx context.Context, urlStr string) (*Webpage, error) {
 	}
 
 	// analysis web content
-	link := &Webpage{URL: urlStr}
-	doc, err := goquery.NewDocumentFromReader(r)
-	if err != nil {
-		return nil, errs.Wrap(err, errs.WithContext("url", u.String()))
+	link = &Webpage{URL: urlStr}
+	doc, qerr := goquery.NewDocumentFromReader(r)
+	if qerr != nil {
+		err = errs.Wrap(qerr, errs.WithContext("url", u.String()))
+		return
 	}
 	doc.Find("head").Each(func(_ int, s *goquery.Selection) {
 		s.Find("title").Each(func(_ int, s *goquery.Selection) {
@@ -96,7 +101,7 @@ func ReadPage(ctx context.Context, urlStr string) (*Webpage, error) {
 			}
 		})
 	})
-	return link, nil
+	return
 }
 
 // SortPages function sorts Info list.
@@ -126,38 +131,48 @@ func (i *Webpage) Encode(w io.Writer) error {
 	return nil
 }
 
-func (wp *Webpage) ImageFile(ctx context.Context, dir string) (string, error) {
+func (wp *Webpage) ImageFile(ctx context.Context, dir string) (tname string, err error) {
 	if wp == nil {
-		return "", errs.Wrap(ecode.ErrNullPointer)
+		err = errs.Wrap(ecode.ErrNullPointer)
+		return
 	}
 	if len(wp.ImageURL) == 0 {
-		return "", errs.Wrap(ecode.ErrNoAPODImage)
+		err = errs.Wrap(ecode.ErrNoAPODImage)
+		return
 	}
 
 	// get Image data
-	u, err := url.Parse(wp.ImageURL)
-	if err != nil {
-		return "", errs.Wrap(err, errs.WithContext("image_url", wp.ImageURL))
+	u, perr := url.Parse(wp.ImageURL)
+	if perr != nil {
+		err = errs.Wrap(perr, errs.WithContext("image_url", wp.ImageURL))
+		return
 	}
-	img, err := fetch.New().GetWithContext(ctx, u)
-	if err != nil {
-		return "", errs.Wrap(err, errs.WithContext("image_url", wp.ImageURL))
+	img, ferr := fetch.New().GetWithContext(ctx, u)
+	if ferr != nil {
+		err = errs.Wrap(ferr, errs.WithContext("image_url", wp.ImageURL))
+		return
 	}
-	defer img.Close()
+	defer func() {
+		err = errs.Join(err, img.Close())
+	}()
 
 	// copy to temporary file
-	file, err := os.CreateTemp(dir, "webpage.*.jpg")
-	if err != nil {
-		return "", errs.Wrap(err)
+	file, ferr := os.CreateTemp(dir, "webpage.*.jpg")
+	if ferr != nil {
+		err = errs.Wrap(ferr)
+		return
 	}
-	defer file.Close()
+	defer func() {
+		err = errs.Join(err, file.Close())
+	}()
 
-	tname := file.Name()
-	_, err = io.Copy(file, img.Body())
-	if err != nil {
-		return "", errs.Wrap(err, errs.WithContext("image_url", wp.ImageURL), errs.WithContext("temp_file", tname))
+	tname = file.Name()
+	_, cerr := io.Copy(file, img.Body())
+	if cerr != nil {
+		err = errs.Wrap(cerr, errs.WithContext("image_url", wp.ImageURL), errs.WithContext("temp_file", tname))
+		return
 	}
-	return tname, nil
+	return
 }
 
 func (wp *Webpage) MakeMessage(prefixMsg string) string {
@@ -168,14 +183,14 @@ func (wp *Webpage) MakeMessage(prefixMsg string) string {
 
 	//title
 	if len(wp.Title) > 0 {
-		bld.WriteString(fmt.Sprintln(prefixMsg, wp.Title))
+		fmt.Fprintln(&bld, prefixMsg, wp.Title)
 	}
 	// URL
-	bld.WriteString(fmt.Sprintln(wp.URL))
+	fmt.Fprintln(&bld, wp.URL)
 	return bld.String()
 }
 
-/* Copyright 2023 Spiegel
+/* Copyright 2023-2026 Spiegel
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.

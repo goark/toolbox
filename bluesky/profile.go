@@ -13,15 +13,17 @@ import (
 )
 
 // Profile method returns actor's profile information.
-func (cfg *Bluesky) Profile(ctx context.Context, actor string) (*bsky.ActorDefs_ProfileViewDetailed, error) {
+func (cfg *Bluesky) Profile(ctx context.Context, actor string) (profile *bsky.ActorDefs_ProfileViewDetailed, err error) {
 	if cfg == nil {
-		return nil, errs.Wrap(ecode.ErrNullPointer, errs.WithContext("actor", actor))
+		err = errs.Wrap(ecode.ErrNullPointer, errs.WithContext("actor", actor))
+		return
 	}
 
 	// create/refresh session
 	if cfg.client == nil {
-		if err := cfg.CreateSession(ctx); err != nil {
-			return nil, errs.Wrap(err, errs.WithContext("actor", actor))
+		if cerr := cfg.CreateSession(ctx); cerr != nil {
+			err = errs.Wrap(cerr, errs.WithContext("actor", actor))
+			return
 		}
 	}
 
@@ -30,12 +32,13 @@ func (cfg *Bluesky) Profile(ctx context.Context, actor string) (*bsky.ActorDefs_
 		actor = cfg.Handle
 	}
 	cfg.Logger().Info("start getting profile", zap.String("actor", actor))
-	profile, err := bsky.ActorGetProfile(ctx, cfg.client, actor)
+	profile, err = bsky.ActorGetProfile(ctx, cfg.client, actor)
 	if err != nil {
-		return nil, errs.Wrap(err, errs.WithContext("actor", actor))
+		err = errs.Wrap(err, errs.WithContext("actor", actor))
+		return
 	}
 	cfg.Logger().Info("complete getting profile", zap.Any("profile", profile))
-	return profile, nil
+	return
 }
 
 // ShowProfile method outouts actor's profile information to io.Wtiter.
@@ -49,31 +52,47 @@ func (cfg *Bluesky) ShowProfile(ctx context.Context, actor string, jsonFlag bool
 			return errs.Wrap(err, errs.WithContext("actor", actor))
 		}
 	} else {
-		fmt.Fprintf(w, " Handle Name: %s\n", prof.Handle)
-		fmt.Fprintf(w, "         DID: %s\n", prof.Did)
+		if _, err := fmt.Fprintf(w, " Handle Name: %s\n", prof.Handle); err != nil {
+			return errs.Wrap(err, errs.WithContext("actor", actor))
+		}
+		if _, err := fmt.Fprintf(w, "         DID: %s\n", prof.Did); err != nil {
+			return errs.Wrap(err, errs.WithContext("actor", actor))
+		}
 		if prof.DisplayName != nil {
-			fmt.Fprintf(w, "Display Name: %s\n", *prof.DisplayName)
+			if _, err := fmt.Fprintf(w, "Display Name: %s\n", *prof.DisplayName); err != nil {
+				return errs.Wrap(err, errs.WithContext("actor", actor))
+			}
 		}
 		if prof.IndexedAt != nil {
-			fmt.Fprintf(w, "    Index at: %s\n", *prof.IndexedAt)
+			if _, err := fmt.Fprintf(w, "    Index at: %s\n", *prof.IndexedAt); err != nil {
+				return errs.Wrap(err, errs.WithContext("actor", actor))
+			}
 		}
 		if prof.PostsCount != nil {
-			fmt.Fprintf(w, "       Posts: %d\n", *prof.PostsCount)
+			if _, err := fmt.Fprintf(w, "       Posts: %d\n", *prof.PostsCount); err != nil {
+				return errs.Wrap(err, errs.WithContext("actor", actor))
+			}
 		}
 		if prof.FollowsCount != nil {
-			fmt.Fprintf(w, "     Follows: %d\n", *prof.FollowsCount)
+			if _, err := fmt.Fprintf(w, "     Follows: %d\n", *prof.FollowsCount); err != nil {
+				return errs.Wrap(err, errs.WithContext("actor", actor))
+			}
 		}
 		if prof.FollowersCount != nil {
-			fmt.Fprintf(w, "   Followers: %d\n", *prof.FollowersCount)
+			if _, err := fmt.Fprintf(w, "   Followers: %d\n", *prof.FollowersCount); err != nil {
+				return errs.Wrap(err, errs.WithContext("actor", actor))
+			}
 		}
 		if prof.Description != nil {
-			fmt.Fprintf(w, "\n%s\n", *prof.Description)
+			if _, err := fmt.Fprintf(w, "\n%s\n", *prof.Description); err != nil {
+				return errs.Wrap(err, errs.WithContext("actor", actor))
+			}
 		}
 	}
 	return nil
 }
 
-/* Copyright 2023 Spiegel
+/* Copyright 2023-2026 Spiegel
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.

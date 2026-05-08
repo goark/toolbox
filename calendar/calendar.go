@@ -117,7 +117,7 @@ func (cal *Config) OutputEvent(w io.Writer) error {
 func OutputEventSimple(evs []koyomi.Event) string {
 	b := strings.Builder{}
 	for _, ev := range evs {
-		b.WriteString(fmt.Sprintln(ev.Date, ev.Title))
+		fmt.Fprintln(&b, ev.Date, ev.Title)
 	}
 	return b.String()
 }
@@ -158,7 +158,7 @@ func (cal *Config) GetEvents() ([]koyomi.Event, error) {
 	return k.Events(), nil
 }
 
-/* Copyright 2024 Spiegel
+/* Copyright 2024-2026 Spiegel
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.

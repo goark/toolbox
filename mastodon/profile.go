@@ -34,20 +34,38 @@ func (cfg *Mastodon) ShowProfile(ctx context.Context, jsonFlag bool, w io.Writer
 			return errs.Wrap(err)
 		}
 	} else {
-		fmt.Fprintf(w, "       User ID: %s\n", account.Username)
-		fmt.Fprintf(w, "User ID (full): @%s@%s\n", account.Username, cfg.Servername())
-		fmt.Fprintf(w, "           URL: %s\n", account.URL)
-		fmt.Fprintf(w, "  Display name: %s\n", account.DisplayName)
-		fmt.Fprintf(w, "    Created at: %v\n", account.CreatedAt)
-		fmt.Fprintf(w, "         Posts: %d\n", account.StatusesCount)
-		fmt.Fprintf(w, "       Follows: %d\n", account.FollowingCount)
-		fmt.Fprintf(w, "     Followers: %d\n", account.FollowersCount)
-		fmt.Fprintf(w, "\n%s\n", account.Note)
+		if _, err := fmt.Fprintf(w, "       User ID: %s\n", account.Username); err != nil {
+			return errs.Wrap(err)
+		}
+		if _, err := fmt.Fprintf(w, "User ID (full): @%s@%s\n", account.Username, cfg.Servername()); err != nil {
+			return errs.Wrap(err)
+		}
+		if _, err := fmt.Fprintf(w, "           URL: %s\n", account.URL); err != nil {
+			return errs.Wrap(err)
+		}
+		if _, err := fmt.Fprintf(w, "  Display name: %s\n", account.DisplayName); err != nil {
+			return errs.Wrap(err)
+		}
+		if _, err := fmt.Fprintf(w, "    Created at: %v\n", account.CreatedAt); err != nil {
+			return errs.Wrap(err)
+		}
+		if _, err := fmt.Fprintf(w, "         Posts: %d\n", account.StatusesCount); err != nil {
+			return errs.Wrap(err)
+		}
+		if _, err := fmt.Fprintf(w, "       Follows: %d\n", account.FollowingCount); err != nil {
+			return errs.Wrap(err)
+		}
+		if _, err := fmt.Fprintf(w, "     Followers: %d\n", account.FollowersCount); err != nil {
+			return errs.Wrap(err)
+		}
+		if _, err := fmt.Fprintf(w, "\n%s\n", account.Note); err != nil {
+			return errs.Wrap(err)
+		}
 	}
 	return nil
 }
 
-/* Copyright 2023 Spiegel
+/* Copyright 2023-2026 Spiegel
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.

@@ -18,34 +18,43 @@ func (cfg *Bluesky) authPath() string {
 	return filepath.Join(cfg.BaseDir(), "bluesky.auth")
 }
 
-func (cfg *Bluesky) readAuth() (*xrpc.AuthInfo, error) {
-	file, err := os.Open(cfg.authPath())
-	if err != nil {
-		return nil, errs.Wrap(err, errs.WithContext("authfile", cfg.authPath()))
+func (cfg *Bluesky) readAuth() (auth *xrpc.AuthInfo, err error) {
+	file, ferr := os.Open(cfg.authPath())
+	if ferr != nil {
+		err = errs.Wrap(ferr, errs.WithContext("authfile", cfg.authPath()))
+		return
 	}
-	defer file.Close()
+	defer func() {
+		err = errs.Join(err, file.Close())
+	}()
 
-	var auth xrpc.AuthInfo
-	if err := json.NewDecoder(file).Decode(&auth); err != nil {
-		return nil, errs.Wrap(err, errs.WithContext("authfile", cfg.authPath()))
+	var vauth xrpc.AuthInfo
+	if jerr := json.NewDecoder(file).Decode(&vauth); jerr != nil {
+		err = errs.Wrap(jerr, errs.WithContext("authfile", cfg.authPath()))
+		return
 	}
-	return &auth, nil
+	auth = &vauth
+	return
 }
 
-func (cfg *Bluesky) writeAuth(auth *xrpc.AuthInfo) error {
-	file, err := os.OpenFile(cfg.authPath(), os.O_RDWR|os.O_CREATE, 0600)
-	if err != nil {
-		return errs.Wrap(err, errs.WithContext("authfile", cfg.authPath()))
+func (cfg *Bluesky) writeAuth(auth *xrpc.AuthInfo) (err error) {
+	file, ferr := os.OpenFile(cfg.authPath(), os.O_RDWR|os.O_CREATE, 0600)
+	if ferr != nil {
+		err = errs.Wrap(ferr, errs.WithContext("authfile", cfg.authPath()))
+		return
 	}
-	defer file.Close()
+	defer func() {
+		err = errs.Join(err, file.Close())
+	}()
 
-	if err := json.NewEncoder(file).Encode(auth); err != nil {
-		return errs.Wrap(err, errs.WithContext("authfile", cfg.authPath()))
+	if jerr := json.NewEncoder(file).Encode(auth); jerr != nil {
+		err = errs.Wrap(jerr, errs.WithContext("authfile", cfg.authPath()))
+		return
 	}
-	return nil
+	return
 }
 
-/* Copyright 2023 Spiegel
+/* Copyright 2023-2026 Spiegel
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.

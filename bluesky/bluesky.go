@@ -3,6 +3,7 @@ package bluesky
 import (
 	"encoding/json"
 	"os"
+	"path/filepath"
 
 	"github.com/bluesky-social/indigo/xrpc"
 	"github.com/goark/errs"
@@ -29,27 +30,33 @@ type Bluesky struct {
 }
 
 // New creates new Bluesky instance.
-func New(path, dir string, wcfg *webpage.Config, logger *log.ZapEventLogger) (*Bluesky, error) {
-	file, err := os.Open(path)
-	if err != nil {
-		return nil, errs.Wrap(err, errs.WithContext("path", path), errs.WithContext("die", dir))
+func New(path, dir string, wcfg *webpage.Config, logger *log.ZapEventLogger) (cfg *Bluesky, err error) {
+	file, ferr := os.Open(filepath.Clean(path))
+	if ferr != nil {
+		err = errs.Wrap(ferr, errs.WithContext("path", path), errs.WithContext("die", dir))
+		return
 	}
-	defer file.Close()
+	defer func() {
+		err = errs.Join(err, file.Close())
+	}()
 
-	var cfg Bluesky
-	if err := json.NewDecoder(file).Decode(&cfg); err != nil {
-		return nil, errs.Wrap(err, errs.WithContext("path", path))
+	var vcfg Bluesky
+	if jerr := json.NewDecoder(file).Decode(&vcfg); jerr != nil {
+		err = errs.Wrap(err, errs.WithContext("path", path))
+		return
 	}
-	if len(cfg.Host) == 0 {
+	if len(vcfg.Host) == 0 {
 		cfg.Host = "https://" + DefaltHostName
 	}
-	if len(cfg.Handle) == 0 {
-		return nil, errs.Wrap(ecode.ErrNoBlueskyHandle, errs.WithContext("path", path), errs.WithContext("die", dir))
+	if len(vcfg.Handle) == 0 {
+		err = errs.Wrap(ecode.ErrNoBlueskyHandle, errs.WithContext("path", path), errs.WithContext("die", dir))
+		return
 	}
-	cfg.baseDir = dir
-	cfg.wcfg = wcfg
-	cfg.logger = logger
-	return &cfg, nil
+	vcfg.baseDir = dir
+	vcfg.wcfg = wcfg
+	vcfg.logger = logger
+	cfg = &vcfg
+	return
 }
 
 // BaseDir method returns base directory.
@@ -69,23 +76,28 @@ func (cfg *Bluesky) Logger() *zap.Logger {
 }
 
 // Export methods exports configuration to config file.
-func (cfg *Bluesky) Export(path string) error {
+func (cfg *Bluesky) Export(path string) (err error) {
 	if cfg == nil {
-		return errs.Wrap(ecode.ErrNullPointer)
+		err = errs.Wrap(ecode.ErrNullPointer)
+		return
 	}
-	file, err := os.OpenFile(path, os.O_RDWR|os.O_CREATE, 0600)
-	if err != nil {
-		return errs.Wrap(err, errs.WithContext("path", path))
+	file, ferr := os.OpenFile(filepath.Clean(path), os.O_RDWR|os.O_CREATE, 0600)
+	if ferr != nil {
+		err = errs.Wrap(ferr, errs.WithContext("path", path))
+		return
 	}
-	defer file.Close()
+	defer func() {
+		err = errs.Join(err, file.Close())
+	}()
 
-	if err := json.NewEncoder(file).Encode(cfg); err != nil {
-		return errs.Wrap(err, errs.WithContext("path", path))
+	if jerr := json.NewEncoder(file).Encode(cfg); jerr != nil {
+		err = errs.Wrap(jerr, errs.WithContext("path", path))
+		return
 	}
-	return nil
+	return
 }
 
-/* Copyright 2023 Spiegel
+/* Copyright 2023-2026 Spiegel
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.

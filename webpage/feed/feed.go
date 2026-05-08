@@ -11,14 +11,18 @@ import (
 )
 
 // Feed fetches feed data from URL.
-func Feed(ctx context.Context, u *url.URL) (*Metadata, error) {
-	resp, err := ftch.New().GetWithContext(ctx, u)
-	if err != nil {
-		return nil, errs.Wrap(err, errs.WithContext("url", u.String()))
+func Feed(ctx context.Context, u *url.URL) (data *Metadata, err error) {
+	resp, ferr := ftch.New().GetWithContext(ctx, u)
+	if ferr != nil {
+		err = errs.Wrap(ferr, errs.WithContext("url", u.String()))
+		return
 	}
-	defer resp.Close()
+	defer func() {
+		err = errs.Join(err, resp.Close())
+	}()
 
-	return decodeFeed(resp.Body())
+	data, err = decodeFeed(resp.Body())
+	return
 }
 
 func decodeFeed(r io.Reader) (*Metadata, error) {
@@ -60,7 +64,7 @@ func decodeFeed(r io.Reader) (*Metadata, error) {
 	return data, nil
 }
 
-/* Copyright 2023 Spiegel
+/* Copyright 2023-2026 Spiegel
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.

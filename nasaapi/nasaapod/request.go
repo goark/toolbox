@@ -110,16 +110,21 @@ func (req *Request) String() string {
 }
 
 // Get method gets APOD data from NASA API, and returns []*Response instance.
-func (req *Request) Get(ctx context.Context) ([]*Response, error) {
+func (req *Request) Get(ctx context.Context) (rsp []*Response, err error) {
 	if req == nil {
-		return nil, errs.Wrap(nasaapi.ErrNullPointer)
+		err = errs.Wrap(nasaapi.ErrNullPointer)
+		return
 	}
-	resp, err := req.getRawData(ctx)
-	if err != nil {
-		return nil, err
+	resp, rerr := req.getRawData(ctx)
+	if rerr != nil {
+		err = errs.Wrap(rerr)
+		return
 	}
-	defer resp.Close()
-	return decode(resp, req.isSingle())
+	defer func() {
+		err = errs.Join(err, resp.Close())
+	}()
+	rsp, err = decode(resp, req.isSingle())
+	return
 }
 
 func (req *Request) getRawData(ctx context.Context) (io.ReadCloser, error) {
@@ -177,7 +182,7 @@ func (req *Request) makeQuery() (url.Values, error) {
 	return v, nil
 }
 
-/* Copyright 2023 Spiegel
+/* Copyright 2023-2026 Spiegel
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.

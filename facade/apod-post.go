@@ -1,7 +1,6 @@
 package facade
 
 import (
-	"errors"
 	"os"
 
 	"github.com/goark/errs"
@@ -23,57 +22,69 @@ func newAPODPostCmd(ui *rwi.RWI) *cobra.Command {
 		Aliases: []string{"pst", "p"},
 		Short:   "Post APOD data to TL",
 		Long:    "Post Astronomy Picture of the Day data to time lines.",
-		RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(cmd *cobra.Command, args []string) (err error) {
 			// Global options
-			gopts, err := getGlobalOptions()
-			if err != nil {
-				return debugPrint(ui, err)
+			gopts, oerr := getGlobalOptions()
+			if oerr != nil {
+				err = debugPrint(ui, oerr)
+				return
 			}
-			apd, err := gopts.getAPOD(cmd.Context())
-			if err != nil {
-				return debugPrint(ui, err)
+			apd, gerr := gopts.getAPOD(cmd.Context())
+			if gerr != nil {
+				err = debugPrint(ui, gerr)
+				return
 			}
 			// local options
-			utcFlag, err := cmd.Flags().GetBool("utc")
-			if err != nil {
-				return debugPrint(ui, err)
+			utcFlag, ferr := cmd.Flags().GetBool("utc")
+			if ferr != nil {
+				err = debugPrint(ui, ferr)
+				return
 			}
-			dateStr, err := cmd.Flags().GetString("date")
-			if err != nil {
-				return debugPrint(ui, err)
+			dateStr, ferr := cmd.Flags().GetString("date")
+			if ferr != nil {
+				err = debugPrint(ui, ferr)
+				return
 			}
-			date, err := values.DateFrom(dateStr, utcFlag)
-			if err != nil {
-				return debugPrint(ui, err)
+			date, verr := values.DateFrom(dateStr, utcFlag)
+			if verr != nil {
+				err = debugPrint(ui, verr)
+				return
 			}
-			bskyFlag, err := cmd.Flags().GetBool("bluesky")
-			if err != nil {
-				return debugPrint(ui, err)
+			bskyFlag, ferr := cmd.Flags().GetBool("bluesky")
+			if ferr != nil {
+				err = debugPrint(ui, ferr)
+				return
 			}
-			mastodonFlag, err := cmd.Flags().GetBool("mastodon")
-			if err != nil {
-				return debugPrint(ui, err)
+			mastodonFlag, ferr := cmd.Flags().GetBool("mastodon")
+			if ferr != nil {
+				err = debugPrint(ui, ferr)
+				return
 			}
-			forceFlag, err := cmd.Flags().GetBool("force")
-			if err != nil {
-				return debugPrint(ui, err)
+			forceFlag, ferr := cmd.Flags().GetBool("force")
+			if ferr != nil {
+				err = debugPrint(ui, ferr)
+				return
 			}
 
 			// lookup APOD data
-			res, err := apd.LookupWithoutCache(cmd.Context(), date, utcFlag, forceFlag)
-			if err != nil {
-				apd.Logger().Error("error in apod.Lookup", zap.Object("error", zapobject.New(err)))
-				return debugPrint(ui, err)
+			res, aerr := apd.LookupWithoutCache(cmd.Context(), date, utcFlag, forceFlag)
+			if aerr != nil {
+				apd.Logger().Error("error in apod.Lookup", zap.Object("error", zapobject.New(aerr)))
+				err = debugPrint(ui, aerr)
+				return
 			}
 
 			// get image file
-			fname, err := res.ImageFile(cmd.Context(), gopts.CacheDir)
-			if err != nil && !errs.Is(err, ecode.ErrNoAPODImage) {
-				return debugPrint(ui, err)
+			fname, rerr := res.ImageFile(cmd.Context(), gopts.CacheDir)
+			if rerr != nil && !errs.Is(rerr, ecode.ErrNoAPODImage) {
+				err = debugPrint(ui, rerr)
+				return
 			}
 			var imgs []string
 			if len(fname) > 0 {
-				defer os.Remove(fname)
+				defer func() {
+					err = errs.Join(err, os.Remove(fname))
+				}()
 				imgs = []string{fname}
 			}
 
@@ -84,40 +95,42 @@ func newAPODPostCmd(ui *rwi.RWI) *cobra.Command {
 
 			// post to Bluesky
 			if bskyFlag {
-				wp, err := gopts.getWebpage(cmd.Context())
-				if err != nil {
-					return debugPrint(ui, err)
+				wp, gerr := gopts.getWebpage(cmd.Context())
+				if gerr != nil {
+					err = debugPrint(ui, gerr)
+					return
 				}
-				if bsky, err := gopts.getBluesky(wp); err != nil {
-					apd.Logger().Info("no Bluesky configuration", zap.Object("error", zapobject.New(err)))
-					lastErrs = append(lastErrs, err)
-				} else if resText, err := bsky.PostMessage(cmd.Context(), &bluesky.Message{Msg: msg, ImageFiles: imgs}); err != nil {
-					bsky.Logger().Error("error in bluesky.PostMessage", zap.Object("error", zapobject.New(err)))
-					lastErrs = append(lastErrs, err)
+				if bsky, gerr := gopts.getBluesky(wp); gerr != nil {
+					apd.Logger().Info("no Bluesky configuration", zap.Object("error", zapobject.New(gerr)))
+					lastErrs = append(lastErrs, gerr)
+				} else if resText, berr := bsky.PostMessage(cmd.Context(), &bluesky.Message{Msg: msg, ImageFiles: imgs}); berr != nil {
+					bsky.Logger().Error("error in bluesky.PostMessage", zap.Object("error", zapobject.New(berr)))
+					lastErrs = append(lastErrs, berr)
 				} else {
 					_ = ui.Outputln("post to Bluesky:", resText)
 				}
 			}
 			// post to Mastodon
 			if mastodonFlag {
-				if mstdn, err := gopts.getMastodon(); err != nil {
-					apd.Logger().Info("no Mastodon configuration", zap.Object("error", zapobject.New(err)))
-					lastErrs = append(lastErrs, err)
-				} else if resText, err := mstdn.PostMessage(cmd.Context(), &mastodon.Message{
+				if mstdn, gerr := gopts.getMastodon(); gerr != nil {
+					apd.Logger().Info("no Mastodon configuration", zap.Object("error", zapobject.New(gerr)))
+					lastErrs = append(lastErrs, gerr)
+				} else if resText, merr := mstdn.PostMessage(cmd.Context(), &mastodon.Message{
 					Msg:        msg,
 					ImageFiles: imgs,
-				}); err != nil {
-					mstdn.Logger().Error("error in mastodon.PostMessage", zap.Object("error", zapobject.New(err)))
-					lastErrs = append(lastErrs, err)
+				}); merr != nil {
+					mstdn.Logger().Error("error in mastodon.PostMessage", zap.Object("error", zapobject.New(merr)))
+					lastErrs = append(lastErrs, merr)
 				} else {
 					_ = ui.Outputln("post to Mastodon:", resText)
 				}
 			}
 
 			if len(lastErrs) > 0 {
-				return debugPrint(ui, errs.Wrap(errors.Join(lastErrs...)))
+				err = debugPrint(ui, errs.Wrap(errs.Join(lastErrs...)))
+				return
 			}
-			return nil
+			return
 		},
 	}
 	apodPostCmd.Flags().BoolP("bluesky", "b", false, "Post to bluesky")
@@ -127,7 +140,7 @@ func newAPODPostCmd(ui *rwi.RWI) *cobra.Command {
 	return apodPostCmd
 }
 
-/* Copyright 2023 Spiegel
+/* Copyright 2023-2026 Spiegel
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.

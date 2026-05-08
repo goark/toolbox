@@ -108,27 +108,27 @@ func MakeMessage(data *nasaapod.Response) string {
 	// hash tag
 	bld.WriteString("#apod " + data.Date.String())
 	if len(data.MediaType) > 0 && data.MediaType != "image" {
-		bld.WriteString(fmt.Sprintf(" (%s)", data.MediaType))
+		fmt.Fprintf(&bld, " (%s)", data.MediaType)
 	}
 	bld.WriteString("\n")
 	//title
 	if len(data.Title) > 0 {
-		bld.WriteString(fmt.Sprintln(data.Title))
+		fmt.Fprintln(&bld, data.Title)
 	}
 	// credit
 	if len(data.Copyright) > 0 {
-		bld.WriteString(fmt.Sprintln("Image Credit:", data.Copyright))
+		fmt.Fprintln(&bld, "Image Credit:", data.Copyright)
 	}
 	// Web page
-	bld.WriteString(fmt.Sprintln("Web page:", data.WebPage()))
+	fmt.Fprintln(&bld, "Web page:", data.WebPage())
 	// content URL
 	if data.MediaType != nasaapod.MediaImage && len(data.Url) > 0 {
-		bld.WriteString(fmt.Sprintln("Content:", data.Url))
+		fmt.Fprintln(&bld, "Content:", data.Url)
 	}
 	return bld.String()
 }
 
-/* Copyright 2023 Spiegel
+/* Copyright 2023-2026 Spiegel
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.

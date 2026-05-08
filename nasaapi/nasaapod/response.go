@@ -1,6 +1,7 @@
 package nasaapod
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"io"
@@ -12,7 +13,6 @@ import (
 	"github.com/goark/fetch"
 	"github.com/goark/toolbox/ecode"
 	"github.com/goark/toolbox/values"
-	"golang.org/x/net/context"
 )
 
 const (
@@ -86,9 +86,10 @@ func (res *Response) WebPage() string {
 	return u.String()
 }
 
-func (res *Response) ImageFile(ctx context.Context, dir string) (string, error) {
+func (res *Response) ImageFile(ctx context.Context, dir string) (tname string, err error) {
 	if res == nil {
-		return "", errs.Wrap(ecode.ErrNullPointer)
+		err = errs.Wrap(ecode.ErrNullPointer)
+		return
 	}
 	var urlStr string
 	if res.MediaType == MediaImage {
@@ -103,36 +104,44 @@ func (res *Response) ImageFile(ctx context.Context, dir string) (string, error) 
 		urlStr = res.ThumbnailUrl
 	}
 	if len(urlStr) == 0 {
-		return "", errs.Wrap(ecode.ErrNoAPODImage)
+		err = errs.Wrap(ecode.ErrNoAPODImage)
+		return
 	}
 
 	// get Image data
-	u, err := url.Parse(urlStr)
-	if err != nil {
-		return "", errs.Wrap(err, errs.WithContext("url", urlStr))
+	u, perr := url.Parse(urlStr)
+	if perr != nil {
+		err = errs.Wrap(perr, errs.WithContext("url", urlStr))
+		return
 	}
-	img, err := fetch.New().GetWithContext(ctx, u)
-	if err != nil {
-		return "", errs.Wrap(err, errs.WithContext("url", urlStr))
+	img, ferr := fetch.New().GetWithContext(ctx, u)
+	if ferr != nil {
+		err = errs.Wrap(ferr, errs.WithContext("url", urlStr))
+		return
 	}
-	defer img.Close()
+	defer func() {
+		err = errs.Join(err, img.Close())
+	}()
 
 	// copy to temporary file
-	file, err := os.CreateTemp(dir, "apod.*.bin")
-	if err != nil {
-		return "", errs.Wrap(err)
+	file, ferr := os.CreateTemp(dir, "apod.*.bin")
+	if ferr != nil {
+		err = errs.Wrap(ferr)
+		return
 	}
-	defer file.Close()
+	defer func() {
+		err = errs.Join(err, file.Close())
+	}()
 
-	tname := file.Name()
-	_, err = io.Copy(file, img.Body())
-	if err != nil {
-		return "", errs.Wrap(err, errs.WithContext("url", urlStr), errs.WithContext("temp_file", tname))
+	tname = file.Name()
+	if _, cerr := io.Copy(file, img.Body()); cerr != nil {
+		err = errs.Wrap(cerr, errs.WithContext("url", urlStr), errs.WithContext("temp_file", tname))
+		return
 	}
-	return tname, nil
+	return
 }
 
-/* Copyright 2023 Spiegel
+/* Copyright 2023-2026 Spiegel
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.

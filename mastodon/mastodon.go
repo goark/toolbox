@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"net/url"
 	"os"
+	"path/filepath"
 
 	"github.com/goark/errs"
 	"github.com/goark/toolbox/consts"
@@ -28,25 +29,30 @@ type Mastodon struct {
 	logger       *log.ZapEventLogger
 }
 
-func New(path string, logger *log.ZapEventLogger) (*Mastodon, error) {
-	file, err := os.Open(path)
-	if err != nil {
-		return nil, errs.Wrap(err, errs.WithContext("path", path))
+func New(path string, logger *log.ZapEventLogger) (cfg *Mastodon, err error) {
+	file, ferr := os.Open(filepath.Clean(path))
+	if ferr != nil {
+		err = errs.Wrap(ferr, errs.WithContext("path", path))
+		return
 	}
-	defer file.Close()
+	defer func() {
+		err = errs.Join(err, file.Close())
+	}()
 
-	var cfg Mastodon
-	if err := json.NewDecoder(file).Decode(&cfg); err != nil {
-		return nil, errs.Wrap(err, errs.WithContext("path", path))
+	var vcfg Mastodon
+	if jerr := json.NewDecoder(file).Decode(&vcfg); jerr != nil {
+		err = errs.Wrap(jerr, errs.WithContext("path", path))
+		return
 	}
-	cfg.client = mstdn.NewClient(&mstdn.Config{
-		Server:       cfg.Server,
-		ClientID:     cfg.ClientID,
-		ClientSecret: cfg.ClientSecret,
-		AccessToken:  cfg.AccessToken,
+	vcfg.client = mstdn.NewClient(&mstdn.Config{
+		Server:       vcfg.Server,
+		ClientID:     vcfg.ClientID,
+		ClientSecret: vcfg.ClientSecret,
+		AccessToken:  vcfg.AccessToken,
 	})
-	cfg.logger = logger
-	return &cfg, nil
+	vcfg.logger = logger
+	cfg = &vcfg
+	return
 }
 
 // AppName method returns application name.
@@ -83,23 +89,28 @@ func (cfg *Mastodon) Logger() *zap.Logger {
 }
 
 // Export methods exports configuration to config file.
-func (cfg *Mastodon) Export(path string) error {
+func (cfg *Mastodon) Export(path string) (err error) {
 	if cfg == nil {
-		return errs.Wrap(ecode.ErrNullPointer)
+		err = errs.Wrap(ecode.ErrNullPointer)
+		return
 	}
-	file, err := os.OpenFile(path, os.O_RDWR|os.O_CREATE, 0600)
-	if err != nil {
-		return errs.Wrap(err, errs.WithContext("path", path))
+	file, ferr := os.OpenFile(filepath.Clean(path), os.O_RDWR|os.O_CREATE, 0600)
+	if ferr != nil {
+		err = errs.Wrap(ferr, errs.WithContext("path", path))
+		return
 	}
-	defer file.Close()
+	defer func() {
+		err = errs.Join(err, file.Close())
+	}()
 
-	if err := json.NewEncoder(file).Encode(cfg); err != nil {
-		return errs.Wrap(err, errs.WithContext("path", path))
+	if jerr := json.NewEncoder(file).Encode(cfg); jerr != nil {
+		err = errs.Wrap(jerr, errs.WithContext("path", path))
+		return
 	}
-	return nil
+	return
 }
 
-/* Copyright 2023 Spiegel
+/* Copyright 2023-2026 Spiegel
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.

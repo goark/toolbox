@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"context"
 	"os"
+	"path/filepath"
 	"strings"
 	"sync"
 
@@ -17,14 +18,17 @@ import (
 type FeedList []string
 
 // NewFeedList function returns new instance of FeedList.
-func NewFeedList(path string) (FeedList, error) {
-	file, err := os.Open(path)
-	if err != nil {
-		return FeedList{}, errs.Wrap(err, errs.WithContext("path", path))
+func NewFeedList(path string) (list FeedList, err error) {
+	list = FeedList{}
+	file, ferr := os.Open(filepath.Clean(path))
+	if ferr != nil {
+		err = errs.Wrap(ferr, errs.WithContext("path", path))
+		return
 	}
-	defer file.Close()
+	defer func() {
+		err = errs.Join(err, file.Close())
+	}()
 
-	list := FeedList{}
 	s := bufio.NewScanner(file)
 	for s.Scan() {
 		txt := strings.TrimSpace(s.Text())
@@ -32,10 +36,12 @@ func NewFeedList(path string) (FeedList, error) {
 			list = append(list, txt)
 		}
 	}
-	if err := s.Err(); err != nil {
-		return FeedList{}, errs.Wrap(err, errs.WithContext("path", path))
+	if ferr := s.Err(); ferr != nil {
+		err = errs.Wrap(ferr, errs.WithContext("path", path))
+		list = FeedList{}
+		return
 	}
-	return list, nil
+	return
 }
 
 // Parse method parses feeds.
@@ -69,7 +75,7 @@ func (fl FeedList) Parse(ctx context.Context, cfg *Config) error {
 	return nil
 }
 
-/* Copyright 2023 Spiegel
+/* Copyright 2023-2026 Spiegel
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.

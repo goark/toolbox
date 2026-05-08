@@ -19,27 +19,35 @@ func inputFromPipe(ui *rwi.RWI) (string, error) {
 	return string(b), nil
 }
 
-func editMessage(ctx context.Context, w io.Writer) (string, error) {
+func editMessage(ctx context.Context, w io.Writer) (msg string, err error) {
 	var editor multiline.Editor
 	editor.SetPrompt(func(w io.Writer, lnum int) (int, error) {
 		return fmt.Fprintf(w, "%2d>", lnum+1)
 	})
-	fmt.Fprintln(w, "Input 'Ctrl+J' or 'Ctrl+Enter' to submit message")
-	fmt.Fprintln(w, "Input 'Ctrl+D' with no chars to stop")
-	lines, err := editor.Read(ctx)
-	if err != nil {
-		if errs.Is(err, io.EOF) {
-			return "", nil
+	if _, ferr := fmt.Fprintln(w, "Input 'Ctrl+J' or 'Ctrl+Enter' to submit message"); ferr != nil {
+		err = errs.Wrap(ferr)
+		return
+	}
+	if _, ferr := fmt.Fprintln(w, "Input 'Ctrl+D' with no chars to stop"); ferr != nil {
+		err = errs.Wrap(ferr)
+		return
+	}
+	lines, eerr := editor.Read(ctx)
+	if eerr != nil {
+		if errs.Is(eerr, io.EOF) {
+			return
 		}
-		return "", errs.Wrap(err)
+		err = errs.Wrap(eerr)
+		return
 	}
 	if len(lines) == 0 {
-		return "", nil
+		return
 	}
-	return strings.Join(lines, "\n"), nil
+	msg = strings.Join(lines, "\n")
+	return
 }
 
-/* Copyright 2023 Spiegel
+/* Copyright 2023-2026 Spiegel
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.

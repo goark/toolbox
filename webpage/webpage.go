@@ -1,23 +1,17 @@
 package webpage
 
 import (
-	"bufio"
 	"context"
 	"encoding/json"
 	"fmt"
 	"io"
-	"net/url"
-	"os"
 	"sort"
 	"strings"
 	"time"
 
-	"github.com/PuerkitoBio/goquery"
 	"github.com/goark/errs"
-	"github.com/goark/fetch"
 	"github.com/goark/toolbox/ecode"
-	"github.com/mattn/go-encoding"
-	"golang.org/x/net/html/charset"
+	"github.com/goark/webinfo"
 )
 
 // Webpage is information of web page
@@ -32,75 +26,18 @@ type Webpage struct {
 
 // ReadPage function reads web page from URL, and analysis information.
 func ReadPage(ctx context.Context, urlStr string) (link *Webpage, err error) {
-	// fetch web page
-	u, ferr := fetch.URL(urlStr)
+	wi, ferr := webinfo.Fetch(ctx, urlStr, "")
 	if ferr != nil {
 		err = errs.Wrap(ferr, errs.WithContext("url", urlStr))
 		return
 	}
-	resp, ferr := fetch.New().GetWithContext(ctx, u)
-	if ferr != nil {
-		err = errs.Wrap(ferr, errs.WithContext("url", u.String()))
-		return
+	link = &Webpage{
+		URL:         urlStr,
+		Canonical:   wi.Canonical,
+		Title:       wi.Title,
+		Description: wi.Description,
+		ImageURL:    wi.ImageURL,
 	}
-	defer func() {
-		err = errs.Join(err, resp.Close())
-	}()
-
-	// detect character encoding
-	br := bufio.NewReader(resp.Body())
-	var r io.Reader = br
-	if data, err2 := br.Peek(1024); err2 == nil { //next 1024 bytes without advancing the reader.
-		enc, name, _ := charset.DetermineEncoding(data, resp.Header().Get("content-type"))
-		if enc != nil {
-			r = enc.NewDecoder().Reader(br)
-		} else if len(name) > 0 {
-			if enc := encoding.GetEncoding(name); enc != nil {
-				r = enc.NewDecoder().Reader(br)
-			}
-		}
-	}
-
-	// analysis web content
-	link = &Webpage{URL: urlStr}
-	doc, qerr := goquery.NewDocumentFromReader(r)
-	if qerr != nil {
-		err = errs.Wrap(qerr, errs.WithContext("url", u.String()))
-		return
-	}
-	doc.Find("head").Each(func(_ int, s *goquery.Selection) {
-		s.Find("title").Each(func(_ int, s *goquery.Selection) {
-			t := s.Text()
-			if len(t) > 0 {
-				link.Title = strings.TrimSpace(t)
-			}
-		})
-		s.Find(`meta[property="og:title"]`).Each(func(_ int, s *goquery.Selection) {
-			if v, ok := s.Attr("content"); ok && len(v) > 0 {
-				link.Title = strings.TrimSpace(v)
-			}
-		})
-		s.Find(`meta[name="description"]`).Each(func(_ int, s *goquery.Selection) {
-			if v, ok := s.Attr("content"); ok && len(v) > 0 {
-				link.Description = strings.TrimSpace(v)
-			}
-		})
-		s.Find(`meta[property="og:description"]`).Each(func(_ int, s *goquery.Selection) {
-			if v, ok := s.Attr("content"); ok && len(v) > 0 {
-				link.Description = strings.TrimSpace(v)
-			}
-		})
-		s.Find(`meta[property="og:image"]`).Each(func(_ int, s *goquery.Selection) {
-			if v, ok := s.Attr("content"); ok && len(v) > 0 {
-				link.ImageURL = strings.TrimSpace(v)
-			}
-		})
-		s.Find("link[rel='canonical']").Each(func(_ int, s *goquery.Selection) {
-			if v, ok := s.Attr("href"); ok && len(v) > 0 {
-				link.Canonical = strings.TrimSpace(v)
-			}
-		})
-	})
 	return
 }
 
@@ -140,38 +77,8 @@ func (wp *Webpage) ImageFile(ctx context.Context, dir string) (tname string, err
 		err = errs.Wrap(ecode.ErrNoAPODImage)
 		return
 	}
-
-	// get Image data
-	u, perr := url.Parse(wp.ImageURL)
-	if perr != nil {
-		err = errs.Wrap(perr, errs.WithContext("image_url", wp.ImageURL))
-		return
-	}
-	img, ferr := fetch.New().GetWithContext(ctx, u)
-	if ferr != nil {
-		err = errs.Wrap(ferr, errs.WithContext("image_url", wp.ImageURL))
-		return
-	}
-	defer func() {
-		err = errs.Join(err, img.Close())
-	}()
-
-	// copy to temporary file
-	file, ferr := os.CreateTemp(dir, "webpage.*.jpg")
-	if ferr != nil {
-		err = errs.Wrap(ferr)
-		return
-	}
-	defer func() {
-		err = errs.Join(err, file.Close())
-	}()
-
-	tname = file.Name()
-	_, cerr := io.Copy(file, img.Body())
-	if cerr != nil {
-		err = errs.Wrap(cerr, errs.WithContext("image_url", wp.ImageURL), errs.WithContext("temp_file", tname))
-		return
-	}
+	wi := &webinfo.Webinfo{ImageURL: wp.ImageURL}
+	tname, err = wi.DownloadImage(ctx, dir, true)
 	return
 }
 

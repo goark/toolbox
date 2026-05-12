@@ -1,7 +1,8 @@
 # [toolbox] -- A collection of miscellaneous commands
 
-[![lint status](https://github.com/goark/toolbox/workflows/lint/badge.svg)](https://github.com/goark/toolbox/actions)
-[![lint status](https://github.com/goark/toolbox/workflows/build/badge.svg)](https://github.com/goark/toolbox/actions)
+[![ci status](https://github.com/goark/toolbox/workflows/ci/badge.svg)](https://github.com/goark/toolbox/actions)
+[![build status](https://github.com/goark/toolbox/workflows/build/badge.svg)](https://github.com/goark/toolbox/actions)
+[![CodeQL status](https://github.com/goark/toolbox/workflows/CodeQL/badge.svg)](https://github.com/goark/toolbox/actions)
 [![GitHub license](https://img.shields.io/badge/license-Apache%202-blue.svg)](https://raw.githubusercontent.com/goark/toolbox/master/LICENSE)
 [![GitHub release](http://img.shields.io/github/release/goark/toolbox.svg)](https://github.com/goark/toolbox/releases/latest)
 

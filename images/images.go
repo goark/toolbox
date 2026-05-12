@@ -10,33 +10,15 @@ import (
 	"path/filepath"
 
 	"github.com/goark/errs"
-	"github.com/goark/fetch"
 	"github.com/goark/toolbox/ecode"
+	"github.com/goark/webinfo"
 	"golang.org/x/image/draw"
 )
 
 // FetchFromURL returns binary image from URL.
 func FetchFromURL(ctx context.Context, urlStr string) (data []byte, err error) {
-	u, ferr := fetch.URL(urlStr)
-	if ferr != nil {
-		err = errs.Wrap(ferr, errs.WithContext("url", urlStr))
-		return
-	}
-	resp, ferr := fetch.New().GetWithContext(ctx, u)
-	if ferr != nil {
-		err = errs.Wrap(ferr, errs.WithContext("url", u.String()))
-		return
-	}
-	defer func() {
-		err = errs.Join(err, resp.Close())
-	}()
-
-	b, ferr := io.ReadAll(resp.Body())
-	if ferr != nil {
-		err = errs.Wrap(ferr, errs.WithContext("url", u.String()))
-		return
-	}
-	data = b
+	wi := &webinfo.Webinfo{ImageURL: urlStr}
+	data, err = wi.ImageBytes(ctx)
 	return
 }
 
@@ -127,7 +109,7 @@ func convertJPEG(src image.Image, quality int) ([]byte, error) {
 	return dst.Bytes(), nil
 }
 
-/* Copyright 2023 Spiegel
+/* Copyright 2023-2026 Spiegel
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.

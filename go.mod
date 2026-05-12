@@ -5,31 +5,30 @@ go 1.26
 toolchain go1.26.3
 
 require (
-	github.com/PuerkitoBio/goquery v1.12.0
 	github.com/bluesky-social/indigo v0.0.0-20260428083920-ce62b8fce9e0
 	github.com/glebarez/sqlite v1.11.0
-	github.com/goark/errs v1.3.3
+	github.com/goark/errs v1.3.4
 	github.com/goark/errs/zapobject v0.1.4
-	github.com/goark/fetch v0.5.1
+	github.com/goark/fetch v0.5.3
 	github.com/goark/gocli v0.13.0
 	github.com/goark/koyomi v0.11.0
+	github.com/goark/webinfo v0.2.0
 	github.com/hymkor/go-multiline-ny v0.23.1
 	github.com/ipfs/go-log/v2 v2.9.1
 	github.com/joho/godotenv v1.5.1
-	github.com/mattn/go-encoding v0.0.2
 	github.com/mattn/go-mastodon v0.0.11
 	github.com/mmcdole/gofeed v1.3.0
 	github.com/nyaosorg/go-readline-ny v1.15.1
 	github.com/spf13/cobra v1.10.2
 	github.com/spf13/viper v1.21.0
 	go.uber.org/zap v1.28.0
-	golang.org/x/image v0.39.0
-	golang.org/x/net v0.53.0
+	golang.org/x/image v0.40.0
 	gorm.io/gorm v1.31.1
 	moul.io/zapgorm2 v1.3.0
 )
 
 require (
+	github.com/PuerkitoBio/goquery v1.12.0 // indirect
 	github.com/andybalholm/cascadia v1.3.3 // indirect
 	github.com/clipperhouse/uax29/v2 v2.6.0 // indirect
 	github.com/dustin/go-humanize v1.0.1 // indirect
@@ -63,6 +62,7 @@ require (
 	github.com/jinzhu/now v1.1.5 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/klauspost/cpuid/v2 v2.2.7 // indirect
+	github.com/mattn/go-encoding v0.0.2 // indirect
 	github.com/mattn/go-isatty v0.0.22 // indirect
 	github.com/mattn/go-runewidth v0.0.23 // indirect
 	github.com/mattn/go-tty v0.0.7 // indirect
@@ -99,10 +99,11 @@ require (
 	go.uber.org/atomic v1.11.0 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
 	go.yaml.in/yaml/v3 v3.0.4 // indirect
-	golang.org/x/crypto v0.50.0 // indirect
-	golang.org/x/sys v0.43.0 // indirect
-	golang.org/x/term v0.42.0 // indirect
-	golang.org/x/text v0.36.0 // indirect
+	golang.org/x/crypto v0.51.0 // indirect
+	golang.org/x/net v0.54.0 // indirect
+	golang.org/x/sys v0.44.0 // indirect
+	golang.org/x/term v0.43.0 // indirect
+	golang.org/x/text v0.37.0 // indirect
 	golang.org/x/xerrors v0.0.0-20231012003039-104605ab7028 // indirect
 	lukechampine.com/blake3 v1.2.1 // indirect
 	modernc.org/libc v1.22.5 // indirect

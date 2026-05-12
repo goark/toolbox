@@ -6,13 +6,12 @@ import (
 	"errors"
 	"io"
 	"net/url"
-	"os"
 	"path"
 
 	"github.com/goark/errs"
-	"github.com/goark/fetch"
 	"github.com/goark/toolbox/ecode"
 	"github.com/goark/toolbox/values"
+	"github.com/goark/webinfo"
 )
 
 const (
@@ -107,37 +106,8 @@ func (res *Response) ImageFile(ctx context.Context, dir string) (tname string, e
 		err = errs.Wrap(ecode.ErrNoAPODImage)
 		return
 	}
-
-	// get Image data
-	u, perr := url.Parse(urlStr)
-	if perr != nil {
-		err = errs.Wrap(perr, errs.WithContext("url", urlStr))
-		return
-	}
-	img, ferr := fetch.New().GetWithContext(ctx, u)
-	if ferr != nil {
-		err = errs.Wrap(ferr, errs.WithContext("url", urlStr))
-		return
-	}
-	defer func() {
-		err = errs.Join(err, img.Close())
-	}()
-
-	// copy to temporary file
-	file, ferr := os.CreateTemp(dir, "apod.*.bin")
-	if ferr != nil {
-		err = errs.Wrap(ferr)
-		return
-	}
-	defer func() {
-		err = errs.Join(err, file.Close())
-	}()
-
-	tname = file.Name()
-	if _, cerr := io.Copy(file, img.Body()); cerr != nil {
-		err = errs.Wrap(cerr, errs.WithContext("url", urlStr), errs.WithContext("temp_file", tname))
-		return
-	}
+	wi := &webinfo.Webinfo{ImageURL: urlStr}
+	tname, err = wi.DownloadImage(ctx, dir, true)
 	return
 }
 

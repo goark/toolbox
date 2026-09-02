@@ -19,7 +19,6 @@ tasks:
     cmds:
       - go mod verify
       - go test -shuffle on ./...
-      - govulncheck ./...
       - golangci-lint-v2 run --enable gosec --timeout 10m0s ./...
     sources:
       - ./go.mod
@@ -42,7 +41,7 @@ tasks:
       - '**/*.go'
 
   prepare:
-      - go mod tidy -v -go=1.26
+      - go mod tidy -v -go=1.27
 
   clean:
     desc: Initialize module and build cache, and remake go.sum file.

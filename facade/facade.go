@@ -25,7 +25,7 @@ var (
 	//Name is applicatin name
 	Name = consts.AppNameShort
 	//Version is version for applicatin
-	Version = "dev-version"
+	Version = ""
 )
 
 const (

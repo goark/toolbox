@@ -2,6 +2,7 @@ package facade
 
 import (
 	"bytes"
+	"runtime/debug"
 	"testing"
 
 	"github.com/goark/gocli/exitcode"
@@ -9,7 +10,8 @@ import (
 )
 
 func TestVersionMin(t *testing.T) {
-	result := "toolbox dev-version\nrepository: https://github.com/goark/toolbox\n"
+	info, _ := debug.ReadBuildInfo()
+	result := "toolbox (devel) (compiled with " + info.GoVersion + ")\nrepository: https://github.com/goark/toolbox\n"
 
 	outBuf := new(bytes.Buffer)
 	outErrBuf := new(bytes.Buffer)

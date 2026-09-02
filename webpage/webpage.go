@@ -26,7 +26,7 @@ type Webpage struct {
 
 // ReadPage function reads web page from URL, and analysis information.
 func ReadPage(ctx context.Context, urlStr string) (link *Webpage, err error) {
-	wi, ferr := webinfo.Fetch(ctx, urlStr, "")
+	wi, ferr := webinfo.Fetch(ctx, urlStr, "") //default user-agent is set in webinfo.Fetch() function
 	if ferr != nil {
 		err = errs.Wrap(ferr, errs.WithContext("url", urlStr))
 		return
@@ -77,7 +77,7 @@ func (wp *Webpage) ImageFile(ctx context.Context, dir string) (tname string, err
 		err = errs.Wrap(ecode.ErrNoAPODImage)
 		return
 	}
-	wi := &webinfo.Webinfo{ImageURL: wp.ImageURL}
+	wi := &webinfo.Webinfo{ImageURL: wp.ImageURL, UserAgent: webinfo.DefaultUserAgent()}
 	tname, err = wi.DownloadImage(ctx, dir, true)
 	return
 }

@@ -62,7 +62,7 @@ func importFromModel(data *model.ApodData) *nasaapod.Response {
 		Date:        date,
 		PostID:      0,
 		Title:       data.Title,
-		Permalink:   data.Url,
+		Permalink:   data.Permalink,
 		MediaType:   data.MediaType,
 		Explanation: data.Explanation,
 		Credit:      data.Copyright,
@@ -78,6 +78,7 @@ func exportToModel(data *nasaapod.Response) model.ApodData {
 		return model.ApodData{}
 	}
 	return model.ApodData{
+		Permalink:      data.Permalink,
 		Copyright:      data.Copyright,
 		Date:           data.Date.String(),
 		Explanation:    data.Explanation,
@@ -90,7 +91,7 @@ func exportToModel(data *nasaapod.Response) model.ApodData {
 	}
 }
 
-/* Copyright 2023 Spiegel
+/* Copyright 2023-2026 Spiegel
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.

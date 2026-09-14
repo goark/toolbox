@@ -104,7 +104,8 @@ func MakeMessage(data *nasaapod.Response) string {
 	bld := strings.Builder{}
 
 	// hash tag
-	bld.WriteString("#apod " + data.Date.String())
+	bld.WriteString("#apod ")
+	bld.WriteString(data.Date.String())
 	if len(data.MediaType) > 0 && data.MediaType != "image" {
 		fmt.Fprintf(&bld, " (%s)", data.MediaType)
 	}
@@ -113,9 +114,14 @@ func MakeMessage(data *nasaapod.Response) string {
 	if len(data.Title) > 0 {
 		fmt.Fprintln(&bld, data.Title)
 	}
-	// credit : temporary remove
-	// if len(data.Copyright) > 0 {
-	// 	fmt.Fprintln(&bld, "Image Credit:", data.Copyright)
+	// TODO(apod-credit-html): Re-enable credit output after HTML-to-plain-text
+	// conversion and length control for SNS posting are implemented.
+	// credit := data.Credit
+	// if len(credit) == 0 {
+	// 	credit = data.Copyright
+	// }
+	// if len(credit) > 0 {
+	// 	fmt.Fprintln(&bld, "Image Credit:", credit)
 	// }
 	// Web page
 	fmt.Fprintln(&bld, "Web page:", data.WebPage())

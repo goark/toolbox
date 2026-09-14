@@ -136,7 +136,7 @@ func TestDate(t *testing.T) {
 			WithCount(tc.count),
 			WithAPIKey(tc.apiKey),
 		)
-		_, err := req.makeQuery()
+		_, err := req.makeQuery(1, defaultPerPage)
 		if !errors.Is(err, tc.err) {
 			t.Errorf("makeQuery() is \"%v\", want \"%v\"", err, tc.err)
 		}

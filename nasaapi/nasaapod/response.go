@@ -28,9 +28,8 @@ type Response struct {
 	Credit      string      `json:"credit,omitempty"`
 	Copyright   string      `json:"copyright,omitempty"`
 	Alt         string      `json:"alt,omitempty"`
-	Url         string      `json:"url,omitempty"` //URL of the Web page ?
+	Url         string      `json:"url,omitempty"`
 	HdUrl       string      `json:"hdurl,omitempty"`
-	// ThumbnailUrl string      `json:"thumbnail_url,omitempty"`
 
 	ServiceVersion string `json:"service_version,omitempty"`
 }
@@ -84,13 +83,6 @@ func (res *Response) WebPage() string {
 		return res.Permalink
 	}
 	return res.Url
-	// Removed as it's no longer needed
-	// u, err := url.Parse(webPage)
-	// if err != nil {
-	// 	return ""
-	// }
-	// u.Path = path.Join(u.Path, "ap"+res.Date.Format("060102")+".html")
-	// return u.String()
 }
 
 func (res *Response) ImageFile(ctx context.Context, dir string) (tname string, err error) {
@@ -98,11 +90,15 @@ func (res *Response) ImageFile(ctx context.Context, dir string) (tname string, e
 		err = errs.Wrap(ecode.ErrNullPointer)
 		return
 	}
-	if len(res.HdUrl) == 0 {
+	urlStr := res.HdUrl
+	if len(urlStr) == 0 {
+		urlStr = res.Url
+	}
+	if len(urlStr) == 0 {
 		err = errs.Wrap(ecode.ErrNoAPODImage)
 		return
 	}
-	wi := &webinfo.Webinfo{ImageURL: res.HdUrl, UserAgent: webinfo.DefaultUserAgent()}
+	wi := &webinfo.Webinfo{ImageURL: urlStr, UserAgent: webinfo.DefaultUserAgent()}
 	tname, err = wi.DownloadImage(ctx, dir, true)
 	return
 }

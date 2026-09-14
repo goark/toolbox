@@ -157,6 +157,27 @@ Global Flags:
 Use "toolbox apod [command] --help" for more information about a command.
 ```
 
+### APOD API migration notes (EN/JA)
+
+Detailed bilingual notes are available here:
+- [docs/apod-api-migration-notes.md](./docs/apod-api-migration-notes.md)
+
+#### English
+
+- Since 2026-09, APOD data source is switched to:
+  - `https://science.nasa.gov/wp-json/wp/v2/apod-basic`
+- Response format changed from NASA legacy APOD API to WordPress JSON API style.
+- Current implementation behavior:
+  - API requests use `page`/`per_page`.
+  - `--date` and date-range semantics are handled by client-side filtering after fetch.
+  - APOD metadata now uses fields like `permalink`, `credit`, `alt`, `url`, `hdurl`.
+- SQLite schema note:
+  - `apod_data` now includes `permalink` column.
+  - Migration is executed even when database file already exists, so existing DBs are updated.
+- Temporary behavior for social posting:
+  - Credit output is intentionally disabled in message generation because new API credit text may include HTML and can exceed SNS limits.
+  - A TODO marker is left in source for future HTML-to-plain-text and length-control support.
+
 ### Usage webpage command
 
 ```

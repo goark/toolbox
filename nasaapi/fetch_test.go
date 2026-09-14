@@ -7,22 +7,23 @@ import (
 
 func TestGetURL(t *testing.T) {
 	testCases := []struct {
+		host string
 		path string
 		q    url.Values
 		want string
 	}{
-		{path: "/foo/bar", q: url.Values{"hoge": []string{"hage"}}, want: "https://api.nasa.gov/foo/bar?hoge=hage"},
+		{host: DefaultHost, path: "/foo/bar", q: url.Values{"hoge": []string{"hage"}}, want: "https://api.nasa.gov/foo/bar?hoge=hage"},
 	}
 
 	for _, tc := range testCases {
-		u := getURL(tc.path, tc.q)
+		u := getURL(tc.host, tc.path, tc.q)
 		if u.String() != tc.want {
 			t.Errorf("getURL() is \"%v\" , want \"%v\"", u.String(), tc.want)
 		}
 	}
 }
 
-/* Copyright 2023 Spiegel
+/* Copyright 2023-2026 Spiegel
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.

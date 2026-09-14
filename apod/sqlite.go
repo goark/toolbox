@@ -59,15 +59,17 @@ func importFromModel(data *model.ApodData) *nasaapod.Response {
 	}
 	date, _ := values.DateFrom(data.Date, false)
 	return &nasaapod.Response{
-		Copyright:      data.Copyright,
-		Date:           date,
-		Explanation:    data.Explanation,
-		HdUrl:          data.HdUrl,
-		MediaType:      data.MediaType,
-		ServiceVersion: data.ServiceVersion,
-		Title:          data.Title,
-		Url:            data.Url,
-		ThumbnailUrl:   data.ThumbnailUrl,
+		Date:        date,
+		PostID:      0,
+		Title:       data.Title,
+		Permalink:   data.Permalink,
+		MediaType:   data.MediaType,
+		Explanation: data.Explanation,
+		Credit:      data.Copyright,
+		Copyright:   data.Copyright,
+		Alt:         "",
+		Url:         data.Url,
+		HdUrl:       data.HdUrl,
 	}
 }
 
@@ -76,19 +78,20 @@ func exportToModel(data *nasaapod.Response) model.ApodData {
 		return model.ApodData{}
 	}
 	return model.ApodData{
+		Permalink:      data.Permalink,
 		Copyright:      data.Copyright,
 		Date:           data.Date.String(),
 		Explanation:    data.Explanation,
 		HdUrl:          data.HdUrl,
 		MediaType:      data.MediaType,
-		ServiceVersion: data.ServiceVersion,
+		ServiceVersion: "",
 		Title:          data.Title,
 		Url:            data.Url,
-		ThumbnailUrl:   data.ThumbnailUrl,
+		ThumbnailUrl:   "",
 	}
 }
 
-/* Copyright 2023 Spiegel
+/* Copyright 2023-2026 Spiegel
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.

@@ -5,7 +5,7 @@ go 1.27
 toolchain go1.27.1
 
 require (
-	github.com/bluesky-social/indigo v0.0.0-20260901223522-800c11248cb1
+	github.com/bluesky-social/indigo v0.0.0-20260903211445-41278964ec8e
 	github.com/glebarez/sqlite v1.11.0
 	github.com/goark/errs v1.3.4
 	github.com/goark/errs/zapobject v0.1.5
@@ -18,18 +18,18 @@ require (
 	github.com/joho/godotenv v1.5.1
 	github.com/mattn/go-mastodon v0.0.13
 	github.com/mmcdole/gofeed v1.4.2
-	github.com/nyaosorg/go-readline-ny v1.15.1
+	github.com/nyaosorg/go-readline-ny v1.16.1
 	github.com/spf13/cobra v1.10.2
 	github.com/spf13/viper v1.21.0
 	go.uber.org/zap v1.28.0
-	golang.org/x/image v0.45.0
+	golang.org/x/image v0.46.0
 	gorm.io/gorm v1.31.2
 	moul.io/zapgorm2 v1.3.0
 )
 
 require (
 	github.com/PuerkitoBio/goquery v1.13.0 // indirect
-	github.com/andybalholm/cascadia v1.3.4 // indirect
+	github.com/andybalholm/cascadia v1.3.5 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/clipperhouse/uax29/v2 v2.7.0 // indirect
 	github.com/dustin/go-humanize v1.0.1 // indirect
@@ -48,7 +48,7 @@ require (
 	github.com/hashicorp/golang-lru v1.0.2 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/ipfs/bbloom v0.1.0 // indirect
-	github.com/ipfs/boxo v0.41.0 // indirect
+	github.com/ipfs/boxo v0.42.2 // indirect
 	github.com/ipfs/go-block-format v0.2.4 // indirect
 	github.com/ipfs/go-cid v0.6.2 // indirect
 	github.com/ipfs/go-datastore v0.9.2 // indirect
@@ -63,7 +63,7 @@ require (
 	github.com/klauspost/cpuid/v2 v2.4.0 // indirect
 	github.com/mattn/go-encoding v0.0.2 // indirect
 	github.com/mattn/go-isatty v0.0.24 // indirect
-	github.com/mattn/go-runewidth v0.0.29 // indirect
+	github.com/mattn/go-runewidth v0.0.30 // indirect
 	github.com/mattn/go-tty v0.0.8 // indirect
 	github.com/minio/sha256-simd v1.0.1 // indirect
 	github.com/mmcdole/goxpp/v2 v2.0.0 // indirect
@@ -97,15 +97,15 @@ require (
 	go.uber.org/atomic v1.11.0 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
 	go.yaml.in/yaml/v3 v3.0.5 // indirect
-	golang.org/x/crypto v0.55.0 // indirect
-	golang.org/x/net v0.58.0 // indirect
-	golang.org/x/sys v0.47.0 // indirect
-	golang.org/x/term v0.45.0 // indirect
-	golang.org/x/text v0.41.0 // indirect
+	golang.org/x/crypto v0.57.0 // indirect
+	golang.org/x/net v0.59.0 // indirect
+	golang.org/x/sys v0.48.0 // indirect
+	golang.org/x/term v0.46.0 // indirect
+	golang.org/x/text v0.42.0 // indirect
 	golang.org/x/xerrors v0.0.0-20240903120638-7835f813f4da // indirect
 	lukechampine.com/blake3 v1.4.1 // indirect
-	modernc.org/libc v1.75.6 // indirect
+	modernc.org/libc v1.75.7 // indirect
 	modernc.org/mathutil v1.7.1 // indirect
 	modernc.org/memory v1.12.1 // indirect
-	modernc.org/sqlite v1.57.0 // indirect
+	modernc.org/sqlite v1.58.0 // indirect
 )

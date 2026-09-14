@@ -42,13 +42,11 @@ func Open(ctx context.Context, dir string, zlogger *log.ZapEventLogger) (*Reposi
 	}
 	zlogger.Desugar().Debug("complete opening database file", zap.String("path", path))
 	// migration
-	if !existFlag {
-		zlogger.Desugar().Debug("start migration", zap.String("path", path), zap.Bool("file exist", existFlag))
-		if err := model.Migration(ctx, db); err != nil {
-			return nil, errs.Wrap(err, errs.WithContext("dbfile", path))
-		}
-		zlogger.Desugar().Debug("complete migration", zap.String("path", path), zap.Bool("file exist", existFlag))
+	zlogger.Desugar().Debug("start migration", zap.String("path", path), zap.Bool("file exist", existFlag))
+	if err := model.Migration(ctx, db); err != nil {
+		return nil, errs.Wrap(err, errs.WithContext("dbfile", path))
 	}
+	zlogger.Desugar().Debug("complete migration", zap.String("path", path), zap.Bool("file exist", existFlag))
 
 	return &Repository{db: db, logger: zlogger}, nil
 }
@@ -69,7 +67,7 @@ func (cfg *Repository) Logger() *zap.Logger {
 	return cfg.logger.Desugar()
 }
 
-/* Copyright 2023 Spiegel
+/* Copyright 2023-2026 Spiegel
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.

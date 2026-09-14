@@ -10,29 +10,31 @@ import (
 )
 
 const (
-	defaultScheme = "https"
-	defaultHost   = "api.nasa.gov"
+	DefaultScheme = "https"            // Default scheme for NASA API requests
+	DefaultHost   = "api.nasa.gov"     // Default host for NASA API requests
+	APODHost      = "science.nasa.gov" // Host for APOD API requests
 )
 
 // Request function requests to NASA API, and returns response data.
-func Fetch(ctx context.Context, path string, q url.Values) (io.ReadCloser, error) {
-	resp, err := fetch.New().GetWithContext(ctx, getURL(path, q))
+func Fetch(ctx context.Context, host string, path string, q url.Values) (io.ReadCloser, error) {
+	u := getURL(host, path, q)
+	resp, err := fetch.New().GetWithContext(ctx, u)
 	if err != nil {
 		return nil, errs.Wrap(err)
 	}
 	return resp.Body(), nil
 }
 
-func getURL(path string, q url.Values) *url.URL {
+func getURL(host string, path string, q url.Values) *url.URL {
 	return &url.URL{
-		Scheme:   defaultScheme,
-		Host:     defaultHost,
+		Scheme:   DefaultScheme,
+		Host:     host,
 		Path:     path,
 		RawQuery: q.Encode(),
 	}
 }
 
-/* Copyright 2023 Spiegel
+/* Copyright 2023-2026 Spiegel
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.

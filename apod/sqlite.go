@@ -59,15 +59,17 @@ func importFromModel(data *model.ApodData) *nasaapod.Response {
 	}
 	date, _ := values.DateFrom(data.Date, false)
 	return &nasaapod.Response{
-		Copyright:      data.Copyright,
-		Date:           date,
-		Explanation:    data.Explanation,
-		HdUrl:          data.HdUrl,
-		MediaType:      data.MediaType,
-		ServiceVersion: data.ServiceVersion,
-		Title:          data.Title,
-		Url:            data.Url,
-		ThumbnailUrl:   data.ThumbnailUrl,
+		Date:        date,
+		PostID:      0,
+		Title:       data.Title,
+		Permalink:   data.Url,
+		MediaType:   data.MediaType,
+		Explanation: data.Explanation,
+		Credit:      data.Copyright,
+		Copyright:   data.Copyright,
+		Alt:         "",
+		Url:         data.Url,
+		HdUrl:       data.HdUrl,
 	}
 }
 
@@ -81,10 +83,10 @@ func exportToModel(data *nasaapod.Response) model.ApodData {
 		Explanation:    data.Explanation,
 		HdUrl:          data.HdUrl,
 		MediaType:      data.MediaType,
-		ServiceVersion: data.ServiceVersion,
+		ServiceVersion: "",
 		Title:          data.Title,
 		Url:            data.Url,
-		ThumbnailUrl:   data.ThumbnailUrl,
+		ThumbnailUrl:   "",
 	}
 }
 

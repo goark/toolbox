@@ -1,11 +1,11 @@
 package nasaapod
 
 const (
-	apiPath = "/planetary/apod"
-	webPage = "https://apod.nasa.gov/apod/"
+	apiPath = "/wp-json/wp/v2/apod-basic/"
+	// webPage = "https://apod.nasa.gov/apod/" // remove this line if not needed
 )
 
-/* Copyright 2023 Spiegel
+/* Copyright 2023-2026 Spiegel
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.

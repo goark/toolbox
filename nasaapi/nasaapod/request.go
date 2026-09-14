@@ -19,8 +19,8 @@ type Request struct {
 	StartDate values.Date `json:"start_date,omitempty"` // The start of a date range, when requesting date for a range of dates. Cannot be used with date.
 	EndDate   values.Date `json:"end_date,omitempty"`   // The end of the date range, when used with start_date.
 	Count     int         `json:"count,omitempty"`      // If this is specified then count randomly chosen images will be returned. Cannot be used with date or start_date and end_date.
-	Thumbs    bool        `json:"thumbs,omitempty"`     // Return the URL of video thumbnail. If an APOD is not a video, this parameter is ignored.
 	APIKey    string      `json:"api_key"`              // api.nasa.gov key for expanded usage
+	// Thumbs    bool     `json:"thumbs,omitempty"`     // Return the URL of video thumbnail. If an APOD is not a video, this parameter is ignored.
 }
 
 type Opts func(*Request)
@@ -70,14 +70,15 @@ func WithCount(count int) Opts {
 	}
 }
 
+// Remove WithThumbs function as the Thumbs field is no longer used.
 // WithThumbs returns function for setting Request.Thumbs.
-func WithThumbs(thumbs bool) Opts {
-	return func(ctx *Request) {
-		if ctx != nil {
-			ctx.Thumbs = thumbs
-		}
-	}
-}
+// func WithThumbs(thumbs bool) Opts {
+// 	return func(ctx *Request) {
+// 		if ctx != nil {
+// 			ctx.Thumbs = thumbs
+// 		}
+// 	}
+// }
 
 // WithAPIKey returns function for setting Request.APIKey.
 func WithAPIKey(apiKey string) Opts {
@@ -110,7 +111,7 @@ func (req *Request) String() string {
 }
 
 // Get method gets APOD data from NASA API, and returns []*Response instance.
-func (req *Request) Get(ctx context.Context) (rsp []*Response, err error) {
+func (req *Request) Get(ctx context.Context) (rsp []Response, err error) {
 	if req == nil {
 		err = errs.Wrap(nasaapi.ErrNullPointer)
 		return
@@ -135,16 +136,17 @@ func (req *Request) getRawData(ctx context.Context) (io.ReadCloser, error) {
 	if err != nil {
 		return nil, errs.Wrap(err)
 	}
-	return nasaapi.Fetch(ctx, apiPath, q)
+	return nasaapi.Fetch(ctx, nasaapi.APODHost, apiPath, q)
 }
 
 func (req *Request) isSingle() bool {
-	if !req.Date.IsZero() {
-		return true
-	}
-	if req.StartDate.IsZero() && req.EndDate.IsZero() && req.Count == 0 {
-		return true
-	}
+	// this flag is always false as the single item check is no longer used
+	// if !req.Date.IsZero() {
+	// 	return true
+	// }
+	// if req.StartDate.IsZero() && req.EndDate.IsZero() && req.Count == 0 {
+	// 	return true
+	// }
 	return false
 }
 
@@ -171,9 +173,9 @@ func (req *Request) makeQuery() (url.Values, error) {
 	if req.Count > 0 {
 		v.Set("count", strconv.Itoa(req.Count))
 	}
-	if req.Thumbs {
-		v.Set("thumbs", "true")
-	}
+	// if req.Thumbs { // removed as Thumbs field is no longer used
+	// 	v.Set("thumbs", "true")
+	// }
 	if len(req.APIKey) > 0 {
 		v.Set("api_key", req.APIKey)
 	} else {

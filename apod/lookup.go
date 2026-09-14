@@ -34,7 +34,6 @@ func (cfg *APOD) Lookup(ctx context.Context, date values.Date, utcFlag, saveFlag
 	res, err := nasaapod.New(
 		nasaapod.WithAPIKey(cfg.APIKey),
 		nasaapod.WithDate(date),
-		nasaapod.WithThumbs(true),
 	).Get(ctx)
 	if err != nil {
 		return nil, errs.Wrap(err, errs.WithContext("date", date.String()))
@@ -44,7 +43,7 @@ func (cfg *APOD) Lookup(ctx context.Context, date values.Date, utcFlag, saveFlag
 		return nil, errs.Wrap(ecode.ErrNoContent, errs.WithContext("date", date.String()))
 	}
 	cfg.Logger().Debug("find APOD data from NASA API", zap.String("date", date.String()), zap.Any("response", res))
-	cfg.put(res[0])
+	cfg.put(&res[0])
 
 	// save APOD data
 	if saveFlag {
@@ -52,7 +51,7 @@ func (cfg *APOD) Lookup(ctx context.Context, date values.Date, utcFlag, saveFlag
 			return nil, errs.Wrap(err, errs.WithContext("date", date.String()), errs.WithContext("save", saveFlag))
 		}
 	}
-	return res[0], nil
+	return &res[0], nil
 }
 
 // Lookup method gets APOD data from NASA API and save cache. If exist data in cache, returns ErrExistAPODData error.
@@ -80,7 +79,6 @@ func (cfg *APOD) LookupWithoutCache(ctx context.Context, date values.Date, utcFl
 	res, err := nasaapod.New(
 		nasaapod.WithAPIKey(cfg.APIKey),
 		nasaapod.WithDate(date),
-		nasaapod.WithThumbs(true),
 	).Get(ctx)
 	if err != nil {
 		return nil, errs.Wrap(err, errs.WithContext("force", forceFlag), errs.WithContext("date", date.String()))
@@ -90,13 +88,13 @@ func (cfg *APOD) LookupWithoutCache(ctx context.Context, date values.Date, utcFl
 		return nil, errs.Wrap(ecode.ErrNoContent, errs.WithContext("force", forceFlag), errs.WithContext("date", date.String()))
 	}
 	cfg.Logger().Debug("find APOD data from NASA API", zap.String("date", date.String()), zap.Any("response", res))
-	cfg.put(res[0])
+	cfg.put(&res[0])
 
 	// save APOD data
 	if err := cfg.saveDB(ctx); err != nil {
 		return nil, errs.Wrap(err, errs.WithContext("force", forceFlag), errs.WithContext("date", date.String()))
 	}
-	return res[0], nil
+	return &res[0], nil
 }
 
 func MakeMessage(data *nasaapod.Response) string {
@@ -115,10 +113,10 @@ func MakeMessage(data *nasaapod.Response) string {
 	if len(data.Title) > 0 {
 		fmt.Fprintln(&bld, data.Title)
 	}
-	// credit
-	if len(data.Copyright) > 0 {
-		fmt.Fprintln(&bld, "Image Credit:", data.Copyright)
-	}
+	// credit : temporary remove
+	// if len(data.Copyright) > 0 {
+	// 	fmt.Fprintln(&bld, "Image Credit:", data.Copyright)
+	// }
 	// Web page
 	fmt.Fprintln(&bld, "Web page:", data.WebPage())
 	// content URL

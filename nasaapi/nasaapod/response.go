@@ -5,8 +5,6 @@ import (
 	"encoding/json"
 	"errors"
 	"io"
-	"net/url"
-	"path"
 
 	"github.com/goark/errs"
 	"github.com/goark/toolbox/ecode"
@@ -21,19 +19,24 @@ const (
 
 // Response is response data from NASA APOD API.
 type Response struct {
-	Copyright      string      `json:"copyright,omitempty"`
-	Date           values.Date `json:"date,omitempty"`
-	Explanation    string      `json:"explanation,omitempty"`
-	HdUrl          string      `json:"hdurl,omitempty"`
-	MediaType      string      `json:"media_type,omitempty"`
-	ServiceVersion string      `json:"service_version,omitempty"`
-	Title          string      `json:"title,omitempty"`
-	Url            string      `json:"url,omitempty"`
-	ThumbnailUrl   string      `json:"thumbnail_url,omitempty"`
+	Date        values.Date `json:"date,omitempty"`
+	PostID      int         `json:"post_id,omitempty"`
+	Title       string      `json:"title,omitempty"`
+	Permalink   string      `json:"permalink,omitempty"`
+	MediaType   string      `json:"media_type,omitempty"`
+	Explanation string      `json:"explanation,omitempty"`
+	Credit      string      `json:"credit,omitempty"`
+	Copyright   string      `json:"copyright,omitempty"`
+	Alt         string      `json:"alt,omitempty"`
+	Url         string      `json:"url,omitempty"` //URL of the Web page ?
+	HdUrl       string      `json:"hdurl,omitempty"`
+	// ThumbnailUrl string      `json:"thumbnail_url,omitempty"`
+
+	ServiceVersion string `json:"service_version,omitempty"`
 }
 
-func decode(r io.Reader, isSingle bool) ([]*Response, error) {
-	var resps []*Response
+func decode(r io.Reader, isSingle bool) ([]Response, error) {
+	var resps []Response
 	dec := json.NewDecoder(r)
 	if isSingle {
 		for {
@@ -44,11 +47,11 @@ func decode(r io.Reader, isSingle bool) ([]*Response, error) {
 				}
 				return nil, errs.Wrap(err)
 			}
-			resps = append(resps, &resp)
+			resps = append(resps, resp)
 		}
 	} else {
 		for {
-			var resp []*Response
+			var resp []Response
 			if err := dec.Decode(&resp); err != nil {
 				if errors.Is(err, io.EOF) {
 					break
@@ -77,12 +80,17 @@ func (res *Response) WebPage() string {
 	if res == nil {
 		return ""
 	}
-	u, err := url.Parse(webPage)
-	if err != nil {
-		return ""
+	if len(res.Permalink) > 0 {
+		return res.Permalink
 	}
-	u.Path = path.Join(u.Path, "ap"+res.Date.Format("060102")+".html")
-	return u.String()
+	return res.Url
+	// Removed as it's no longer needed
+	// u, err := url.Parse(webPage)
+	// if err != nil {
+	// 	return ""
+	// }
+	// u.Path = path.Join(u.Path, "ap"+res.Date.Format("060102")+".html")
+	// return u.String()
 }
 
 func (res *Response) ImageFile(ctx context.Context, dir string) (tname string, err error) {
@@ -90,23 +98,11 @@ func (res *Response) ImageFile(ctx context.Context, dir string) (tname string, e
 		err = errs.Wrap(ecode.ErrNullPointer)
 		return
 	}
-	var urlStr string
-	if res.MediaType == MediaImage {
-		if len(res.Url) > 0 {
-			urlStr = res.Url
-		} else if len(res.HdUrl) > 0 {
-			urlStr = res.HdUrl
-		} else if len(res.ThumbnailUrl) > 0 {
-			urlStr = res.ThumbnailUrl
-		}
-	} else if len(res.ThumbnailUrl) > 0 {
-		urlStr = res.ThumbnailUrl
-	}
-	if len(urlStr) == 0 {
+	if len(res.HdUrl) == 0 {
 		err = errs.Wrap(ecode.ErrNoAPODImage)
 		return
 	}
-	wi := &webinfo.Webinfo{ImageURL: urlStr}
+	wi := &webinfo.Webinfo{ImageURL: res.HdUrl, UserAgent: webinfo.DefaultUserAgent()}
 	tname, err = wi.DownloadImage(ctx, dir, true)
 	return
 }

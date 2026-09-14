@@ -32,7 +32,6 @@ func TestDate(t *testing.T) {
 			startDate: dateFromMust(""),
 			endDate:   dateFromMust(""),
 			count:     0,
-			thumbs:    false,
 			apiKey:    "",
 			err:       nil,
 			want:      `{"date":"","start_date":"","end_date":"","api_key":""}`,
@@ -42,7 +41,6 @@ func TestDate(t *testing.T) {
 			startDate: dateFromMust(""),
 			endDate:   dateFromMust(""),
 			count:     0,
-			thumbs:    false,
 			apiKey:    "",
 			err:       nil,
 			want:      `{"date":"2023-02-22","start_date":"","end_date":"","api_key":""}`,
@@ -52,7 +50,6 @@ func TestDate(t *testing.T) {
 			startDate: dateFromMust("2023-02-22"),
 			endDate:   dateFromMust(""),
 			count:     0,
-			thumbs:    false,
 			apiKey:    "",
 			err:       nil,
 			want:      `{"date":"","start_date":"2023-02-22","end_date":"","api_key":""}`,
@@ -62,7 +59,6 @@ func TestDate(t *testing.T) {
 			startDate: dateFromMust("2023-02-22"),
 			endDate:   dateFromMust("2023-02-22"),
 			count:     0,
-			thumbs:    false,
 			apiKey:    "",
 			err:       nil,
 			want:      `{"date":"","start_date":"2023-02-22","end_date":"2023-02-22","api_key":""}`,
@@ -72,7 +68,6 @@ func TestDate(t *testing.T) {
 			startDate: dateFromMust(""),
 			endDate:   dateFromMust(""),
 			count:     1,
-			thumbs:    false,
 			apiKey:    "",
 			err:       nil,
 			want:      `{"date":"","start_date":"","end_date":"","count":1,"api_key":""}`,
@@ -82,17 +77,15 @@ func TestDate(t *testing.T) {
 			startDate: dateFromMust(""),
 			endDate:   dateFromMust(""),
 			count:     0,
-			thumbs:    true,
 			apiKey:    "foo",
 			err:       nil,
-			want:      `{"date":"","start_date":"","end_date":"","thumbs":true,"api_key":"foo"}`,
+			want:      `{"date":"","start_date":"","end_date":"","api_key":"foo"}`,
 		},
 		{
 			date:      dateFromMust("2023-02-22"),
 			startDate: dateFromMust("2023-02-22"),
 			endDate:   dateFromMust(""),
 			count:     0,
-			thumbs:    false,
 			apiKey:    "",
 			err:       nasaapi.ErrCombination,
 			want:      "",
@@ -102,7 +95,6 @@ func TestDate(t *testing.T) {
 			startDate: dateFromMust(""),
 			endDate:   dateFromMust("2023-02-22"),
 			count:     0,
-			thumbs:    false,
 			apiKey:    "",
 			err:       nasaapi.ErrCombination,
 			want:      "",
@@ -112,7 +104,6 @@ func TestDate(t *testing.T) {
 			startDate: dateFromMust(""),
 			endDate:   dateFromMust("2023-02-22"),
 			count:     0,
-			thumbs:    false,
 			apiKey:    "",
 			err:       nasaapi.ErrCombination,
 			want:      "",
@@ -122,7 +113,6 @@ func TestDate(t *testing.T) {
 			startDate: dateFromMust(""),
 			endDate:   dateFromMust(""),
 			count:     1,
-			thumbs:    false,
 			apiKey:    "",
 			err:       nasaapi.ErrCombination,
 			want:      "",
@@ -132,7 +122,6 @@ func TestDate(t *testing.T) {
 			startDate: dateFromMust("2023-02-22"),
 			endDate:   dateFromMust(""),
 			count:     1,
-			thumbs:    false,
 			apiKey:    "",
 			err:       nasaapi.ErrCombination,
 			want:      "",
@@ -145,7 +134,6 @@ func TestDate(t *testing.T) {
 			WithStartDate(tc.startDate),
 			WithEndDate(tc.endDate),
 			WithCount(tc.count),
-			WithThumbs(tc.thumbs),
 			WithAPIKey(tc.apiKey),
 		)
 		_, err := req.makeQuery()
@@ -165,7 +153,7 @@ func TestDate(t *testing.T) {
 
 /* MIT License
  *
- * Copyright 2023 Spiegel
+ * Copyright 2023-2026 Spiegel
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal

@@ -175,8 +175,8 @@ Detailed bilingual notes are available here:
   - `apod_data` now includes `permalink` column.
   - Migration is executed even when database file already exists, so existing DBs are updated.
 - Temporary behavior for social posting:
-  - Credit output is intentionally disabled in message generation because new API credit text may include HTML and can exceed SNS limits.
-  - A TODO marker is left in source for future HTML-to-plain-text and length-control support.
+  - Credit text is sanitized by HTML tag stripping before message output.
+  - If credit sanitization fails, the credit line is omitted and posting continues.
 
 ### Usage webpage command
 

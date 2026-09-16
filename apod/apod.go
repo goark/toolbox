@@ -27,9 +27,9 @@ type APOD struct {
 }
 
 // New functions creates new APOD instance from file.
-func New(ctx context.Context, path, cacheDir string, logger *log.ZapEventLogger) (cfg *APOD, err error) {
+func New(ctx context.Context, path, cacheDir string, logger *log.ZapEventLogger, migrationFlag bool) (cfg *APOD, err error) {
 	// open database
-	repos, ferr := db.Open(ctx, cacheDir, logger)
+	repos, ferr := db.Open(ctx, cacheDir, logger, migrationFlag)
 	if ferr != nil {
 		err = errs.Wrap(ferr, errs.WithContext("cache_dir", cacheDir))
 		return

@@ -37,6 +37,7 @@ const (
 
 var (
 	debugFlag              bool   //debug flag
+	migrationFlag          bool   //migration flag
 	configPath             string //path for config file
 	defaultConfigPath      = config.Path(Name, configFile+".yaml")
 	defaultBskyConfigPath  = config.Path(Name, bskyConfigFile)
@@ -75,6 +76,7 @@ func newRootCmd(ui *rwi.RWI, args []string) *cobra.Command {
 
 	// global options (other)
 	rootCmd.PersistentFlags().BoolVarP(&debugFlag, "debug", "", false, "for debug")
+	rootCmd.PersistentFlags().BoolVarP(&migrationFlag, "force-migration", "", false, "Force database migration")
 	rootCmd.PersistentFlags().StringVarP(&configPath, "config", "", defaultConfigPath, "Config file")
 
 	rootCmd.SilenceUsage = true
@@ -144,7 +146,7 @@ func Execute(ui *rwi.RWI, args []string) (exit exitcode.ExitCode) {
 	return
 }
 
-/* Copyright 2023 Spiegel
+/* Copyright 2023-2026 Spiegel
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.

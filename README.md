@@ -39,15 +39,16 @@ Available Commands:
   webpage     Handling information for Web pages
 
 Flags:
-      --apod-config string       Config file for APOD (default "/home/username/.config/toolbox/nasaapi.json")
-      --bluesky-config string    Config file for Bluesky (default "/home/username/.config/toolbox/bluesky.json")
-      --cache-dir string         Directory for cache files (default "/home/username/.cache/toolbox")
-      --config string            Config file (default "/home/username/.config/toolbox/config.yaml")
+      --apod-config string       Config file for APOD (default "~/.config/toolbox/nasaapi.json")
+      --bluesky-config string    Config file for Bluesky (default "~/.config/toolbox/bluesky.json")
+      --cache-dir string         Directory for cache files (default "~/.cache/toolbox")
+      --config string            Config file (default "~/.config/toolbox/config.yaml")
       --debug                    for debug
+      --force-migration          Force database migration
   -h, --help                     help for toolbox
-      --log-dir string           Directory for log files (default "/home/username/.cache/toolbox")
+      --log-dir string           Directory for log files (default "~/.cache/toolbox")
       --log-level string         Log level [nop|error|warn|info|debug|trace] (default "nop")
-      --mastodon-config string   Config file for Mastodon (default "/home/username/.config/toolbox/mastodon.json")
+      --mastodon-config string   Config file for Mastodon (default "~/.config/toolbox/mastodon.json")
       --temp-dir string          Temporary directory (default /tmp)
 
 Use "toolbox [command] --help" for more information about a command.
@@ -57,6 +58,7 @@ Use "toolbox [command] --help" for more information about a command.
 
 ```
 $ toolbox mastodon -h
+$ ./toolbox mastodon -h
 Simple Mastodon commands.
 
 Usage:
@@ -75,14 +77,15 @@ Flags:
   -h, --help   help for mastodon
 
 Global Flags:
-      --apod-config string       Config file for APOD (default "/home/username/.config/toolbox/nasaapi.json")
-      --bluesky-config string    Config file for Bluesky (default "/home/username/.config/toolbox/bluesky.json")
-      --cache-dir string         Directory for cache files (default "/home/username/.cache/toolbox")
-      --config string            Config file (default "/home/username/.config/toolbox/config.yaml")
+      --apod-config string       Config file for APOD (default "~/.config/toolbox/nasaapi.json")
+      --bluesky-config string    Config file for Bluesky (default "~/.config/toolbox/bluesky.json")
+      --cache-dir string         Directory for cache files (default "~/.cache/toolbox")
+      --config string            Config file (default "~/.config/toolbox/config.yaml")
       --debug                    for debug
-      --log-dir string           Directory for log files (default "/home/username/.cache/toolbox")
+      --force-migration          Force database migration
+      --log-dir string           Directory for log files (default "~/.cache/toolbox")
       --log-level string         Log level [nop|error|warn|info|debug|trace] (default "nop")
-      --mastodon-config string   Config file for Mastodon (default "/home/username/.config/toolbox/mastodon.json")
+      --mastodon-config string   Config file for Mastodon (default "~/.config/toolbox/mastodon.json")
       --temp-dir string          Temporary directory (default /tmp)
 
 Use "toolbox mastodon [command] --help" for more information about a command.
@@ -110,14 +113,15 @@ Flags:
   -h, --help   help for bluesky
 
 Global Flags:
-      --apod-config string       Config file for APOD (default "/home/username/.config/toolbox/nasaapi.json")
-      --bluesky-config string    Config file for Bluesky (default "/home/username/.config/toolbox/bluesky.json")
-      --cache-dir string         Directory for cache files (default "/home/username/.cache/toolbox")
-      --config string            Config file (default "/home/username/.config/toolbox/config.yaml")
+      --apod-config string       Config file for APOD (default "~/.config/toolbox/nasaapi.json")
+      --bluesky-config string    Config file for Bluesky (default "~/.config/toolbox/bluesky.json")
+      --cache-dir string         Directory for cache files (default "~/.cache/toolbox")
+      --config string            Config file (default "~/.config/toolbox/config.yaml")
       --debug                    for debug
-      --log-dir string           Directory for log files (default "/home/username/.cache/toolbox")
+      --force-migration          Force database migration
+      --log-dir string           Directory for log files (default "~/.cache/toolbox")
       --log-level string         Log level [nop|error|warn|info|debug|trace] (default "nop")
-      --mastodon-config string   Config file for Mastodon (default "/home/username/.config/toolbox/mastodon.json")
+      --mastodon-config string   Config file for Mastodon (default "~/.config/toolbox/mastodon.json")
       --temp-dir string          Temporary directory (default /tmp)
 
 Use "toolbox bluesky [command] --help" for more information about a command.
@@ -127,7 +131,7 @@ Use "toolbox bluesky [command] --help" for more information about a command.
 
 ```
 $ toolbox apod -h
-Commands for Astronomy Picture of the Day by NASA API.
+Commands for Astronomy Picture of the Day by NASA/APOD API.
 
 Usage:
   toolbox apod [flags]
@@ -144,14 +148,15 @@ Flags:
   -u, --utc           Time base on UTC
 
 Global Flags:
-      --apod-config string       Config file for APOD (default "/home/username/.config/toolbox/nasaapi.json")
-      --bluesky-config string    Config file for Bluesky (default "/home/username/.config/toolbox/bluesky.json")
-      --cache-dir string         Directory for cache files (default "/home/username/.cache/toolbox")
-      --config string            Config file (default "/home/username/.config/toolbox/config.yaml")
+      --apod-config string       Config file for APOD (default "~/.config/toolbox/nasaapi.json")
+      --bluesky-config string    Config file for Bluesky (default "~/.config/toolbox/bluesky.json")
+      --cache-dir string         Directory for cache files (default "~/.cache/toolbox")
+      --config string            Config file (default "~/.config/toolbox/config.yaml")
       --debug                    for debug
-      --log-dir string           Directory for log files (default "/home/username/.cache/toolbox")
+      --force-migration          Force database migration
+      --log-dir string           Directory for log files (default "~/.cache/toolbox")
       --log-level string         Log level [nop|error|warn|info|debug|trace] (default "nop")
-      --mastodon-config string   Config file for Mastodon (default "/home/username/.config/toolbox/mastodon.json")
+      --mastodon-config string   Config file for Mastodon (default "~/.config/toolbox/mastodon.json")
       --temp-dir string          Temporary directory (default /tmp)
 
 Use "toolbox apod [command] --help" for more information about a command.

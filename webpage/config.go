@@ -20,9 +20,9 @@ type Config struct {
 }
 
 // New functions creates new Config instance.
-func New(ctx context.Context, cacheDir string, logger *log.ZapEventLogger) (*Config, error) {
+func New(ctx context.Context, cacheDir string, logger *log.ZapEventLogger, migrationFlag bool) (*Config, error) {
 	// open database
-	repos, err := db.Open(ctx, cacheDir, logger)
+	repos, err := db.Open(ctx, cacheDir, logger, migrationFlag)
 	if err != nil {
 		return nil, errs.Wrap(err, errs.WithContext("cache_dir", cacheDir))
 	}

@@ -89,7 +89,10 @@ func newAPODPostCmd(ui *rwi.RWI) *cobra.Command {
 			}
 
 			// make message
-			msg := apod.MakeMessage(res)
+			msg, merr := apod.MakeMessage(res)
+			if merr != nil {
+				apd.Logger().Warn("failed to normalize APOD credit text; credit line is omitted", zap.Object("error", zapobject.New(merr)))
+			}
 
 			var lastErrs []error
 

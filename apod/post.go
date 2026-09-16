@@ -4,17 +4,20 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/goark/errs"
 	"github.com/goark/toolbox/nasaapi/nasaapod"
 	"github.com/goark/toolbox/striptag"
 )
 
 // MakeMessage creates a message string from the given APOD response data.
 // It includes the hash tag, title, credit, web page, and content URL.
-func MakeMessage(data *nasaapod.Response) string {
+// Even if an error is returned, it still generates a best-effort message.
+func MakeMessage(data *nasaapod.Response) (string, error) {
 	if data == nil {
-		return ""
+		return "", nil
 	}
 	bld := strings.Builder{}
+	var msgErr error
 
 	// hash tag
 	bld.WriteString("#apod ")
@@ -35,9 +38,10 @@ func MakeMessage(data *nasaapod.Response) string {
 	if len(credit) > 0 {
 		txt, err := striptag.StripTags(credit) // remove HTML tags from credit
 		if err == nil {
-			credit = txt
+			fmt.Fprintln(&bld, "Image Credit:", txt)
+		} else {
+			msgErr = errs.Wrap(err, errs.WithContext("credit", credit))
 		}
-		fmt.Fprintln(&bld, "Image Credit:", credit)
 	}
 	// Web page
 	fmt.Fprintln(&bld, "Web page:", data.WebPage())
@@ -45,7 +49,7 @@ func MakeMessage(data *nasaapod.Response) string {
 	if data.MediaType != nasaapod.MediaImage && len(data.Url) > 0 {
 		fmt.Fprintln(&bld, "Content:", data.Url)
 	}
-	return bld.String()
+	return bld.String(), msgErr
 }
 
 /* Copyright 2023-2026 Spiegel

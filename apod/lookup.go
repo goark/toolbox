@@ -2,8 +2,6 @@ package apod
 
 import (
 	"context"
-	"fmt"
-	"strings"
 
 	"github.com/goark/errs"
 	"github.com/goark/toolbox/ecode"
@@ -95,41 +93,6 @@ func (cfg *APOD) LookupWithoutCache(ctx context.Context, date values.Date, utcFl
 		return nil, errs.Wrap(err, errs.WithContext("force", forceFlag), errs.WithContext("date", date.String()))
 	}
 	return &res[0], nil
-}
-
-func MakeMessage(data *nasaapod.Response) string {
-	if data == nil {
-		return ""
-	}
-	bld := strings.Builder{}
-
-	// hash tag
-	bld.WriteString("#apod ")
-	bld.WriteString(data.Date.String())
-	if len(data.MediaType) > 0 && data.MediaType != "image" {
-		fmt.Fprintf(&bld, " (%s)", data.MediaType)
-	}
-	bld.WriteString("\n")
-	//title
-	if len(data.Title) > 0 {
-		fmt.Fprintln(&bld, data.Title)
-	}
-	// TODO(apod-credit-html): Re-enable credit output after HTML-to-plain-text
-	// conversion and length control for SNS posting are implemented.
-	// credit := data.Credit
-	// if len(credit) == 0 {
-	// 	credit = data.Copyright
-	// }
-	// if len(credit) > 0 {
-	// 	fmt.Fprintln(&bld, "Image Credit:", credit)
-	// }
-	// Web page
-	fmt.Fprintln(&bld, "Web page:", data.WebPage())
-	// content URL
-	if data.MediaType != nasaapod.MediaImage && len(data.Url) > 0 {
-		fmt.Fprintln(&bld, "Content:", data.Url)
-	}
-	return bld.String()
 }
 
 /* Copyright 2023-2026 Spiegel

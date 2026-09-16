@@ -18,7 +18,7 @@ func newAPODCmd(ui *rwi.RWI) *cobra.Command {
 		Use:     "apod",
 		Aliases: []string{},
 		Short:   "NASA APOD commands",
-		Long:    "Commands for Astronomy Picture of the Day by NASA API.",
+		Long:    "Commands for Astronomy Picture of the Day by NASA/APOD API.",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return debugPrint(ui, errs.Wrap(ecode.ErrNoCommand))
 		},
@@ -35,7 +35,7 @@ func newAPODCmd(ui *rwi.RWI) *cobra.Command {
 }
 
 func (gopts *globalOptions) getAPOD(ctx context.Context) (*apod.APOD, error) {
-	acfg, err := apod.New(ctx, gopts.apodConfigPath, gopts.CacheDir, gopts.Logger)
+	acfg, err := apod.New(ctx, gopts.apodConfigPath, gopts.CacheDir, gopts.Logger, migrationFlag)
 	if err != nil {
 		err = errs.Wrap(err)
 		gopts.Logger.Desugar().Error("cannot get configuration for Mastodon", zap.Object("error", zapobject.New(err)))
@@ -44,7 +44,7 @@ func (gopts *globalOptions) getAPOD(ctx context.Context) (*apod.APOD, error) {
 	return acfg, nil
 }
 
-/* Copyright 2023 Spiegel
+/* Copyright 2023-2026 Spiegel
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.

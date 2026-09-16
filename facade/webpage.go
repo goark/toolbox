@@ -32,15 +32,16 @@ func newWebpageCmd(ui *rwi.RWI) *cobra.Command {
 	return webpageCmd
 }
 
+// getWebpage retrieves the webpage configuration.
 func (gopts *globalOptions) getWebpage(ctx context.Context) (*webpage.Config, error) {
-	cfg, err := webpage.New(ctx, gopts.CacheDir, gopts.Logger)
+	cfg, err := webpage.New(ctx, gopts.CacheDir, gopts.Logger, migrationFlag)
 	if err != nil {
 		return nil, errs.Wrap(err)
 	}
 	return cfg, nil
 }
 
-/* Copyright 2023 Spiegel
+/* Copyright 2023-2026 Spiegel
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.

@@ -15,9 +15,10 @@ import (
 )
 
 const (
-	sqliteFile = "db.sqlite"
+	sqliteFile = "db.sqlite" // SQLite database file name
 )
 
+// existFile checks if the SQLite database file exists in the given directory.
 func existFile(dir string) (string, bool) {
 	path := filepath.Join(dir, sqliteFile)
 	if _, err := os.Stat(path); err != nil {
@@ -26,15 +27,20 @@ func existFile(dir string) (string, bool) {
 	return path, true
 }
 
+// Repository wraps database and logger instances for repository operations.
 type Repository struct {
 	db     *gorm.DB
 	logger *log.ZapEventLogger
 }
 
-func Open(ctx context.Context, dir string, zlogger *log.ZapEventLogger) (*Repository, error) {
+// Open opens the SQLite repository and runs migration when required.
+func Open(ctx context.Context, dir string, zlogger *log.ZapEventLogger, migrationFlag bool) (*Repository, error) {
 	// path of SQLite file
 	path, existFlag := existFile(dir)
-	zlogger.Desugar().Debug("database file", zap.String("path", path), zap.Bool("file exist", existFlag))
+	if !existFlag {
+		migrationFlag = true
+	}
+	zlogger.Desugar().Debug("database file", zap.String("path", path), zap.Bool("file exist", existFlag), zap.Bool("migration", migrationFlag))
 	// open SQLite database
 	db, err := conn.GetDB(path, zlogger)
 	if err != nil {
@@ -42,12 +48,13 @@ func Open(ctx context.Context, dir string, zlogger *log.ZapEventLogger) (*Reposi
 	}
 	zlogger.Desugar().Debug("complete opening database file", zap.String("path", path))
 	// migration
-	zlogger.Desugar().Debug("start migration", zap.String("path", path), zap.Bool("file exist", existFlag))
-	if err := model.Migration(ctx, db); err != nil {
-		return nil, errs.Wrap(err, errs.WithContext("dbfile", path))
+	if migrationFlag {
+		zlogger.Desugar().Debug("start migration", zap.String("path", path), zap.Bool("file exist", existFlag), zap.Bool("migration", migrationFlag))
+		if err := model.Migration(ctx, db); err != nil {
+			return nil, errs.Wrap(err, errs.WithContext("dbfile", path))
+		}
+		zlogger.Desugar().Debug("complete migration", zap.String("path", path), zap.Bool("file exist", existFlag), zap.Bool("migration", migrationFlag))
 	}
-	zlogger.Desugar().Debug("complete migration", zap.String("path", path), zap.Bool("file exist", existFlag))
-
 	return &Repository{db: db, logger: zlogger}, nil
 }
 

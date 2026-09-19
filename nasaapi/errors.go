@@ -3,8 +3,9 @@ package nasaapi
 import "errors"
 
 var (
-	ErrNullPointer = errors.New("null reference instance")
-	ErrCombination = errors.New("invalid parameter combination passed")
+	ErrNullPointer     = errors.New("null reference instance")
+	ErrCombination     = errors.New("invalid parameter combination passed")
+	ErrAPODAPIResponse = errors.New("error response from NASA APOD API")
 )
 
 /* Copyright 2023 Spiegel

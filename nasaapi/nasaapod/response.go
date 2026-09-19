@@ -1,13 +1,16 @@
 package nasaapod
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"errors"
 	"io"
+	"net/http"
 
 	"github.com/goark/errs"
 	"github.com/goark/toolbox/ecode"
+	"github.com/goark/toolbox/nasaapi"
 	"github.com/goark/toolbox/values"
 	"github.com/goark/webinfo"
 )
@@ -19,24 +22,42 @@ const (
 
 // Response is response data from NASA APOD API.
 type Response struct {
-	Date        values.Date `json:"date,omitempty"`
-	PostID      int         `json:"post_id,omitempty"`
-	Title       string      `json:"title,omitempty"`
-	Permalink   string      `json:"permalink,omitempty"`
-	MediaType   string      `json:"media_type,omitempty"`
-	Explanation string      `json:"explanation,omitempty"`
-	Credit      string      `json:"credit,omitempty"`
-	Copyright   string      `json:"copyright,omitempty"`
-	Alt         string      `json:"alt,omitempty"`
-	Url         string      `json:"url,omitempty"`
-	HdUrl       string      `json:"hdurl,omitempty"`
+	Date         values.Date `json:"date,omitempty"`           // APOD date in YYYY-MM-DD format.
+	PostID       int         `json:"post_id,omitempty"`        // WordPress post ID.
+	Title        string      `json:"title,omitempty"`          // APOD post title.
+	Permalink    string      `json:"permalink,omitempty"`      // URL of the APOD post on the site.
+	MediaType    string      `json:"media_type,omitempty"`     // Normalized APOD media type, such as "image", "video", or "iframe".
+	Explanation  string      `json:"explanation,omitempty"`    // APOD explanation text.
+	Credit       string      `json:"credit,omitempty"`         // APOD credit information.
+	Copyright    string      `json:"copyright,omitempty"`      // APOD copyright information.
+	Alt          string      `json:"alt,omitempty"`            // APOD alt text for the image.
+	Url          string      `json:"url,omitempty"`            // APOD post URL. This matches the permalink.
+	HdUrl        string      `json:"hdurl,omitempty"`          // Full-size featured image URL when available.
+	BasicHTML    string      `json:"basic_html,omitempty"`     // APOD Basic HTML document as a JSON string.
+	BasicHTMLUrl string      `json:"basic_html_url,omitempty"` // Plain-text HTML source URL for easier copy/paste workflows.
+}
 
-	ServiceVersion string `json:"service_version,omitempty"`
+// ResponseError represents an error response from the NASA APOD API.
+type ResponseError struct {
+	Code    string `json:"code"`    // Error code from the API.
+	Message string `json:"message"` // Error message from the API.
+	Data    struct {
+		Status int `json:"status"` // HTTP status code from the API.
+	} `json:"data"`
 }
 
 func decode(r io.Reader, isSingle bool) ([]Response, error) {
+	// try decode error response first
+	buf := &bytes.Buffer{}
+	var respErr ResponseError
+	if err := json.NewDecoder(io.TeeReader(r, buf)).Decode(&respErr); err == nil {
+		if isAPODErrorResponse(&respErr) {
+			return nil, errs.Wrap(nasaapi.ErrAPODAPIResponse, errs.WithContext("response", respErr))
+		}
+	}
+	// decode normal response
 	var resps []Response
-	dec := json.NewDecoder(r)
+	dec := json.NewDecoder(bytes.NewReader(buf.Bytes()))
 	if isSingle {
 		for {
 			var resp Response
@@ -61,6 +82,19 @@ func decode(r io.Reader, isSingle bool) ([]Response, error) {
 		}
 	}
 	return resps, nil
+}
+
+func isAPODErrorResponse(respErr *ResponseError) bool {
+	if respErr == nil {
+		return false
+	}
+	if respErr.Data.Status >= http.StatusBadRequest {
+		return true
+	}
+	if respErr.Data.Status == 0 && len(respErr.Code) > 0 {
+		return true
+	}
+	return false
 }
 
 // Encode method writes encoded response data to writer by JSON format.

@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"io"
 	"net/url"
+	"path"
 	"strconv"
 
 	"github.com/goark/errs"
@@ -14,17 +15,16 @@ import (
 
 const (
 	defaultPerPage = 25
-	maxPerPage     = 100
-	maxPage        = 500
+	maxPerPage     = defaultPerPage
 )
 
 // Request is for context of APOD API.
 type Request struct {
-	Date      values.Date `json:"date,omitempty"`       // The date of the APOD image to retrieve
-	StartDate values.Date `json:"start_date,omitempty"` // The start of a date range, when requesting date for a range of dates. Cannot be used with date.
-	EndDate   values.Date `json:"end_date,omitempty"`   // The end of the date range, when used with start_date.
-	Count     int         `json:"count,omitempty"`      // If this is specified then count randomly chosen images will be returned. Cannot be used with date or start_date and end_date.
-	APIKey    string      `json:"api_key"`              // api.nasa.gov key for expanded usage
+	Date      values.Date `json:"date,omitempty"`       // Single APOD date (YYYY-MM-DD), resolved to YYMMDD path.
+	StartDate values.Date `json:"start_date,omitempty"` // Date range start (YYYY-MM-DD), encoded as date_from=YYMMDD.
+	EndDate   values.Date `json:"end_date,omitempty"`   // Date range end (YYYY-MM-DD), encoded as date_to=YYMMDD.
+	Page      int         `json:"page,omitempty"`       // Page number for list results.
+	PerPage   int         `json:"per_page,omitempty"`   // Number of results per page (max 25).
 }
 
 type Opts func(*Request)
@@ -65,20 +65,20 @@ func WithEndDate(endDate values.Date) Opts {
 	}
 }
 
-// WithCount returns function for setting Request.Count.
-func WithCount(count int) Opts {
+// WithPage returns function for setting Request.Page.
+func WithPage(page int) Opts {
 	return func(ctx *Request) {
 		if ctx != nil {
-			ctx.Count = count
+			ctx.Page = page
 		}
 	}
 }
 
-// WithAPIKey returns function for setting Request.APIKey.
-func WithAPIKey(apiKey string) Opts {
+// WithPerPage returns function for setting Request.PerPage.
+func WithPerPage(perPage int) Opts {
 	return func(ctx *Request) {
 		if ctx != nil {
-			ctx.APIKey = apiKey
+			ctx.PerPage = perPage
 		}
 	}
 }
@@ -105,37 +105,76 @@ func (req *Request) String() string {
 }
 
 // Get method gets APOD data from APOD API.
+// Deprecated: Prefer using GetList or GetByDate for explicit request mode.
 func (req *Request) Get(ctx context.Context) (rsp []Response, err error) {
 	if req == nil {
 		err = errs.Wrap(nasaapi.ErrNullPointer)
 		return
 	}
-	if err = req.validate(); err != nil {
-		return nil, err
+	if req.Date.IsZero() {
+		return req.GetList(ctx)
 	}
-	perPage := req.perPage()
-	for page := 1; page <= maxPage; page++ {
-		resps, ferr := req.fetchPage(ctx, page, perPage)
-		if ferr != nil {
-			return nil, errs.Wrap(ferr)
-		}
-		if len(resps) == 0 {
-			break
-		}
-		matched := req.filterResponses(resps)
-		rsp = append(rsp, matched...)
-		if req.done(rsp, resps) {
-			break
-		}
+	resp, err := req.GetByDate(ctx)
+	if err != nil {
+		return nil, errs.Wrap(err)
 	}
-	if req.Count > 0 && len(rsp) > req.Count {
-		rsp = rsp[:req.Count]
+	if resp == nil {
+		return nil, nil
 	}
-	return
+	return []Response{*resp}, nil
 }
 
-func (req *Request) fetchPage(ctx context.Context, page, perPage int) ([]Response, error) {
-	resp, err := req.getRawData(ctx, page, perPage)
+// GetList gets APOD list data from APOD API.
+func (req *Request) GetList(ctx context.Context) (rsp []Response, err error) {
+	if req == nil {
+		err = errs.Wrap(nasaapi.ErrNullPointer)
+		return
+	}
+	if err = req.validateListMode(); err != nil {
+		return nil, err
+	}
+	resps, ferr := req.fetchList(ctx)
+	if ferr != nil {
+		return nil, errs.Wrap(ferr)
+	}
+	return resps, nil
+}
+
+// GetByDate gets APOD single item data from APOD API by Request.Date.
+func (req *Request) GetByDate(ctx context.Context) (*Response, error) {
+	if req == nil {
+		return nil, errs.Wrap(nasaapi.ErrNullPointer)
+	}
+	if err := req.validateDateMode(); err != nil {
+		return nil, errs.Wrap(err)
+	}
+	resp, err := req.fetchByDate(ctx)
+	if err != nil {
+		return nil, errs.Wrap(err)
+	}
+	return resp, nil
+}
+
+func (req *Request) fetchByDate(ctx context.Context) (*Response, error) {
+	resp, err := req.getRawDataByDate(ctx)
+	if err != nil {
+		return nil, errs.Wrap(err)
+	}
+	defer func() {
+		_ = resp.Close()
+	}()
+	resps, err := decode(resp, true)
+	if err != nil {
+		return nil, errs.Wrap(err)
+	}
+	if len(resps) == 0 {
+		return nil, nil
+	}
+	return &resps[0], nil
+}
+
+func (req *Request) fetchList(ctx context.Context) ([]Response, error) {
+	resp, err := req.getRawDataList(ctx)
 	if err != nil {
 		return nil, errs.Wrap(err)
 	}
@@ -149,11 +188,18 @@ func (req *Request) fetchPage(ctx context.Context, page, perPage int) ([]Respons
 	return resps, nil
 }
 
-func (req *Request) getRawData(ctx context.Context, page, perPage int) (io.ReadCloser, error) {
+func (req *Request) getRawDataByDate(ctx context.Context) (io.ReadCloser, error) {
 	if req == nil {
 		return nil, errs.Wrap(nasaapi.ErrNullPointer)
 	}
-	q, err := req.makeQuery(page, perPage)
+	return nasaapi.Fetch(ctx, nasaapi.APODHost, path.Join(apiPath, req.dateCode(req.Date)), nil)
+}
+
+func (req *Request) getRawDataList(ctx context.Context) (io.ReadCloser, error) {
+	if req == nil {
+		return nil, errs.Wrap(nasaapi.ErrNullPointer)
+	}
+	q, err := req.makeQuery()
 	if err != nil {
 		return nil, errs.Wrap(err)
 	}
@@ -165,94 +211,93 @@ func (req *Request) validate() error {
 		return errs.Wrap(nasaapi.ErrNullPointer)
 	}
 	if !req.Date.IsZero() {
-		if !req.StartDate.IsZero() || !req.EndDate.IsZero() || req.Count > 0 {
+		if !req.StartDate.IsZero() || !req.EndDate.IsZero() || req.Page > 0 || req.PerPage > 0 {
 			return errs.Wrap(nasaapi.ErrCombination, errs.WithContext("config", req))
 		}
 	}
 	if !req.StartDate.IsZero() {
-		if !req.Date.IsZero() || req.Count > 0 {
+		if !req.Date.IsZero() {
 			return errs.Wrap(nasaapi.ErrCombination, errs.WithContext("config", req))
 		}
 	}
 	if !req.EndDate.IsZero() {
-		if req.StartDate.IsZero() || !req.Date.IsZero() || req.Count > 0 {
+		if req.StartDate.IsZero() || !req.Date.IsZero() {
 			return errs.Wrap(nasaapi.ErrCombination, errs.WithContext("config", req))
 		}
 	}
-	if req.Count < 0 {
+	if !req.StartDate.IsZero() && !req.EndDate.IsZero() && req.StartDate.After(req.EndDate) {
+		return errs.Wrap(nasaapi.ErrCombination, errs.WithContext("config", req))
+	}
+	if req.Page < 0 || req.PerPage < 0 {
 		return errs.Wrap(nasaapi.ErrCombination, errs.WithContext("config", req))
 	}
 	return nil
 }
 
-func (req *Request) perPage() int {
-	if req == nil || req.Count <= 0 {
-		return defaultPerPage
+func (req *Request) validateDateMode() error {
+	if req == nil {
+		return errs.Wrap(nasaapi.ErrNullPointer)
 	}
-	if req.Count > maxPerPage {
-		return maxPerPage
+	if req.Date.IsZero() {
+		return errs.Wrap(nasaapi.ErrCombination, errs.WithContext("config", req))
 	}
-	return req.Count
+	if !req.StartDate.IsZero() || !req.EndDate.IsZero() || req.Page > 0 || req.PerPage > 0 {
+		return errs.Wrap(nasaapi.ErrCombination, errs.WithContext("config", req))
+	}
+	return req.validate()
 }
 
-func (req *Request) makeQuery(page, perPage int) (url.Values, error) {
+func (req *Request) validateListMode() error {
+	if req == nil {
+		return errs.Wrap(nasaapi.ErrNullPointer)
+	}
+	if !req.Date.IsZero() {
+		return errs.Wrap(nasaapi.ErrCombination, errs.WithContext("config", req))
+	}
+	return req.validate()
+}
+
+func (req *Request) page() int {
+	if req == nil || req.Page <= 0 {
+		return 1
+	}
+	return req.Page
+}
+
+func (req *Request) perPage() int {
+	if req == nil || req.PerPage <= 0 {
+		return defaultPerPage
+	}
+	if req.PerPage > maxPerPage {
+		return maxPerPage
+	}
+	return req.PerPage
+}
+
+func (req *Request) makeQuery() (url.Values, error) {
 	if err := req.validate(); err != nil {
 		return nil, errs.Wrap(err)
 	}
-	if page <= 0 || perPage <= 0 {
-		return nil, errs.Wrap(nasaapi.ErrCombination, errs.WithContext("page", page), errs.WithContext("per_page", perPage))
+	if !req.Date.IsZero() {
+		return nil, errs.Wrap(nasaapi.ErrCombination, errs.WithContext("config", req))
 	}
 	v := url.Values{}
-	v.Set("page", strconv.Itoa(page))
-	v.Set("per_page", strconv.Itoa(perPage))
+	v.Set("page", strconv.Itoa(req.page()))
+	v.Set("per_page", strconv.Itoa(req.perPage()))
+	if !req.StartDate.IsZero() {
+		v.Set("date_from", req.dateCode(req.StartDate))
+	}
+	if !req.EndDate.IsZero() {
+		v.Set("date_to", req.dateCode(req.EndDate))
+	}
 	return v, nil
 }
 
-func (req *Request) filterResponses(resps []Response) []Response {
-	if req == nil {
-		return nil
+func (req *Request) dateCode(date values.Date) string {
+	if date.IsZero() {
+		return ""
 	}
-	matched := make([]Response, 0, len(resps))
-	for _, r := range resps {
-		if !req.Date.IsZero() {
-			if r.Date.Equal(req.Date) {
-				matched = append(matched, r)
-			}
-			continue
-		}
-		if !req.StartDate.IsZero() {
-			if r.Date.Before(req.StartDate) {
-				continue
-			}
-			if !req.EndDate.IsZero() && r.Date.After(req.EndDate) {
-				continue
-			}
-			matched = append(matched, r)
-			continue
-		}
-		matched = append(matched, r)
-	}
-	return matched
-}
-
-func (req *Request) done(rsp, pageData []Response) bool {
-	if req == nil {
-		return true
-	}
-	if req.Count > 0 && len(rsp) >= req.Count {
-		return true
-	}
-	if req.Date.IsZero() && req.StartDate.IsZero() {
-		return false
-	}
-	if len(pageData) == 0 {
-		return true
-	}
-	oldest := pageData[len(pageData)-1].Date
-	if !req.Date.IsZero() {
-		return len(rsp) > 0 || oldest.Before(req.Date)
-	}
-	return oldest.Before(req.StartDate)
+	return date.Format("060102")
 }
 
 /* Copyright 2023-2026 Spiegel

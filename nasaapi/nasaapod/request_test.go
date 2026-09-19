@@ -21,110 +21,131 @@ func TestDate(t *testing.T) {
 		date      values.Date
 		startDate values.Date
 		endDate   values.Date
-		count     int
-		thumbs    bool
-		apiKey    string
+		page      int
+		perPage   int
 		err       error
 		want      string
+		wantQuery string
 	}{
 		{
 			date:      dateFromMust(""),
 			startDate: dateFromMust(""),
 			endDate:   dateFromMust(""),
-			count:     0,
-			apiKey:    "",
+			page:      0,
+			perPage:   0,
 			err:       nil,
-			want:      `{"date":"","start_date":"","end_date":"","api_key":""}`,
+			want:      `{"date":"","start_date":"","end_date":""}`,
+			wantQuery: "page=1&per_page=25",
 		},
 		{
 			date:      dateFromMust("2023-02-22"),
 			startDate: dateFromMust(""),
 			endDate:   dateFromMust(""),
-			count:     0,
-			apiKey:    "",
+			page:      0,
+			perPage:   0,
 			err:       nil,
-			want:      `{"date":"2023-02-22","start_date":"","end_date":"","api_key":""}`,
+			want:      `{"date":"2023-02-22","start_date":"","end_date":""}`,
+			wantQuery: "",
 		},
 		{
 			date:      dateFromMust(""),
 			startDate: dateFromMust("2023-02-22"),
 			endDate:   dateFromMust(""),
-			count:     0,
-			apiKey:    "",
+			page:      0,
+			perPage:   0,
 			err:       nil,
-			want:      `{"date":"","start_date":"2023-02-22","end_date":"","api_key":""}`,
+			want:      `{"date":"","start_date":"2023-02-22","end_date":""}`,
+			wantQuery: "date_from=230222&page=1&per_page=25",
 		},
 		{
 			date:      dateFromMust(""),
 			startDate: dateFromMust("2023-02-22"),
 			endDate:   dateFromMust("2023-02-22"),
-			count:     0,
-			apiKey:    "",
+			page:      0,
+			perPage:   0,
 			err:       nil,
-			want:      `{"date":"","start_date":"2023-02-22","end_date":"2023-02-22","api_key":""}`,
+			want:      `{"date":"","start_date":"2023-02-22","end_date":"2023-02-22"}`,
+			wantQuery: "date_from=230222&date_to=230222&page=1&per_page=25",
 		},
 		{
 			date:      dateFromMust(""),
 			startDate: dateFromMust(""),
 			endDate:   dateFromMust(""),
-			count:     1,
-			apiKey:    "",
+			page:      2,
+			perPage:   10,
 			err:       nil,
-			want:      `{"date":"","start_date":"","end_date":"","count":1,"api_key":""}`,
+			want:      `{"date":"","start_date":"","end_date":"","page":2,"per_page":10}`,
+			wantQuery: "page=2&per_page=10",
 		},
 		{
 			date:      dateFromMust(""),
 			startDate: dateFromMust(""),
 			endDate:   dateFromMust(""),
-			count:     0,
-			apiKey:    "foo",
+			page:      0,
+			perPage:   40,
 			err:       nil,
-			want:      `{"date":"","start_date":"","end_date":"","api_key":"foo"}`,
+			want:      `{"date":"","start_date":"","end_date":"","per_page":40}`,
+			wantQuery: "page=1&per_page=25",
 		},
 		{
 			date:      dateFromMust("2023-02-22"),
 			startDate: dateFromMust("2023-02-22"),
 			endDate:   dateFromMust(""),
-			count:     0,
-			apiKey:    "",
+			page:      0,
+			perPage:   0,
 			err:       nasaapi.ErrCombination,
 			want:      "",
+			wantQuery: "",
 		},
 		{
 			date:      dateFromMust("2023-02-22"),
 			startDate: dateFromMust(""),
 			endDate:   dateFromMust("2023-02-22"),
-			count:     0,
-			apiKey:    "",
+			page:      0,
+			perPage:   0,
 			err:       nasaapi.ErrCombination,
 			want:      "",
+			wantQuery: "",
 		},
 		{
 			date:      dateFromMust(""),
 			startDate: dateFromMust(""),
 			endDate:   dateFromMust("2023-02-22"),
-			count:     0,
-			apiKey:    "",
+			page:      0,
+			perPage:   0,
 			err:       nasaapi.ErrCombination,
 			want:      "",
+			wantQuery: "",
 		},
 		{
 			date:      dateFromMust("2023-02-22"),
 			startDate: dateFromMust(""),
 			endDate:   dateFromMust(""),
-			count:     1,
-			apiKey:    "",
+			page:      1,
+			perPage:   0,
 			err:       nasaapi.ErrCombination,
 			want:      "",
+			wantQuery: "",
 		},
 		{
 			date:      dateFromMust(""),
 			startDate: dateFromMust("2023-02-22"),
-			endDate:   dateFromMust(""),
-			count:     1,
-			apiKey:    "",
+			endDate:   dateFromMust("2023-02-21"),
+			page:      0,
+			perPage:   0,
 			err:       nasaapi.ErrCombination,
 			want:      "",
+			wantQuery: "",
+		},
+		{
+			date:      dateFromMust(""),
+			startDate: dateFromMust(""),
+			endDate:   dateFromMust(""),
+			page:      -1,
+			perPage:   0,
+			err:       nasaapi.ErrCombination,
+			want:      "",
+			wantQuery: "",
 		},
 	}
 
@@ -133,14 +154,31 @@ func TestDate(t *testing.T) {
 			WithDate(tc.date),
 			WithStartDate(tc.startDate),
 			WithEndDate(tc.endDate),
-			WithCount(tc.count),
-			WithAPIKey(tc.apiKey),
+			WithPage(tc.page),
+			WithPerPage(tc.perPage),
 		)
-		_, err := req.makeQuery(1, defaultPerPage)
+		if !tc.date.IsZero() {
+			err := req.validate()
+			if !errors.Is(err, tc.err) {
+				t.Errorf("validate() is \"%v\", want \"%v\"", err, tc.err)
+			}
+			if err == nil {
+				if got, err := req.Encode(); err != nil {
+					t.Errorf("Encode() is \"%v\", want nil", err)
+				} else if got != tc.want {
+					t.Errorf("Encode() = \"%v\", want \"%v\"", got, tc.want)
+				}
+			}
+			continue
+		}
+		q, err := req.makeQuery()
 		if !errors.Is(err, tc.err) {
 			t.Errorf("makeQuery() is \"%v\", want \"%v\"", err, tc.err)
 		}
 		if err == nil {
+			if got := q.Encode(); got != tc.wantQuery {
+				t.Errorf("query = %q, want %q", got, tc.wantQuery)
+			}
 			if got, err := req.Encode(); err != nil {
 				t.Errorf("Encode() is \"%v\", want nil", err)
 			} else if got != tc.want {
@@ -148,6 +186,90 @@ func TestDate(t *testing.T) {
 			}
 
 		}
+	}
+}
+
+func TestValidateDateMode(t *testing.T) {
+	testCases := []struct {
+		name string
+		req  *Request
+		err  error
+	}{
+		{
+			name: "ok",
+			req: New(
+				WithDate(dateFromMust("2026-09-19")),
+			),
+			err: nil,
+		},
+		{
+			name: "no date",
+			req:  New(),
+			err:  nasaapi.ErrCombination,
+		},
+		{
+			name: "date with page",
+			req: New(
+				WithDate(dateFromMust("2026-09-19")),
+				WithPage(2),
+			),
+			err: nasaapi.ErrCombination,
+		},
+		{
+			name: "date with range",
+			req: New(
+				WithDate(dateFromMust("2026-09-19")),
+				WithStartDate(dateFromMust("2026-09-01")),
+			),
+			err: nasaapi.ErrCombination,
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			err := tc.req.validateDateMode()
+			if !errors.Is(err, tc.err) {
+				t.Errorf("validateDateMode() is %v, want %v", err, tc.err)
+			}
+		})
+	}
+}
+
+func TestValidateListMode(t *testing.T) {
+	testCases := []struct {
+		name string
+		req  *Request
+		err  error
+	}{
+		{
+			name: "ok default",
+			req:  New(),
+			err:  nil,
+		},
+		{
+			name: "ok range",
+			req: New(
+				WithStartDate(dateFromMust("2026-09-01")),
+				WithEndDate(dateFromMust("2026-09-19")),
+			),
+			err: nil,
+		},
+		{
+			name: "contains date",
+			req: New(
+				WithDate(dateFromMust("2026-09-19")),
+			),
+			err: nasaapi.ErrCombination,
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			err := tc.req.validateListMode()
+			if !errors.Is(err, tc.err) {
+				t.Errorf("validateListMode() is %v, want %v", err, tc.err)
+			}
+		})
 	}
 }
 

@@ -30,18 +30,17 @@ func (cfg *APOD) Lookup(ctx context.Context, date values.Date, utcFlag, saveFlag
 	// get APOD data by NASA API
 	cfg.Logger().Debug("start reading APOD data", zap.String("date", date.String()))
 	res, err := nasaapod.New(
-		nasaapod.WithAPIKey(cfg.APIKey),
 		nasaapod.WithDate(date),
-	).Get(ctx)
+	).GetByDate(ctx)
 	if err != nil {
 		return nil, errs.Wrap(err, errs.WithContext("date", date.String()))
 	}
 	cfg.Logger().Debug("complete reading APOD data", zap.String("date", date.String()), zap.Any("response", res))
-	if len(res) == 0 {
+	if res == nil {
 		return nil, errs.Wrap(ecode.ErrNoContent, errs.WithContext("date", date.String()))
 	}
 	cfg.Logger().Debug("find APOD data from NASA API", zap.String("date", date.String()), zap.Any("response", res))
-	cfg.put(&res[0])
+	cfg.put(res)
 
 	// save APOD data
 	if saveFlag {
@@ -49,7 +48,7 @@ func (cfg *APOD) Lookup(ctx context.Context, date values.Date, utcFlag, saveFlag
 			return nil, errs.Wrap(err, errs.WithContext("date", date.String()), errs.WithContext("save", saveFlag))
 		}
 	}
-	return &res[0], nil
+	return res, nil
 }
 
 // Lookup method gets APOD data from NASA API and save cache. If exist data in cache, returns ErrExistAPODData error.
@@ -75,24 +74,23 @@ func (cfg *APOD) LookupWithoutCache(ctx context.Context, date values.Date, utcFl
 	// get APOD data by NASA API
 	cfg.Logger().Debug("start reading APOD data", zap.String("date", date.String()))
 	res, err := nasaapod.New(
-		nasaapod.WithAPIKey(cfg.APIKey),
 		nasaapod.WithDate(date),
-	).Get(ctx)
+	).GetByDate(ctx)
 	if err != nil {
 		return nil, errs.Wrap(err, errs.WithContext("force", forceFlag), errs.WithContext("date", date.String()))
 	}
 	cfg.Logger().Debug("complete reading APOD data", zap.String("date", date.String()), zap.Any("response", res))
-	if len(res) == 0 {
+	if res == nil {
 		return nil, errs.Wrap(ecode.ErrNoContent, errs.WithContext("force", forceFlag), errs.WithContext("date", date.String()))
 	}
 	cfg.Logger().Debug("find APOD data from NASA API", zap.String("date", date.String()), zap.Any("response", res))
-	cfg.put(&res[0])
+	cfg.put(res)
 
 	// save APOD data
 	if err := cfg.saveDB(ctx); err != nil {
 		return nil, errs.Wrap(err, errs.WithContext("force", forceFlag), errs.WithContext("date", date.String()))
 	}
-	return &res[0], nil
+	return res, nil
 }
 
 /* Copyright 2023-2026 Spiegel

@@ -46,6 +46,11 @@ type ResponseError struct {
 	} `json:"data"`
 }
 
+// decode decodes APOD API responses and normalizes them into a response slice.
+//
+// The API may return either a single object or an array depending on endpoint
+// and query mode. This function also detects structured API error payloads and
+// converts them into ErrAPODAPIResponse.
 func decode(r io.Reader, isSingle bool) ([]Response, error) {
 	// try decode error response first
 	buf := &bytes.Buffer{}
@@ -84,6 +89,7 @@ func decode(r io.Reader, isSingle bool) ([]Response, error) {
 	return resps, nil
 }
 
+// isAPODErrorResponse reports whether decoded JSON matches APOD API error shape.
 func isAPODErrorResponse(respErr *ResponseError) bool {
 	if respErr == nil {
 		return false
@@ -119,6 +125,9 @@ func (res *Response) WebPage() string {
 	return res.Url
 }
 
+// ImageFile downloads the APOD image and stores it under dir.
+//
+// The method prefers HdUrl and falls back to Url when HdUrl is unavailable.
 func (res *Response) ImageFile(ctx context.Context, dir string) (tname string, err error) {
 	if res == nil {
 		err = errs.Wrap(ecode.ErrNullPointer)

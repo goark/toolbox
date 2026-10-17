@@ -142,7 +142,7 @@ func (res *Response) ImageFile(ctx context.Context, dir string) (tname string, e
 		return
 	}
 	wi := &webinfo.Webinfo{ImageURL: urlStr, UserAgent: webinfo.DefaultUserAgent()}
-	tname, err = wi.DownloadImage(ctx, dir, true)
+	tname, err = wi.DownloadImage(ctx, false, dir, true) // HTTP/1.1 and HTTP/2 client
 	return
 }
 

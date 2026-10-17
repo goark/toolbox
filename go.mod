@@ -2,28 +2,28 @@ module github.com/goark/toolbox
 
 go 1.27
 
-toolchain go1.27.1
+toolchain go1.27.2
 
 require (
 	github.com/bluesky-social/indigo v0.0.0-20260903211445-41278964ec8e
 	github.com/glebarez/sqlite v1.11.0
 	github.com/goark/errs v1.3.4
 	github.com/goark/errs/zapobject v0.1.5
-	github.com/goark/fetch v0.5.3
+	github.com/goark/fetch v0.6.0
 	github.com/goark/gocli v0.14.0
 	github.com/goark/koyomi v0.12.0
-	github.com/goark/webinfo v0.3.0
+	github.com/goark/webinfo v0.4.0
 	github.com/hymkor/go-multiline-ny v0.23.1
 	github.com/ipfs/go-log/v2 v2.9.2
 	github.com/joho/godotenv v1.5.1
 	github.com/mattn/go-mastodon v0.0.13
-	github.com/mmcdole/gofeed v1.4.2
-	github.com/nyaosorg/go-readline-ny v1.16.1
+	github.com/mmcdole/gofeed v1.5.0
+	github.com/nyaosorg/go-readline-ny v1.16.2
 	github.com/spf13/cobra v1.10.2
 	github.com/spf13/viper v1.21.0
 	go.uber.org/zap v1.28.0
-	golang.org/x/image v0.46.0
-	golang.org/x/net v0.59.0
+	golang.org/x/image v0.47.0
+	golang.org/x/net v0.61.0
 	gorm.io/gorm v1.31.2
 	moul.io/zapgorm2 v1.3.0
 )
@@ -98,10 +98,10 @@ require (
 	go.uber.org/atomic v1.11.0 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
 	go.yaml.in/yaml/v3 v3.0.5 // indirect
-	golang.org/x/crypto v0.57.0 // indirect
-	golang.org/x/sys v0.48.0 // indirect
-	golang.org/x/term v0.46.0 // indirect
-	golang.org/x/text v0.42.0 // indirect
+	golang.org/x/crypto v0.58.0 // indirect
+	golang.org/x/sys v0.49.0 // indirect
+	golang.org/x/term v0.47.0 // indirect
+	golang.org/x/text v0.43.0 // indirect
 	golang.org/x/xerrors v0.0.0-20240903120638-7835f813f4da // indirect
 	lukechampine.com/blake3 v1.4.1 // indirect
 	modernc.org/libc v1.75.7 // indirect

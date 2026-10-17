@@ -18,7 +18,7 @@ import (
 // FetchFromURL returns binary image from URL.
 func FetchFromURL(ctx context.Context, urlStr string) (data []byte, err error) {
 	wi := &webinfo.Webinfo{ImageURL: urlStr, UserAgent: webinfo.DefaultUserAgent()}
-	data, err = wi.ImageBytes(ctx)
+	data, err = wi.ImageBytes(ctx, false) // HTTP/1.1 and HTTP/2 client
 	return
 }
 

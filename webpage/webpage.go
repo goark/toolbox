@@ -78,7 +78,7 @@ func (wp *Webpage) ImageFile(ctx context.Context, dir string) (tname string, err
 		return
 	}
 	wi := &webinfo.Webinfo{ImageURL: wp.ImageURL, UserAgent: webinfo.DefaultUserAgent()}
-	tname, err = wi.DownloadImage(ctx, dir, true)
+	tname, err = wi.DownloadImage(ctx, true, dir, true) // HTTP/1.1 only client
 	return
 }
 

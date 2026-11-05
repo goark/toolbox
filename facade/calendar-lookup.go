@@ -30,14 +30,14 @@ func newCalendarLookupCmd(ui *rwi.RWI) *cobra.Command {
 			}
 
 			// lookup calendar data
-			return debugPrint(ui, ccfg.OutputEvent(ui.Writer()))
+			return debugPrint(ui, ccfg.OutputEvent(cmd.Context(), ui.Writer()))
 		},
 	}
 
 	return calendarLookupCmd
 }
 
-/* Copyright 2024 Spiegel
+/* Copyright 2024-2026 Spiegel
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.

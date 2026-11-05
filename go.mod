@@ -2,17 +2,17 @@ module github.com/goark/toolbox
 
 go 1.27
 
-toolchain go1.27.2
+toolchain go1.27.3
 
 require (
 	github.com/bluesky-social/indigo v0.0.0-20260903211445-41278964ec8e
 	github.com/glebarez/sqlite v1.11.0
 	github.com/goark/errs v1.3.4
 	github.com/goark/errs/zapobject v0.1.5
-	github.com/goark/fetch v0.6.0
+	github.com/goark/fetch v0.6.1
 	github.com/goark/gocli v0.14.0
-	github.com/goark/koyomi v0.12.0
-	github.com/goark/webinfo v0.4.0
+	github.com/goark/koyomi v0.12.1
+	github.com/goark/webinfo v0.4.1
 	github.com/hymkor/go-multiline-ny v0.23.1
 	github.com/ipfs/go-log/v2 v2.9.2
 	github.com/joho/godotenv v1.5.1
@@ -23,7 +23,7 @@ require (
 	github.com/spf13/viper v1.21.0
 	go.uber.org/zap v1.28.0
 	golang.org/x/image v0.47.0
-	golang.org/x/net v0.61.0
+	golang.org/x/net v0.62.0
 	gorm.io/gorm v1.31.2
 	moul.io/zapgorm2 v1.3.0
 )
@@ -85,8 +85,8 @@ require (
 	github.com/spf13/afero v1.15.0 // indirect
 	github.com/spf13/cast v1.10.0 // indirect
 	github.com/spf13/pflag v1.0.10 // indirect
-	github.com/spiegel-im-spiegel/ics-golang v0.1.2 // indirect
-	github.com/spiegel-im-spiegel/iso8601duration v0.1.2 // indirect
+	github.com/spiegel-im-spiegel/ics-golang v0.2.1 // indirect
+	github.com/spiegel-im-spiegel/iso8601duration v0.1.3 // indirect
 	github.com/subosito/gotenv v1.6.0 // indirect
 	github.com/tomnomnom/linkheader v0.0.0-20250811210735-e5fe3b51442e // indirect
 	github.com/whyrusleeping/cbor-gen v0.3.1 // indirect
@@ -98,7 +98,7 @@ require (
 	go.uber.org/atomic v1.11.0 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
 	go.yaml.in/yaml/v3 v3.0.5 // indirect
-	golang.org/x/crypto v0.58.0 // indirect
+	golang.org/x/crypto v0.58.1-0.20261009181718-2f1f834330b2 // indirect
 	golang.org/x/sys v0.49.0 // indirect
 	golang.org/x/term v0.47.0 // indirect
 	golang.org/x/text v0.43.0 // indirect

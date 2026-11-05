@@ -47,7 +47,7 @@ func newCalendarPostCmd(ui *rwi.RWI) *cobra.Command {
 
 			// lookup calendar data
 			b := &bytes.Buffer{}
-			if err := ccfg.OutputEvent(b); err != nil {
+			if err := ccfg.OutputEvent(cmd.Context(), b); err != nil {
 				gopts.Logger.Error("error in calendar.Config.OutputEvent", zap.Object("error", zapobject.New(err)))
 				return debugPrint(ui, err)
 			}
@@ -99,7 +99,7 @@ func newCalendarPostCmd(ui *rwi.RWI) *cobra.Command {
 	return calendarPostCmd
 }
 
-/* Copyright 2024 Spiegel
+/* Copyright 2024-2026 Spiegel
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.

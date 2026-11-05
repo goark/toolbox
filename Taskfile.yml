@@ -28,6 +28,7 @@ tasks:
     desc: Check reachable vulnerabilities with latest govulncheck.
     cmds:
       - go run golang.org/x/vuln/cmd/govulncheck@latest ./...
+      # - go run golang.org/x/vuln/cmd/govulncheck@latest -show verbose ./...
     sources:
       - ./go.mod
       - '**/*.go'

@@ -1,6 +1,7 @@
 package calendar
 
 import (
+	"context"
 	"fmt"
 	"io"
 	"path/filepath"
@@ -85,11 +86,11 @@ func NewConfig(start, end string, holiday, moonPhase, solarTerm, eclipse, planet
 	}, nil
 }
 
-func (cal *Config) OutputEvent(w io.Writer) error {
+func (cal *Config) OutputEvent(ctx context.Context, w io.Writer) error {
 	if cal == nil {
 		return errs.Wrap(ecode.ErrNullPointer)
 	}
-	evs, err := cal.GetEvents()
+	evs, err := cal.GetEvents(ctx)
 	if err != nil {
 		return errs.Wrap(err)
 	}
@@ -123,7 +124,7 @@ func OutputEventSimple(evs []koyomi.Event) string {
 }
 
 // GetEvents method returns astronomical events.
-func (cal *Config) GetEvents() ([]koyomi.Event, error) {
+func (cal *Config) GetEvents(ctx context.Context) ([]koyomi.Event, error) {
 	if cal == nil {
 		return nil, errs.Wrap(ecode.ErrNullPointer)
 	}
@@ -151,7 +152,7 @@ func (cal *Config) GetEvents() ([]koyomi.Event, error) {
 		koyomi.WithStartDate(cal.start),
 		koyomi.WithEndDate(cal.end),
 		koyomi.WithTempDir(cal.tempDir.Path()),
-	).Get()
+	).Get(ctx)
 	if err != nil {
 		return nil, errs.Wrap(err)
 	}

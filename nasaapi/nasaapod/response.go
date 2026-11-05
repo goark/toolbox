@@ -141,8 +141,8 @@ func (res *Response) ImageFile(ctx context.Context, dir string) (tname string, e
 		err = errs.Wrap(ecode.ErrNoAPODImage)
 		return
 	}
-	wi := &webinfo.Webinfo{ImageURL: urlStr, UserAgent: webinfo.DefaultUserAgent()}
-	tname, err = wi.DownloadImage(ctx, false, dir, true) // HTTP/1.1 and HTTP/2 client
+	wi := &webinfo.Webinfo{ImageURL: urlStr, UserAgent: webinfo.DefaultUserAgent(), ForceHTTP11: false}
+	tname, err = wi.DownloadImage(ctx, dir, true) // HTTP/1.1 and HTTP/2 client
 	return
 }
 

@@ -11,7 +11,7 @@ require (
 	github.com/goark/errs/zapobject v0.1.5
 	github.com/goark/fetch v0.6.1
 	github.com/goark/gocli v0.14.0
-	github.com/goark/koyomi v0.12.1
+	github.com/goark/koyomi v0.12.2
 	github.com/goark/webinfo v0.4.1
 	github.com/hymkor/go-multiline-ny v0.23.1
 	github.com/ipfs/go-log/v2 v2.9.2
@@ -29,8 +29,10 @@ require (
 )
 
 require (
+	github.com/ChannelMeter/iso8601duration v0.0.0-20150204201828-8da3af7a2a61 // indirect
 	github.com/PuerkitoBio/goquery v1.13.0 // indirect
 	github.com/andybalholm/cascadia v1.3.5 // indirect
+	github.com/apognu/gocal v0.9.1 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/clipperhouse/uax29/v2 v2.7.0 // indirect
 	github.com/dustin/go-humanize v1.0.1 // indirect
@@ -41,6 +43,7 @@ require (
 	github.com/go-logr/logr v1.4.4 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
 	github.com/go-viper/mapstructure/v2 v2.5.0 // indirect
+	github.com/goark/concal v0.1.2 // indirect
 	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/gorilla/websocket v1.5.3 // indirect
@@ -85,8 +88,6 @@ require (
 	github.com/spf13/afero v1.15.0 // indirect
 	github.com/spf13/cast v1.10.0 // indirect
 	github.com/spf13/pflag v1.0.10 // indirect
-	github.com/spiegel-im-spiegel/ics-golang v0.2.1 // indirect
-	github.com/spiegel-im-spiegel/iso8601duration v0.1.3 // indirect
 	github.com/subosito/gotenv v1.6.0 // indirect
 	github.com/tomnomnom/linkheader v0.0.0-20250811210735-e5fe3b51442e // indirect
 	github.com/whyrusleeping/cbor-gen v0.3.1 // indirect

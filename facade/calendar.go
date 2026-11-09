@@ -36,7 +36,7 @@ func newCalendarCmd(ui *rwi.RWI) *cobra.Command {
 	return calendarCmd
 }
 
-func getCalendarConfig(cmd *cobra.Command, gopts *globalOptions) (*calendar.Config, error) {
+func getCalendarConfig(cmd *cobra.Command) (*calendar.Config, error) {
 	start, err := cmd.Flags().GetString("start")
 	if err != nil {
 		return nil, errs.Wrap(err)
@@ -79,10 +79,10 @@ func getCalendarConfig(cmd *cobra.Command, gopts *globalOptions) (*calendar.Conf
 	if err != nil {
 		return nil, errs.Wrap(err)
 	}
-	return calendar.NewConfig(start, end, holidayFlag, moonPhaseFlag, solarTermFlag, eclipseFlag, planetFlag, gopts.TempDir, templateFile)
+	return calendar.NewConfig(start, end, holidayFlag, moonPhaseFlag, solarTermFlag, eclipseFlag, planetFlag, templateFile)
 }
 
-/* Copyright 2024 Spiegel
+/* Copyright 2024-2026 Spiegel
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.

@@ -13,18 +13,8 @@ func newCalendarLookupCmd(ui *rwi.RWI) *cobra.Command {
 		Short:   "Lookup astronomical calendar",
 		Long:    "Lookup astronomical calendar.",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			// Global options
-			gopts, err := getGlobalOptions()
-			if err != nil {
-				return debugPrint(ui, err)
-			}
-			// make temporary directory
-			if err := gopts.TempDir.MakeDir(); err != nil {
-				return debugPrint(ui, err)
-			}
-			defer func() { _ = gopts.TempDir.CleanUp() }()
 			// local options
-			ccfg, err := getCalendarConfig(cmd, gopts)
+			ccfg, err := getCalendarConfig(cmd)
 			if err != nil {
 				return debugPrint(ui, err)
 			}

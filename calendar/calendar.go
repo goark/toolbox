@@ -13,7 +13,6 @@ import (
 	"github.com/goark/koyomi"
 	"github.com/goark/koyomi/value"
 	"github.com/goark/toolbox/ecode"
-	"github.com/goark/toolbox/tempdir"
 )
 
 const defaultTemplate = `{{ range . }}{{ .Date }} {{ .Title }}
@@ -21,18 +20,18 @@ const defaultTemplate = `{{ range . }}{{ .Date }} {{ .Title }}
 
 // Config type is configurations for calendar package.
 type Config struct {
-	start, end   value.DateJp
-	holiday      bool
-	moonPhase    bool
-	solarTerm    bool
-	eclipse      bool
-	planet       bool
-	tempDir      *tempdir.TempDir
+	start, end value.DateJp
+	holiday    bool
+	moonPhase  bool
+	solarTerm  bool
+	eclipse    bool
+	planet     bool
+	// tempDir      *tempdir.TempDir
 	templateFile string
 }
 
 // NewConfig function creates new Config instance.
-func NewConfig(start, end string, holiday, moonPhase, solarTerm, eclipse, planet bool, tempDir *tempdir.TempDir, templateFile string) (*Config, error) {
+func NewConfig(start, end string, holiday, moonPhase, solarTerm, eclipse, planet bool /*tempDir *tempdir.TempDir,*/, templateFile string) (*Config, error) {
 	startdate := value.NewDate(time.Time{})
 	enddate := value.NewDate(time.Time{})
 	if len(start) == 0 && len(end) == 0 {
@@ -74,14 +73,14 @@ func NewConfig(start, end string, holiday, moonPhase, solarTerm, eclipse, planet
 		}
 	}
 	return &Config{
-		start:        startdate,
-		end:          enddate,
-		holiday:      holiday,
-		moonPhase:    moonPhase,
-		solarTerm:    solarTerm,
-		eclipse:      eclipse,
-		planet:       planet,
-		tempDir:      tempDir,
+		start:     startdate,
+		end:       enddate,
+		holiday:   holiday,
+		moonPhase: moonPhase,
+		solarTerm: solarTerm,
+		eclipse:   eclipse,
+		planet:    planet,
+		// tempDir:      tempDir,
 		templateFile: templateFile,
 	}, nil
 }
@@ -151,7 +150,6 @@ func (cal *Config) GetEvents(ctx context.Context) ([]koyomi.Event, error) {
 		koyomi.WithCalendarID(ids...),
 		koyomi.WithStartDate(cal.start),
 		koyomi.WithEndDate(cal.end),
-		koyomi.WithTempDir(cal.tempDir.Path()),
 	).Get(ctx)
 	if err != nil {
 		return nil, errs.Wrap(err)
